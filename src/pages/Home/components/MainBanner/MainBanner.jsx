@@ -1,4 +1,4 @@
-import mainBannerImage from "../../assets/images/fanpick_banner.webp";
+import mainBannerImage from "../../../../assets/images/fanpick_banner.webp";
 import styles from "./MainBanner.module.css";
 
 const MainBanner = () => {

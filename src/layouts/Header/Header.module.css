@@ -1,9 +1,11 @@
 .header {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 1000;
   height: var(--header-height);
   color: var(--color-text-white);
   background-color: var(--color-primary-dark);
+  font-family: "Graduate", serif;
 }
 
 /* 좌측 로고 / 중앙 메뉴 / 우측 로그인 */
@@ -53,7 +55,6 @@
   justify-content: center;
   padding: 10px 0 13px;
   color: var(--color-text-white);
-  font-family: "Graduate", serif;
   font-size: 18px;
   font-weight: 700;
   line-height: 1;

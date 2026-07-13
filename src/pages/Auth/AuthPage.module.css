@@ -1,0 +1,251 @@
+.authPage {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  width: 100%;
+  padding: 60px 24px 100px;
+  color: #ffffff;
+  background-color: var(--color-primary-dark);
+}
+
+.authContainer {
+  width: 100%;
+  max-width: 626px;
+}
+
+.title {
+  margin: 0;
+  color: #ffffff;
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.description {
+  margin: 20px 0 0;
+  color: #9ba1b8;
+  font-size: 17px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 80px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.label {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  height: 57px;
+  padding: 0 25px;
+  color: #ffffff;
+  font-size: 18px;
+  background-color: #272a3a;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  outline: none;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.input::placeholder {
+  color: #747b97;
+}
+
+.input:focus {
+  color: #111321;
+  background-color: #f1f4fb;
+  border-color: transparent;
+}
+
+.input:focus::placeholder {
+  color: #777d8f;
+}
+
+.passwordField {
+  position: relative;
+}
+
+.passwordField .input {
+  padding-right: 68px;
+}
+
+.passwordToggle {
+  position: absolute;
+  top: 50%;
+  right: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: #969bb0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.passwordToggle svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.passwordToggle:hover {
+  color: #ffffff;
+}
+
+.input:focus + .passwordToggle {
+  color: #62687c;
+}
+
+.submitButton {
+  width: 100%;
+  height: 76px;
+  margin-top: 29px;
+  color: #ffffff;
+  font-size: 25px;
+  font-weight: 700;
+  background-color: #ef183d;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: #d91336;
+}
+
+.submitButton:disabled {
+  color: #747b97;
+  background-color: #282b3b;
+  cursor: not-allowed;
+}
+
+.accountMenu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 34px;
+}
+
+.accountMenu a {
+  color: #cbd0e2;
+  font-size: 18px;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.accountMenu a:hover {
+  color: #ffffff;
+}
+
+.divider {
+  width: 1px;
+  height: 16px;
+  background-color: #484b5e;
+}
+
+.errorMessage {
+  margin: -7px 0 0;
+  color: #ff5d77;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.successMessage {
+  margin: -7px 0 0;
+  color: #5edb9d;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.helperText {
+  margin: 0;
+  color: #8f95aa;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+}
+
+@media (max-width: 768px) {
+  .authPage {
+    padding: 45px 20px 70px;
+  }
+
+  .title {
+    font-size: 42px;
+  }
+
+  .description {
+    font-size: 15px;
+  }
+
+  .authForm {
+    margin-top: 75px;
+  }
+
+  .input {
+    height: 55px;
+    padding: 0 20px;
+    font-size: 16px;
+  }
+
+  .passwordField .input {
+    padding-right: 60px;
+  }
+
+  .passwordToggle {
+    right: 18px;
+  }
+
+  .submitButton {
+    height: 64px;
+    font-size: 22px;
+  }
+
+  .accountMenu {
+    gap: 11px;
+  }
+
+  .accountMenu a {
+    font-size: 15px;
+  }
+}

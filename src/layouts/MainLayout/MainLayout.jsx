@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
-import Header from "../../components/Header/Header";
-import Footer from "../../components/Footer/Footer";
+import Header from "../Header/Header.jsx";
+import Footer from "../Footer/Footer.jsx";
+import TopButton from "../../components/TopButton/TopButton.jsx";
 import styles from "./MainLayout.module.css";
 
 const MainLayout = () => {
@@ -8,11 +9,12 @@ const MainLayout = () => {
     <div className={styles.layout}>
       <Header />
 
-      <div className={styles.content}>
+      <main className={styles.content}>
         <Outlet />
-      </div>
+      </main>
 
       <Footer />
+      <TopButton />
     </div>
   );
 };

@@ -1,0 +1,125 @@
+.matchSection {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  padding: 30px 0 80px;
+  color: #ffffff;
+  background-color: #181a29;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  width: min(100% - 40px, 1400px);
+  margin: 0 auto;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+  font-family: "Graduate", serif;
+}
+
+.filters::-webkit-scrollbar {
+  display: none;
+}
+
+.filterButton {
+  flex-shrink: 0;
+  min-width: 120px;
+  height: 56px;
+  padding: 0 24px;
+  border: 1px solid rgb(255 255 255 / 62%);
+  border-radius: 12px;
+  color: #ffffff;
+  background-color: transparent;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.filterButton:hover {
+  border-color: #ffffff;
+  background-color: rgb(255 255 255 / 6%);
+}
+
+.filterButton.active {
+  border-color: #8494db;
+  background-color: #25304f;
+}
+
+.sectionHeader {
+  margin: 48px 0 58px;
+}
+
+.title {
+  margin: 0 0 8px;
+  color: #ffffff;
+  font-size: clamp(38px, 4vw, 54px);
+  font-weight: 700;
+  line-height: 1;
+  font-family: "Graduate", serif;
+}
+
+.dateRange {
+  margin: 0;
+  color: rgb(255 255 255 / 88%);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.matchList {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.emptyMessage {
+  padding: 80px 20px;
+  color: rgb(255 255 255 / 55%);
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .matchList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .matchSection {
+    padding: 24px 0 60px;
+  }
+
+  .inner {
+    width: min(100% - 32px, 1400px);
+  }
+
+  .filters {
+    gap: 12px;
+  }
+
+  .filterButton {
+    min-width: auto;
+    height: 46px;
+    padding: 0 20px;
+    border-radius: 9px;
+    font-size: 14px;
+  }
+
+  .sectionHeader {
+    margin: 38px 0;
+  }
+
+  .matchList {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
