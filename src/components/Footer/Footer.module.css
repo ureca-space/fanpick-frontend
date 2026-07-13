@@ -1,0 +1,238 @@
+.footer {
+  border-top: 1px solid #353949;
+  color: var(--color-text-white);
+  background-color: #131726;
+}
+
+.inner {
+  min-height: 350px;
+  padding-top: 30px;
+  padding-bottom: 50px;
+}
+
+/* 상단 약관 메뉴 / SNS */
+.topArea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.policyList {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 12px;
+}
+
+.policyItem {
+  display: flex;
+  align-items: center;
+}
+
+.policyItem:not(:last-child)::after {
+  width: 1px;
+  height: 13px;
+  margin: 0 20px;
+  background-color: #454957;
+  content: "";
+}
+
+.policyLink {
+  color: #b5b7be;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  transition: color 0.2s ease;
+}
+
+.policyLink:hover {
+  color: #ffffff;
+}
+
+/* SNS */
+.socialList {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.socialLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  color: #ffffff;
+  background-color: #3a4152;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.socialLink svg {
+  width: 18px;
+  height: 18px;
+  color: currentcolor;
+  fill: currentcolor;
+}
+
+.socialLink:hover {
+  background-color: #4a5265;
+  transform: translateY(-2px);
+}
+
+/* 블로그 아이콘 크기 보정 */
+.socialList li:nth-child(2) .socialLink svg {
+  width: 19px;
+  height: 19px;
+}
+
+/* 하단 회사 정보 / 워드마크 */
+.bottomArea {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 60px;
+  margin-top: 105px;
+}
+
+.companyInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.infoRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 28px;
+}
+
+.infoRow p {
+  color: #cfd0d3;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.copyright {
+  margin-top: 8px;
+  color: #77798c;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* 오른쪽 아래 워드마크 */
+.wordmark {
+  flex-shrink: 0;
+  color: #444758;
+  font-family: Arial, sans-serif;
+  font-size: 27px;
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: -2px;
+  user-select: none;
+}
+
+/* 태블릿 */
+@media (max-width: 900px) {
+  .inner {
+    min-height: auto;
+    padding-top: 28px;
+    padding-bottom: 40px;
+  }
+
+  .topArea {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+  }
+
+  .policyItem:not(:last-child)::after {
+    margin: 0 12px;
+  }
+
+  .policyLink {
+    font-size: 14px;
+  }
+
+  .socialList {
+    gap: 10px;
+  }
+
+  .socialLink {
+    width: 42px;
+    height: 42px;
+  }
+
+  .socialLink svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .bottomArea {
+    align-items: flex-end;
+    gap: 30px;
+    margin-top: 60px;
+  }
+
+  .infoRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .wordmark {
+    font-size: 24px;
+  }
+}
+
+/* 모바일 */
+@media (max-width: 600px) {
+  .policyList {
+    align-items: flex-start;
+  }
+
+  .policyItem {
+    width: 100%;
+  }
+
+  .policyItem:not(:last-child)::after {
+    display: none;
+  }
+
+  .socialList {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .bottomArea {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+  }
+
+  .companyInfo {
+    gap: 10px;
+  }
+
+  .infoRow p {
+    font-size: 13px;
+  }
+
+  .copyright {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .wordmark {
+    align-self: flex-end;
+    font-size: 22px;
+  }
+}

@@ -1,0 +1,107 @@
+/* 공통 CSS */
+
+@import url("https://fonts.googleapis.com/css2?family=Anton&family=Graduate&display=swap");
+
+:root {
+  font-family:
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  color: #111827;
+  background-color: #ffffff;
+
+  --color-primary: #071a33;
+  --color-primary-light: #0d2748;
+  --color-primary-dark: #041226;
+
+  --color-accent: #e31b36;
+  --color-accent-hover: #c8172d;
+
+  --color-background: #ffffff;
+  --color-background-light: #f4f6f8;
+
+  --color-text-primary: #111827;
+  --color-text-secondary: #667085;
+  --color-text-white: #ffffff;
+
+  --color-border: #e5e7eb;
+
+  --content-width: 1280px;
+  --header-height: 88px;
+  --section-padding: 100px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.container {
+  width: min(calc(100% - 80px), var(--content-width));
+  margin: 0 auto;
+}
+
+.section {
+  padding: var(--section-padding) 0;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --header-height: 64px;
+    --section-padding: 64px;
+  }
+
+  .container {
+    width: calc(100% - 40px);
+  }
+}
