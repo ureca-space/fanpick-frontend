@@ -9,10 +9,13 @@ import WorldCupPlayPage from "../pages/WorldCupPlay/WorldCupPlayPage";
 import NotFoundPage from "../pages/NotFound/NotFoundPage";
 import LoginPage from "../pages/Auth/Login/LoginPage";
 import SignupPage from "../pages/Auth/Signup/SignupPage";
+import ScrollToTop from "./ScrollToTop";
 
 const AppRouter = () => {
   return (
     <BrowserRouter>
+      <ScrollToTop />
+
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />

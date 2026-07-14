@@ -1,5 +1,6 @@
 import { useState } from "react";
 import MatchCard from "../../../../components/MatchCard/MatchCard";
+import MatchFilter from "../../../../components/MatchFilter/MatchFilter";
 import styles from "./MatchSection.module.css";
 
 const FILTERS = [
@@ -14,7 +15,7 @@ const MATCHES = [
   {
     id: 1,
     sport: "baseball",
-    sportLabel: "BaseBall",
+    sportLabel: "BASEBALL",
     league: "KBO",
     date: "07.16",
     day: "목",
@@ -36,19 +37,19 @@ const MATCHES = [
   {
     id: 2,
     sport: "soccer",
-    sportLabel: "Soccer",
-    league: "PREMIER LEAGUE",
+    sportLabel: "SOCCER",
+    league: "K LEAGUE",
     date: "07.17",
     day: "금",
     time: "21:00",
     venue: "서울 월드컵 경기장",
     homeTeam: {
-      name: "서울",
+      name: "FC 서울",
       shortName: "서울",
       logo: "/images/team-logos/seoul.png",
     },
     awayTeam: {
-      name: "수원",
+      name: "수원 삼성",
       shortName: "수원",
       logo: "/images/team-logos/suwon.png",
     },
@@ -103,41 +104,20 @@ const MATCHES = [
 
 const MatchSection = () => {
   const [activeFilter, setActiveFilter] = useState("all");
-  const [votedMatchIds, setVotedMatchIds] = useState([]);
 
   const filteredMatches =
     activeFilter === "all"
       ? MATCHES
       : MATCHES.filter((match) => match.sport === activeFilter);
 
-  const handleVote = (matchId) => {
-    setVotedMatchIds((prev) => {
-      if (prev.includes(matchId)) {
-        return prev;
-      }
-
-      return [...prev, matchId];
-    });
-  };
-
   return (
     <section className={styles.matchSection}>
-      <div className={styles.inner}>
-        <div className={styles.filters}>
-          {FILTERS.map((filter) => (
-            <button
-              key={filter.id}
-              className={`${styles.filterButton} ${
-                activeFilter === filter.id ? styles.active : ""
-              }`}
-              type="button"
-              aria-pressed={activeFilter === filter.id}
-              onClick={() => setActiveFilter(filter.id)}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
+      <div className={`container ${styles.inner}`}>
+        <MatchFilter
+          filters={FILTERS}
+          activeFilter={activeFilter}
+          onChange={setActiveFilter}
+        />
 
         <header className={styles.sectionHeader}>
           <h2 className={styles.title}>MATCHES</h2>
@@ -147,12 +127,7 @@ const MatchSection = () => {
         {filteredMatches.length > 0 ? (
           <div className={styles.matchList}>
             {filteredMatches.map((match) => (
-              <MatchCard
-                key={match.id}
-                match={match}
-                isVoted={votedMatchIds.includes(match.id)}
-                onVote={handleVote}
-              />
+              <MatchCard key={match.id} match={match} />
             ))}
           </div>
         ) : (
