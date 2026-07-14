@@ -6,6 +6,7 @@ import HomePage from "../pages/Home/HomePage";
 import PredictionPage from "../pages/Prediction/PredictionPage";
 import WorldCupPage from "../pages/WorldCup/WorldCupPage";
 import WorldCupPlayPage from "../pages/WorldCupPlay/WorldCupPlayPage";
+import Player from "../pages/Player/Player.jsx";
 import NotFoundPage from "../pages/NotFound/NotFoundPage";
 import LoginPage from "../pages/Auth/Login/LoginPage";
 import SignupPage from "../pages/Auth/Signup/SignupPage";
@@ -25,9 +26,9 @@ const AppRouter = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/sports/:sport" element={<SportPage />} />
           <Route path="/worldcup" element={<WorldCupPage />} />
+          <Route path="/player" element={<Player />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-
           <Route path="/find-password" element={<FindPasswordPage />} />
 
           <Route path="/reset-password" element={<ResetPasswordPage />} />
