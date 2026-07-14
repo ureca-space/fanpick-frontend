@@ -105,7 +105,7 @@ const HotMatchSection = () => {
 
   return (
     <>
-      <section className={styles.hotMatchSection}>
+      <section className={`section ${styles.hotMatchSection}`}>
         <div className="container">
           <header className={styles.sectionHeader}>
             <h2 className={styles.title}>HOT MATCH</h2>

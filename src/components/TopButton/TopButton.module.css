@@ -48,7 +48,7 @@
 }
 
 .topButton:hover {
-  color: #ffffff;
+  color: var(--color-text-white);
   background-color: rgb(20 22 43 / 95%);
   border-color: rgb(255 255 255 / 35%);
   transform: translateY(-3px);
@@ -59,7 +59,7 @@
 }
 
 .topButton:focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 2px solid var(--color-text-white);
   outline-offset: 4px;
 }
 

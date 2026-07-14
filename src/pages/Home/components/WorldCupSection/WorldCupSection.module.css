@@ -5,14 +5,12 @@
   padding: 30px 0 80px;
   overflow: hidden;
   color: var(--color-text-white);
-  background-color: #181a29;
+  background-color: var(--color-surface-dark);
 }
 
 .inner {
   position: relative;
   z-index: 1;
-  width: min(calc(100% - 80px), var(--content-width));
-  margin: 0 auto;
 }
 
 /* HOT MATCH와 동일한 제목 간격 */
@@ -23,8 +21,8 @@
 .sectionTitle {
   margin: 0 0 8px;
   color: var(--color-text-white);
-  font-family: "Graduate", serif;
-  font-size: clamp(38px, 4vw, 54px);
+  font-family: var(--font-display);
+  font-size: var(--font-size-section-title);
   font-weight: 700;
   line-height: 1;
 }
@@ -98,7 +96,7 @@
 
 .placeholderText {
   color: rgb(255 255 255 / 10%);
-  font-family: "Anton", sans-serif;
+  font-family: var(--font-condensed);
   font-size: clamp(44px, 6vw, 86px);
   font-weight: 400;
   letter-spacing: 0.04em;
@@ -169,12 +167,12 @@
   justify-content: center;
   width: 58px;
   height: 58px;
-  border: 5px solid #181a29;
+  border: 5px solid var(--color-surface-dark);
   border-radius: 50%;
   color: var(--color-text-white);
   background-color: var(--color-accent);
   box-shadow: 0 8px 20px rgb(0 0 0 / 25%);
-  font-family: "Anton", sans-serif;
+  font-family: var(--font-condensed);
   font-size: 19px;
   font-weight: 400;
   letter-spacing: 0.04em;
@@ -219,7 +217,7 @@
 
 .startButton:hover {
   border-color: var(--color-text-white);
-  color: #181a29;
+  color: var(--color-surface-dark);
   background-color: var(--color-text-white);
 }
 
@@ -229,10 +227,6 @@
 }
 
 @media (max-width: 900px) {
-  .inner {
-    width: calc(100% - 40px);
-  }
-
   .matchup {
     grid-template-columns: minmax(0, 1fr) 60px minmax(0, 1fr);
   }

@@ -5,7 +5,7 @@
   padding: 22px;
   border: 1px solid transparent;
   border-radius: 8px;
-  background-color: #252838;
+  background-color: var(--color-surface-card);
   transition:
     border-color 0.2s ease,
     transform 0.2s ease;
@@ -27,16 +27,16 @@
   padding: 4px 8px;
   border: 1px solid rgb(255 255 255 / 60%);
   border-radius: 3px;
-  color: #ffffff;
+  color: var(--color-text-white);
   font-size: 12px;
   font-weight: 600;
-  font-family: "Graduate", serif;
+  font-family: var(--font-display);
 }
 
 .league {
   color: rgb(255 255 255 / 58%);
   font-size: 12px;
-  font-family: "Graduate", serif;
+  font-family: var(--font-display);
 }
 
 .matchInfo {
@@ -46,7 +46,7 @@
 .matchDate {
   display: block;
   margin-bottom: 5px;
-  color: #ffffff;
+  color: var(--color-text-white);
   font-size: 21px;
   font-weight: 800;
 }
@@ -87,14 +87,14 @@
 .teamLogo {
   display: block;
   object-fit: contain;
-  background-color: #ffffff;
+  background-color: var(--color-background);
 }
 
 .logoFallback {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  color: var(--color-text-white);
   background-color: #393e55;
   font-size: 13px;
   font-weight: 800;
@@ -103,7 +103,7 @@
 .teamName {
   overflow: hidden;
   width: 100%;
-  color: #ffffff;
+  color: var(--color-text-white);
   font-size: 15px;
   font-weight: 700;
   text-align: center;
@@ -136,7 +136,7 @@
 }
 
 .voteLabels strong {
-  color: #ffffff;
+  color: var(--color-text-white);
 }
 
 .voteBar {
@@ -165,7 +165,7 @@
   height: 43px;
   border: 1px solid rgb(255 255 255 / 50%);
   border-radius: 5px;
-  color: #ffffff;
+  color: var(--color-text-white);
   background-color: transparent;
   font-size: 14px;
   font-weight: 700;
@@ -177,9 +177,9 @@
 }
 
 .voteButton:hover {
-  border-color: #ffffff;
-  color: #181a29;
-  background-color: #ffffff;
+  border-color: var(--color-text-white);
+  color: var(--color-surface-dark);
+  background-color: var(--color-text-white);
 }
 
 .voteButton:disabled {

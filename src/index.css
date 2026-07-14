@@ -10,8 +10,12 @@
     "Segoe UI",
     sans-serif;
 
-  color: #111827;
-  background-color: #ffffff;
+  color: var(--color-text-primary);
+  background-color: var(--color-background);
+
+  --font-display: "Graduate", serif;
+  --font-condensed: "Anton", sans-serif;
+  --font-size-section-title: clamp(38px, 4vw, 54px);
 
   --color-primary: #071a33;
   --color-primary-light: #0d2748;
@@ -19,9 +23,13 @@
 
   --color-accent: #e31b36;
   --color-accent-hover: #c8172d;
+  --color-accent-strong: #ef183d;
+  --color-accent-strong-hover: #d91336;
 
   --color-background: #ffffff;
   --color-background-light: #f4f6f8;
+  --color-surface-dark: #181a29;
+  --color-surface-card: #252838;
 
   --color-text-primary: #111827;
   --color-text-secondary: #667085;

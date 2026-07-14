@@ -4,7 +4,7 @@
   min-height: 100vh;
   padding: 30px 0 80px;
   color: var(--color-text-white);
-  background-color: #181a29;
+  background-color: var(--color-surface-dark);
 }
 
 .inner {
@@ -19,8 +19,8 @@
 .title {
   margin: 0 0 8px;
   color: var(--color-text-white);
-  font-family: "Graduate", serif;
-  font-size: clamp(38px, 4vw, 54px);
+  font-family: var(--font-display);
+  font-size: var(--font-size-section-title);
   font-weight: 700;
   line-height: 1;
 }
