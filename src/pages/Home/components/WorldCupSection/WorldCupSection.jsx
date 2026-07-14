@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../../../../contexts/useAuth";
+import FanPickDialog from "../../../../components/FanPickDialog/FanPickDialog";
 import MatchFilter from "../../../../components/MatchFilter/MatchFilter";
 import styles from "./WorldCupSection.module.css";
 
@@ -89,6 +91,7 @@ const PlayerPreview = ({ player }) => {
 
         <div className={styles.playerInfo}>
           <span className={styles.playerTeam}>{player.team}</span>
+
           <strong className={styles.playerName}>{player.name}</strong>
         </div>
       </div>
@@ -98,64 +101,114 @@ const PlayerPreview = ({ player }) => {
 
 const WorldCupSection = () => {
   const navigate = useNavigate();
+  const { isLoggedIn, isAuthLoading } = useAuth();
+
   const [activeFilter, setActiveFilter] = useState("soccer");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [pendingWorldCupPath, setPendingWorldCupPath] = useState("");
 
   const currentWorldCup = WORLD_CUPS[activeFilter];
 
   const handleStartWorldCup = () => {
-    navigate(`/worldcup/${activeFilter}`);
+    if (isAuthLoading) return;
+
+    const worldCupPath = `/worldcup/${activeFilter}`;
+
+    if (!isLoggedIn) {
+      setPendingWorldCupPath(worldCupPath);
+      setIsDialogOpen(true);
+      return;
+    }
+
+    navigate(worldCupPath);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setPendingWorldCupPath("");
+  };
+
+  const handleMoveToLogin = () => {
+    if (!pendingWorldCupPath) return;
+
+    setIsDialogOpen(false);
+
+    navigate("/login", {
+      state: {
+        from: {
+          pathname: pendingWorldCupPath,
+          search: "",
+          hash: "",
+        },
+      },
+    });
+
+    setPendingWorldCupPath("");
   };
 
   return (
-    <section className={styles.worldCupSection}>
-      <div className={`container ${styles.inner}`}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>PLAYER PICK</h2>
+    <>
+      <section className={styles.worldCupSection}>
+        <div className={`container ${styles.inner}`}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>PLAYER PICK</h2>
 
-          <p className={styles.sectionDescription}>
-            인기 선수 중 당신의 최애 선수를 선택해 보세요.
-          </p>
-        </div>
+            <p className={styles.sectionDescription}>
+              인기 선수 중 당신의 최애 선수를 선택해 보세요.
+            </p>
+          </div>
 
-        <div className={styles.filterArea}>
-          <MatchFilter
-            filters={FILTERS}
-            activeFilter={activeFilter}
-            onChange={setActiveFilter}
-          />
-        </div>
-
-        <div className={styles.worldCupCard}>
-          <div className={styles.matchup}>
-            <PlayerPreview
-              key={currentWorldCup.leftPlayer.image}
-              player={currentWorldCup.leftPlayer}
+          <div className={styles.filterArea}>
+            <MatchFilter
+              filters={FILTERS}
+              activeFilter={activeFilter}
+              onChange={setActiveFilter}
             />
+          </div>
 
-            <div className={styles.vsArea} aria-hidden="true">
-              <span className={styles.vsBadge}>VS</span>
+          <div className={styles.worldCupCard}>
+            <div className={styles.matchup}>
+              <PlayerPreview
+                key={currentWorldCup.leftPlayer.image}
+                player={currentWorldCup.leftPlayer}
+              />
+
+              <div className={styles.vsArea} aria-hidden="true">
+                <span className={styles.vsBadge}>VS</span>
+              </div>
+
+              <PlayerPreview
+                key={currentWorldCup.rightPlayer.image}
+                player={currentWorldCup.rightPlayer}
+              />
             </div>
 
-            <PlayerPreview
-              key={currentWorldCup.rightPlayer.image}
-              player={currentWorldCup.rightPlayer}
-            />
-          </div>
+            <div className={styles.cardBottom}>
+              <p className={styles.previewText}>대표 선수 미리보기입니다.</p>
 
-          <div className={styles.cardBottom}>
-            <p className={styles.previewText}>대표 선수 미리보기입니다.</p>
-
-            <button
-              type="button"
-              className={styles.startButton}
-              onClick={handleStartWorldCup}
-            >
-              시작하기
-            </button>
+              <button
+                type="button"
+                className={styles.startButton}
+                onClick={handleStartWorldCup}
+                disabled={isAuthLoading}
+              >
+                시작하기
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <FanPickDialog
+        isOpen={isDialogOpen}
+        title="로그인이 필요합니다"
+        description="선수 월드컵에 참여하려면 먼저 로그인해 주세요."
+        confirmText="로그인하기"
+        cancelText="취소"
+        onClose={handleCloseDialog}
+        onConfirm={handleMoveToLogin}
+      />
+    </>
   );
 };
 

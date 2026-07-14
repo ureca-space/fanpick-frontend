@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import useAuth from "../../contexts/useAuth";
+import { supabase } from "../../lib/supabase";
 import styles from "./Header.module.css";
 
 const menuList = [
@@ -22,7 +24,12 @@ const menuList = [
 ];
 
 const Header = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isLoggedIn, isAuthLoading } = useAuth();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -42,8 +49,102 @@ const Header = () => {
     setIsMenuOpen((prev) => !prev);
   };
 
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+
+    try {
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error("로그아웃 오류:", error);
+
+        const currentPath = `${location.pathname}${location.search}${location.hash}`;
+
+        navigate(currentPath, {
+          replace: true,
+          state: {
+            ...location.state,
+            authDialog: "logoutError",
+          },
+        });
+
+        return;
+      }
+
+      closeMenu();
+
+      navigate("/", {
+        replace: true,
+        state: {
+          authDialog: "logout",
+        },
+      });
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   const getNavLinkClass = ({ isActive }) =>
     `${styles.navLink} ${isActive ? styles.active : ""}`;
+
+  const renderAuthMenu = (isMobile = false) => {
+    if (isAuthLoading) return null;
+
+    const tabIndex = isMobile ? (isMenuOpen ? 0 : -1) : undefined;
+
+    if (isLoggedIn) {
+      return (
+        <>
+          <NavLink
+            to="/mypage"
+            className={getNavLinkClass}
+            onClick={closeMenu}
+            tabIndex={tabIndex}
+          >
+            MY PAGE
+          </NavLink>
+
+          <span className={styles.divider} aria-hidden="true" />
+
+          <button
+            type="button"
+            className={`${styles.navLink} ${styles.logoutButton}`}
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            tabIndex={tabIndex}
+          >
+            {isLoggingOut ? "LOGGING OUT..." : "LOGOUT"}
+          </button>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <NavLink
+          to="/login"
+          className={getNavLinkClass}
+          onClick={closeMenu}
+          tabIndex={tabIndex}
+        >
+          LOGIN
+        </NavLink>
+
+        <span className={styles.divider} aria-hidden="true" />
+
+        <NavLink
+          to="/signup"
+          className={getNavLinkClass}
+          onClick={closeMenu}
+          tabIndex={tabIndex}
+        >
+          JOIN US
+        </NavLink>
+      </>
+    );
+  };
 
   return (
     <header className={styles.header}>
@@ -57,7 +158,6 @@ const Header = () => {
           <img src="/logos/fanpick_logo.svg" alt="FanPick" />
         </Link>
 
-        {/* 데스크톱 스포츠 메뉴 */}
         <nav className={styles.navigation} aria-label="스포츠 메뉴">
           {menuList.map((menu) => (
             <NavLink
@@ -71,20 +171,8 @@ const Header = () => {
           ))}
         </nav>
 
-        {/* 데스크톱 회원 메뉴 */}
-        <div className={styles.authMenu}>
-          <NavLink to="/login" className={getNavLinkClass} onClick={closeMenu}>
-            LOGIN
-          </NavLink>
+        <div className={styles.authMenu}>{renderAuthMenu()}</div>
 
-          <span className={styles.divider} aria-hidden="true" />
-
-          <NavLink to="/signup" className={getNavLinkClass} onClick={closeMenu}>
-            JOIN US
-          </NavLink>
-        </div>
-
-        {/* 모바일 햄버거 버튼 */}
         <button
           type="button"
           className={`${styles.menuButton} ${
@@ -101,7 +189,6 @@ const Header = () => {
         </button>
       </div>
 
-      {/* 모바일 드롭다운 메뉴 */}
       <div
         id="mobile-menu"
         className={`${styles.mobileMenu} ${
@@ -126,27 +213,7 @@ const Header = () => {
           ))}
         </nav>
 
-        <div className={styles.mobileAuthMenu}>
-          <NavLink
-            to="/login"
-            className={getNavLinkClass}
-            onClick={closeMenu}
-            tabIndex={isMenuOpen ? 0 : -1}
-          >
-            LOGIN
-          </NavLink>
-
-          <span className={styles.divider} aria-hidden="true" />
-
-          <NavLink
-            to="/signup"
-            className={getNavLinkClass}
-            onClick={closeMenu}
-            tabIndex={isMenuOpen ? 0 : -1}
-          >
-            JOIN US
-          </NavLink>
-        </div>
+        <div className={styles.mobileAuthMenu}>{renderAuthMenu(true)}</div>
       </div>
     </header>
   );

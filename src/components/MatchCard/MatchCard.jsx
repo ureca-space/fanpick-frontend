@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../../contexts/useAuth";
 import FanPickDialog from "../FanPickDialog/FanPickDialog";
 import styles from "./MatchCard.module.css";
 
@@ -26,6 +27,8 @@ const TeamLogo = ({ src, name, shortName }) => {
 
 const MatchCard = ({ match }) => {
   const navigate = useNavigate();
+  const { isLoggedIn, isAuthLoading } = useAuth();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const totalVotes = match.homeVotes + match.awayVotes;
@@ -35,8 +38,17 @@ const MatchCard = ({ match }) => {
 
   const awayVoteRate = 100 - homeVoteRate;
 
-  const handleOpenDialog = () => {
-    setIsDialogOpen(true);
+  const predictionPath = `/prediction?matchId=${match.id}`;
+
+  const handleVoteClick = () => {
+    if (isAuthLoading) return;
+
+    if (!isLoggedIn) {
+      setIsDialogOpen(true);
+      return;
+    }
+
+    navigate(predictionPath);
   };
 
   const handleCloseDialog = () => {
@@ -45,7 +57,16 @@ const MatchCard = ({ match }) => {
 
   const handleMoveToLogin = () => {
     setIsDialogOpen(false);
-    navigate("/login");
+
+    navigate("/login", {
+      state: {
+        from: {
+          pathname: "/prediction",
+          search: `?matchId=${match.id}`,
+          hash: "",
+        },
+      },
+    });
   };
 
   return (
@@ -53,6 +74,7 @@ const MatchCard = ({ match }) => {
       <article className={styles.matchCard}>
         <div className={styles.cardHeader}>
           <span className={styles.sportBadge}>{match.sportLabel}</span>
+
           <span className={styles.league}>{match.league}</span>
         </div>
 
@@ -119,7 +141,8 @@ const MatchCard = ({ match }) => {
         <button
           className={styles.voteButton}
           type="button"
-          onClick={handleOpenDialog}
+          onClick={handleVoteClick}
+          disabled={isAuthLoading}
         >
           투표하기
         </button>
