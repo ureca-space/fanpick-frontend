@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../../../../contexts/useAuth";
 import FanPickDialog from "../../../../components/FanPickDialog/FanPickDialog";
 import MatchFilter from "../../../../components/MatchFilter/MatchFilter";
 import styles from "./HotMatchSection.module.css";
@@ -83,24 +84,56 @@ const HOT_MATCHES = [
 ];
 
 const HotMatchSection = () => {
+  const navigate = useNavigate();
+  const { isLoggedIn, isAuthLoading } = useAuth();
+
   const [activeFilter, setActiveFilter] = useState("baseball");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const navigate = useNavigate();
+  const [pendingVote, setPendingVote] = useState(null);
 
   const hotMatch = HOT_MATCHES.find((match) => match.sport === activeFilter);
 
-  const handleOpenDialog = () => {
-    setIsDialogOpen(true);
+  const handleVoteClick = (selectedTeam) => {
+    if (isAuthLoading || !hotMatch) return;
+
+    const predictionPath = `/prediction?matchId=${hotMatch.id}&team=${selectedTeam}`;
+
+    if (!isLoggedIn) {
+      setPendingVote({
+        matchId: hotMatch.id,
+        selectedTeam,
+      });
+
+      setIsDialogOpen(true);
+      return;
+    }
+
+    navigate(predictionPath);
   };
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
+    setPendingVote(null);
   };
 
   const handleMoveToLogin = () => {
+    if (!pendingVote) return;
+
+    const search =
+      `?matchId=${pendingVote.matchId}` + `&team=${pendingVote.selectedTeam}`;
+
     setIsDialogOpen(false);
-    navigate("/login");
+    setPendingVote(null);
+
+    navigate("/login", {
+      state: {
+        from: {
+          pathname: "/prediction",
+          search,
+          hash: "",
+        },
+      },
+    });
   };
 
   return (
@@ -143,7 +176,8 @@ const HotMatchSection = () => {
                   <button
                     type="button"
                     className={styles.selectButton}
-                    onClick={handleOpenDialog}
+                    onClick={() => handleVoteClick("home")}
+                    disabled={isAuthLoading}
                   >
                     투표하기
                   </button>
@@ -154,6 +188,7 @@ const HotMatchSection = () => {
 
                   <div className={styles.schedule}>
                     <span className={styles.date}>{hotMatch.date}</span>
+
                     <span className={styles.time}>{hotMatch.time}</span>
                   </div>
                 </div>
@@ -177,7 +212,8 @@ const HotMatchSection = () => {
                   <button
                     type="button"
                     className={styles.selectButton}
-                    onClick={handleOpenDialog}
+                    onClick={() => handleVoteClick("away")}
+                    disabled={isAuthLoading}
                   >
                     투표하기
                   </button>

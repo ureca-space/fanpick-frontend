@@ -162,6 +162,20 @@
   display: none;
 }
 
+.logoutButton {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.logoutButton:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
 /* 태블릿 */
 @media (max-width: 1100px) {
   .navigation {

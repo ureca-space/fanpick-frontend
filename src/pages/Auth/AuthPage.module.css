@@ -3,29 +3,29 @@
   flex: 1;
   justify-content: center;
   width: 100%;
-  padding: 60px 24px 100px;
+  padding: 50px 24px 80px;
   color: var(--color-text-white);
   background-color: var(--color-primary-dark);
 }
 
 .authContainer {
   width: 100%;
-  max-width: 626px;
+  max-width: 520px;
 }
 
 .title {
   margin: 0;
   color: var(--color-text-white);
-  font-size: 52px;
+  font-size: 44px;
   font-weight: 700;
   line-height: 1.2;
   text-align: center;
 }
 
 .description {
-  margin: 20px 0 0;
+  margin: 16px 0 0;
   color: #9ba1b8;
-  font-size: 17px;
+  font-size: 15px;
   line-height: 1.6;
   text-align: center;
 }
@@ -33,28 +33,28 @@
 .authForm {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  margin-top: 80px;
+  gap: 15px;
+  margin-top: 56px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .label {
   color: var(--color-text-white);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
 }
 
 .input {
   width: 100%;
-  height: 57px;
-  padding: 0 25px;
+  height: 52px;
+  padding: 0 20px;
   color: var(--color-text-white);
-  font-size: 18px;
+  font-size: 16px;
   background-color: #272a3a;
   border: 1px solid transparent;
   border-radius: 5px;
@@ -84,18 +84,18 @@
 }
 
 .passwordField .input {
-  padding-right: 68px;
+  padding-right: 58px;
 }
 
 .passwordToggle {
   position: absolute;
   top: 50%;
-  right: 22px;
+  right: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   padding: 0;
   color: #969bb0;
   background: none;
@@ -105,8 +105,8 @@
 }
 
 .passwordToggle svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.6;
@@ -124,10 +124,10 @@
 
 .submitButton {
   width: 100%;
-  height: 76px;
-  margin-top: 29px;
+  height: 62px;
+  margin-top: 20px;
   color: var(--color-text-white);
-  font-size: 25px;
+  font-size: 20px;
   font-weight: 700;
   background-color: var(--color-accent-strong);
   border: 0;
@@ -152,13 +152,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 15px;
-  margin-top: 34px;
+  gap: 13px;
+  margin-top: 27px;
 }
 
 .accountMenu a {
   color: #cbd0e2;
-  font-size: 18px;
+  font-size: 16px;
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -169,28 +169,28 @@
 
 .divider {
   width: 1px;
-  height: 16px;
+  height: 14px;
   background-color: #484b5e;
 }
 
 .errorMessage {
-  margin: -7px 0 0;
+  margin: -5px 0 0;
   color: #ff5d77;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.4;
 }
 
 .successMessage {
-  margin: -7px 0 0;
+  margin: -5px 0 0;
   color: #5edb9d;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.4;
 }
 
 .helperText {
   margin: 0;
   color: #8f95aa;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -205,47 +205,69 @@
   clip: rect(0, 0, 0, 0);
 }
 
+.passwordField .input::-ms-reveal,
+.passwordField .input::-ms-clear {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .authPage {
-    padding: 45px 20px 70px;
+    padding: 40px 20px 65px;
+  }
+
+  .authContainer {
+    max-width: 480px;
   }
 
   .title {
-    font-size: 42px;
+    font-size: 36px;
   }
 
   .description {
-    font-size: 15px;
+    margin-top: 14px;
+    font-size: 14px;
   }
 
   .authForm {
-    margin-top: 75px;
+    gap: 14px;
+    margin-top: 48px;
   }
 
   .input {
-    height: 55px;
-    padding: 0 20px;
-    font-size: 16px;
+    height: 50px;
+    padding: 0 18px;
+    font-size: 15px;
   }
 
   .passwordField .input {
-    padding-right: 60px;
+    padding-right: 54px;
   }
 
   .passwordToggle {
-    right: 18px;
+    right: 16px;
+  }
+
+  .passwordToggle svg {
+    width: 21px;
+    height: 21px;
   }
 
   .submitButton {
-    height: 64px;
-    font-size: 22px;
+    height: 56px;
+    margin-top: 18px;
+    font-size: 18px;
   }
 
   .accountMenu {
-    gap: 11px;
+    gap: 10px;
+    margin-top: 24px;
   }
 
   .accountMenu a {
-    font-size: 15px;
+    font-size: 14px;
+  }
+
+  .divider {
+    height: 13px;
   }
 }
