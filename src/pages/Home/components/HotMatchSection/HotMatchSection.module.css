@@ -1,0 +1,340 @@
+.hotMatchSection {
+  position: relative;
+  color: var(--color-text-white);
+  background-color: #151726;
+}
+
+.sectionHeader {
+  margin-bottom: 34px;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: var(--font-size-section-title);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.description {
+  margin: 14px 0 0;
+  color: rgb(255 255 255 / 60%);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.content {
+  margin-top: 64px;
+}
+
+.hotMatch {
+  display: grid;
+  grid-template-columns: 296px 180px 296px;
+  align-items: center;
+  justify-content: center;
+  gap: 80px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.teamColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.teamCard {
+  display: flex;
+  flex-direction: column;
+  width: 296px;
+  min-height: 360px;
+  padding: 22px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background-color: var(--color-surface-card);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.teamCard:hover {
+  border-color: rgb(255 255 255 / 24%);
+  box-shadow: 0 14px 30px rgb(0 0 0 / 22%);
+  transform: translateY(-4px);
+}
+
+.logoBox {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 230px;
+  padding: 18px;
+}
+
+.logoBox img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 210px;
+  object-fit: contain;
+}
+
+.teamNameBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 68px;
+  margin-top: auto;
+  border-radius: 8px;
+  background-color: #181a2a;
+}
+
+.teamName {
+  overflow: hidden;
+  width: 100%;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selectButton {
+  min-width: 112px;
+  height: 43px;
+  margin-top: 30px;
+  padding: 0 22px;
+  border: 1px solid rgb(255 255 255 / 50%);
+  border-radius: 5px;
+  color: var(--color-text-white);
+  background-color: transparent;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.selectButton:hover {
+  border-color: var(--color-text-white);
+  color: var(--color-surface-dark);
+  background-color: var(--color-text-white);
+}
+
+.selectButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.matchInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.vs {
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 2px 2px 0 var(--color-text-white);
+}
+
+.schedule {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 32px;
+}
+
+.date {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.time {
+  margin-top: 6px;
+  color: rgb(255 255 255 / 72%);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.emptyMessage {
+  padding: 100px 20px;
+  color: rgb(255 255 255 / 55%);
+  text-align: center;
+}
+
+@media (max-width: 1000px) {
+  .hotMatch {
+    grid-template-columns: 240px 120px 240px;
+    gap: 30px;
+  }
+
+  .teamCard {
+    width: 240px;
+    min-height: 330px;
+    padding: 20px;
+  }
+
+  .logoBox {
+    min-height: 200px;
+    padding: 14px;
+  }
+
+  .logoBox img {
+    max-height: 180px;
+  }
+
+  .teamNameBox {
+    height: 60px;
+  }
+
+  .teamName {
+    font-size: 22px;
+  }
+
+  .vs {
+    font-size: 44px;
+  }
+
+  .date {
+    font-size: 23px;
+  }
+}
+
+@media (max-width: 700px) {
+  .sectionHeader {
+    margin-bottom: 28px;
+  }
+
+  .description {
+    font-size: 14px;
+  }
+
+  .content {
+    margin-top: 48px;
+  }
+
+  .hotMatch {
+    grid-template-columns: minmax(0, 1fr) 70px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .teamCard {
+    width: 100%;
+    min-height: 270px;
+    padding: 14px;
+  }
+
+  .logoBox {
+    min-height: 160px;
+    padding: 10px;
+  }
+
+  .logoBox img {
+    max-height: 145px;
+  }
+
+  .teamNameBox {
+    height: 54px;
+  }
+
+  .teamName {
+    font-size: 18px;
+  }
+
+  .selectButton {
+    min-width: 100px;
+    height: 40px;
+    padding: 0 18px;
+    font-size: 13px;
+  }
+
+  .vs {
+    font-size: 34px;
+    text-shadow: 1px 1px 0 var(--color-text-white);
+  }
+
+  .schedule {
+    margin-top: 24px;
+  }
+
+  .date {
+    font-size: 19px;
+  }
+
+  .time {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 560px) {
+  .hotMatch {
+    grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .teamCard {
+    min-height: 220px;
+    padding: 10px;
+  }
+
+  .logoBox {
+    min-height: 125px;
+    padding: 6px;
+  }
+
+  .logoBox img {
+    max-height: 115px;
+  }
+
+  .teamNameBox {
+    height: 46px;
+    border-radius: 6px;
+  }
+
+  .teamName {
+    font-size: 14px;
+  }
+
+  .selectButton {
+    min-width: auto;
+    height: 36px;
+    padding: 0 14px;
+    font-size: 12px;
+  }
+
+  .vs {
+    font-size: 28px;
+  }
+
+  .schedule {
+    margin-top: 22px;
+  }
+
+  .date {
+    font-size: 16px;
+  }
+
+  .time {
+    margin-top: 4px;
+    font-size: 12px;
+  }
+}

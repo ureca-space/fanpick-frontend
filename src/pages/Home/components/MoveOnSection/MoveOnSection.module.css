@@ -1,0 +1,95 @@
+.moveOnSection {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: clamp(560px, 55vw, 780px);
+  overflow: hidden;
+  padding: 100px 20px;
+  background-color: var(--color-primary-dark);
+  font-family: var(--font-display);
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  color: var(--color-text-white);
+  font-size: clamp(72px, 9vw, 160px);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: -5px;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.title span {
+  display: block;
+  opacity: 0;
+  white-space: nowrap;
+  will-change: opacity, transform;
+}
+
+.timeTo {
+  --start-position: calc(-50vw - 50%);
+}
+
+.moveOn {
+  --start-position: calc(50vw + 50%);
+}
+
+.visible .timeTo {
+  animation: titleEnter 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.visible .moveOn {
+  animation: titleEnter 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes titleEnter {
+  from {
+    opacity: 0;
+    transform: translateX(var(--start-position));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .moveOnSection {
+    min-height: 560px;
+  }
+
+  .title {
+    font-size: clamp(70px, 14vw, 110px);
+    letter-spacing: -3px;
+  }
+}
+
+@media (max-width: 600px) {
+  .moveOnSection {
+    min-height: 460px;
+    padding: 80px 20px;
+  }
+
+  .title {
+    font-size: clamp(56px, 17vw, 82px);
+    line-height: 0.95;
+    letter-spacing: -2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title span {
+    opacity: 1;
+    animation: none;
+    transform: translateX(0);
+  }
+}

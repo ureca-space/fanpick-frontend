@@ -28,6 +28,16 @@ const Header = () => {
     setIsMenuOpen(false);
   };
 
+  const handleLogoClick = () => {
+    closeMenu();
+
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+  };
+
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
   };
@@ -41,7 +51,7 @@ const Header = () => {
         <Link
           to="/"
           className={styles.logo}
-          onClick={closeMenu}
+          onClick={handleLogoClick}
           aria-label="FAN PICK 홈으로 이동"
         >
           <img src="/logos/fanpick_logo.svg" alt="FanPick" />

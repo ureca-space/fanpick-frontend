@@ -6,13 +6,16 @@ import HomePage from "../pages/Home/HomePage";
 import PredictionPage from "../pages/Prediction/PredictionPage";
 import WorldCupPage from "../pages/WorldCup/WorldCupPage";
 import WorldCupPlayPage from "../pages/WorldCupPlay/WorldCupPlayPage";
-import LoginPage from "../pages/Login/LoginPage";
-import SignupPage from "../pages/Signup/SignupPage";
 import NotFoundPage from "../pages/NotFound/NotFoundPage";
+import LoginPage from "../pages/Auth/Login/LoginPage";
+import SignupPage from "../pages/Auth/Signup/SignupPage";
+import ScrollToTop from "./ScrollToTop";
 
 const AppRouter = () => {
   return (
     <BrowserRouter>
+      <ScrollToTop />
+
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
