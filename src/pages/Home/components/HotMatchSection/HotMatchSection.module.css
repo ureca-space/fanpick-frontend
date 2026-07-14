@@ -1,6 +1,5 @@
 .hotMatchSection {
   position: relative;
-  padding: var(--section-padding) 0;
   color: var(--color-text-white);
   background-color: #151726;
 }
@@ -12,8 +11,8 @@
 .title {
   margin: 0;
   color: var(--color-text-white);
-  font-family: "Graduate", serif;
-  font-size: clamp(38px, 4vw, 54px);
+  font-family: var(--font-display);
+  font-size: var(--font-size-section-title);
   font-weight: 700;
   line-height: 1;
 }
@@ -54,7 +53,7 @@
   padding: 22px;
   border: 1px solid transparent;
   border-radius: 8px;
-  background-color: #252838;
+  background-color: var(--color-surface-card);
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
@@ -99,7 +98,7 @@
   overflow: hidden;
   width: 100%;
   color: var(--color-text-white);
-  font-family: "Graduate", serif;
+  font-family: var(--font-display);
   font-size: 26px;
   font-weight: 700;
   line-height: 1;
@@ -129,7 +128,7 @@
 
 .selectButton:hover {
   border-color: var(--color-text-white);
-  color: #181a29;
+  color: var(--color-surface-dark);
   background-color: var(--color-text-white);
 }
 
@@ -147,7 +146,7 @@
 
 .vs {
   color: var(--color-accent);
-  font-family: "Graduate", serif;
+  font-family: var(--font-display);
   font-size: 52px;
   font-weight: 700;
   line-height: 1;
@@ -163,7 +162,7 @@
 
 .date {
   color: var(--color-text-white);
-  font-family: "Graduate", serif;
+  font-family: var(--font-display);
   font-size: 27px;
   font-weight: 700;
   line-height: 1;

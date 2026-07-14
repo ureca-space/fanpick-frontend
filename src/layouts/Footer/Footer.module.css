@@ -47,7 +47,7 @@
 }
 
 .policyLink:hover {
-  color: #ffffff;
+  color: var(--color-text-white);
 }
 
 /* SNS */
@@ -65,7 +65,7 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  color: #ffffff;
+  color: var(--color-text-white);
   background-color: #3a4152;
   transition:
     background-color 0.2s ease,

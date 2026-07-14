@@ -108,7 +108,7 @@ const WorldCupSection = () => {
 
   return (
     <section className={styles.worldCupSection}>
-      <div className={styles.inner}>
+      <div className={`container ${styles.inner}`}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>PLAYER PICK</h2>
 

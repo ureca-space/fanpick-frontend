@@ -9,7 +9,7 @@
   overflow: hidden;
   padding: 100px 20px;
   background-color: var(--color-primary-dark);
-  font-family: "Graduate", serif;
+  font-family: var(--font-display);
 }
 
 .title {
@@ -17,7 +17,7 @@
   flex-direction: column;
   align-items: center;
   margin: 0;
-  color: #ffffff;
+  color: var(--color-text-white);
   font-size: clamp(72px, 9vw, 160px);
   font-weight: 600;
   line-height: 0.9;
