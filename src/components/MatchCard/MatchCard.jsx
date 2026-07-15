@@ -25,7 +25,7 @@ const TeamLogo = ({ src, name, shortName }) => {
   );
 };
 
-const MatchCard = ({ match, mode = "prediction" }) => {
+const MatchCard = ({ match }) => {
   const navigate = useNavigate();
   const { isLoggedIn, isAuthLoading } = useAuth();
 
@@ -69,10 +69,6 @@ const MatchCard = ({ match, mode = "prediction" }) => {
     });
   };
 
-  /* 달력 용으로 사용 시 카드에서 일부 데이터 숨기기 기능 + line 28, 
-  isCalendarMode 선택 여부 적용 line 117~154 감쌈, 157~167 감쌈 확인 */
-  const isCalendarMode = mode === "calendar";
-  
   return (
     <>
       <article className={styles.matchCard}>
@@ -116,8 +112,6 @@ const MatchCard = ({ match, mode = "prediction" }) => {
           </div>
         </div>
 
-        {!isCalendarMode && (
-          <>
         <div className={styles.voteArea}>
           <div className={styles.voteLabels}>
             <span>
@@ -152,11 +146,8 @@ const MatchCard = ({ match, mode = "prediction" }) => {
         >
           투표하기
         </button>
-         </>
-        )}
       </article>
 
-        {!isCalendarMode && (
       <FanPickDialog
         isOpen={isDialogOpen}
         title="로그인이 필요합니다"
@@ -166,7 +157,6 @@ const MatchCard = ({ match, mode = "prediction" }) => {
         onClose={handleCloseDialog}
         onConfirm={handleMoveToLogin}
       />
-      )}
     </>
   );
 };
