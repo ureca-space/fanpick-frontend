@@ -14,6 +14,7 @@ import FindPasswordPage from "../pages/Auth/FindPassword/FindPasswordPage";
 import ResetPasswordPage from "../pages/Auth/ResetPassword/ResetPassword.jsx";
 import ProtectedRoute from "./ProtectedRoute";
 import ScrollToTop from "./ScrollToTop";
+import Calendar from "../pages/Calendar/Calendar.jsx";
 
 const AppRouter = () => {
   return (
@@ -27,6 +28,7 @@ const AppRouter = () => {
           <Route path="/sports/:sport" element={<SportPage />} />
           <Route path="/worldcup" element={<WorldCupPage />} />
           <Route path="/player" element={<Player />} />
+          <Route path="/calendar" element={<Calendar/>}/>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/find-password" element={<FindPasswordPage />} />
