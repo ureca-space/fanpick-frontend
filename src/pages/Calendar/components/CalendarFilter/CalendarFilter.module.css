@@ -1,0 +1,142 @@
+.teamFilterSection,
+.myMatchSection {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 18px;
+  background: rgb(255 255 255 / 4%);
+}
+
+.sectionHeadingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.sectionHeading {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.teamFilterChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.teamFilterChip,
+.teamFilterChipActive {
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.16s ease;
+}
+
+.teamFilterChip {
+  color: rgb(255 255 255 / 72%);
+  background: rgb(255 255 255 / 4%);
+}
+
+.teamFilterChipActive {
+  color: var(--color-text-white);
+  background: var(--color-accent);
+}
+
+.teamFilterEmpty,
+.myMatchEmpty {
+  margin: 0;
+  color: rgb(255 255 255 / 66%);
+  font-size: 13px;
+}
+
+.myMatchList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.myMatchItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 3%);
+}
+
+.myMatchInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.myMatchSport {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgb(227 27 54 / 18%);
+  color: var(--color-text-white);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.myMatchDate,
+.myMatchLabel {
+  font-size: 13px;
+}
+
+.myMatchDate {
+  color: rgb(255 255 255 / 64%);
+}
+
+.myMatchLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.myMatchRemoveButton {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 8%);
+  color: var(--color-text-white);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  transition: background-color 0.16s ease;
+}
+
+.myMatchRemoveButton:hover {
+  background: rgb(227 27 54 / 28%);
+}
+
+@media (max-width: 720px) {
+  .teamFilterSection,
+  .myMatchSection {
+    padding: 12px 12px 13px;
+  }
+
+  .sectionHeadingRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .myMatchItem {
+    grid-template-columns: 1fr auto;
+    gap: 6px;
+  }
+
+  .myMatchInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}

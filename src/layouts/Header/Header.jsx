@@ -6,20 +6,24 @@ import styles from "./Header.module.css";
 
 const menuList = [
   {
-    label: "BASEBALL",
-    path: "/sports/baseball",
+    label: "PLAYERS",
+    path: "/players",
   },
   {
-    label: "SOCCER",
-    path: "/sports/football",
+    label: "MATCH SCHEDULE",
+    path: "/matches",
   },
   {
-    label: "BASKETBALL",
-    path: "/sports/basketball",
+    label: "CALENDAR",
+    path: "/calendar",
   },
   {
-    label: "LOL",
-    path: "/sports/lol",
+    label: "PREDICTION",
+    path: "/prediction",
+  },
+  {
+    label: "PICK BATTLE",
+    path: "/worldcup",
   },
 ];
 

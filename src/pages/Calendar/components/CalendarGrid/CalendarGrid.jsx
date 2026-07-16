@@ -1,5 +1,5 @@
-﻿import CalendarCell from "./CalendarCell";
-import css from "../Calendar.module.css";
+import CalendarCell from "../CalendarCell/CalendarCell";
+import css from "./CalendarGrid.module.css";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -28,7 +28,7 @@ const getCalendarDays = ({ year, month }) => {
   });
 };
 
-const CalendarGrid = ({ year, month, matchByDate }) => {
+const CalendarGrid = ({ year, month, matchByDate, onMatchClick }) => {
   const days = getCalendarDays({ year, month });
 
   return (
@@ -47,6 +47,7 @@ const CalendarGrid = ({ year, month, matchByDate }) => {
             key={day.date}
             day={day}
             matches={matchByDate[day.date] || []}
+            onMatchClick={onMatchClick}
           />
         ))}
       </div>
