@@ -1,0 +1,348 @@
+.backdrop {
+  position: fixed;
+  z-index: 3000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  background-color: rgb(0 0 0 / 72%);
+  backdrop-filter: blur(6px);
+}
+
+.dialog {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(360px, 1.1fr);
+  width: min(900px, 100%);
+  height: min(840px, calc(100vh - 60px));
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 10%);
+  color: var(--color-text-white);
+  background-color: var(--color-surface-dark);
+  box-shadow: 0 28px 80px rgb(0 0 0 / 45%);
+}
+
+.closeButton {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 50%;
+  background-color: rgb(4 18 38 / 70%);
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.closeButton:hover {
+  border-color: rgb(255 255 255 / 35%);
+  background-color: rgb(4 18 38 / 95%);
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.closeButton span {
+  position: absolute;
+  top: 18px;
+  left: 10px;
+  width: 18px;
+  height: 2px;
+  background-color: var(--color-text-white);
+}
+
+.closeButton span:first-child {
+  transform: rotate(45deg);
+}
+
+.closeButton span:last-child {
+  transform: rotate(-45deg);
+}
+
+.imageArea {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--color-surface-card);
+}
+
+.imageArea img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.imageFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(
+      circle at center,
+      rgb(255 255 255 / 7%) 0%,
+      transparent 58%
+    ),
+    var(--color-surface-card);
+}
+
+.imageFallback span {
+  color: rgb(255 255 255 / 12%);
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.content {
+  min-width: 0;
+  min-height: 0;
+  padding: 58px 52px 46px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.content::-webkit-scrollbar {
+  display: none;
+}
+
+.sport {
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 1.2px;
+}
+
+.name {
+  margin-top: 18px;
+  color: var(--color-text-white);
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.englishName {
+  margin-top: 7px;
+  color: rgb(255 255 255 / 38%);
+  font-family: var(--font-display);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.basicInformation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 0;
+  margin-top: 26px;
+  color: rgb(255 255 255 / 68%);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.basicInformation span {
+  display: flex;
+  align-items: center;
+}
+
+.basicInformation span:not(:last-child)::after {
+  margin: 0 14px;
+  color: rgb(255 255 255 / 22%);
+  content: "·";
+}
+
+.introduction {
+  margin-top: 30px;
+  color: rgb(255 255 255 / 72%);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.tags span {
+  padding: 7px 10px;
+  border: 1px solid rgb(227 27 54 / 28%);
+  color: var(--color-accent);
+  background-color: rgb(227 27 54 / 8%);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.profileList {
+  display: grid;
+  gap: 0;
+  margin: 38px 0 0;
+  border-top: 1px solid rgb(255 255 255 / 10%);
+}
+
+.profileList div {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  align-items: center;
+  min-height: 58px;
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+}
+
+.profileList dt {
+  color: rgb(255 255 255 / 38%);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.profileList dd {
+  margin: 0;
+  color: rgb(255 255 255 / 78%);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.ratingSection {
+  margin-top: 38px;
+  padding-top: 28px;
+}
+
+.ratingHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.ratingHeader h3 {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ratingHeader > span {
+  color: rgb(255 255 255 / 35%);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.ratingList {
+  display: grid;
+  gap: 15px;
+  margin-top: 22px;
+}
+
+.ratingList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.ratingLabel {
+  color: rgb(255 255 255 / 72%);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.stars {
+  display: flex;
+  flex-shrink: 0;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: 3px;
+}
+
+.stars strong {
+  color: var(--color-accent);
+  font-weight: 400;
+}
+
+.stars > span {
+  color: rgb(255 255 255 / 13%);
+}
+
+.ratingNotice {
+  margin-top: 24px;
+  color: rgb(255 255 255 / 28%);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+@media (max-width: 760px) {
+  .backdrop {
+    align-items: flex-start;
+    padding: 18px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .backdrop::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dialog {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .imageArea {
+    height: auto;
+    min-height: auto;
+    aspect-ratio: 4 / 4.5;
+  }
+
+  .imageFallback {
+    min-height: 0;
+  }
+
+  .content {
+    padding: 36px 24px 30px;
+    overflow: visible;
+  }
+
+  .closeButton {
+    top: 14px;
+    right: 14px;
+  }
+
+  .profileList div {
+    grid-template-columns: 110px 1fr;
+  }
+
+  .ratingHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .ratingList li {
+    gap: 12px;
+  }
+
+  .stars {
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+}
