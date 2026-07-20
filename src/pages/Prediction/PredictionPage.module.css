@@ -1,0 +1,291 @@
+.page {
+  min-height: 100vh;
+  padding: 112px 0 140px;
+  color: var(--color-background);
+  background: var(--color-surface-dark);
+}
+
+.inner {
+  max-width: 1100px;
+}
+
+/* 제목 */
+
+.hero {
+  margin-bottom: 92px;
+  text-align: center;
+}
+
+.hero h1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(36px, 4vw, 60px);
+}
+
+.hero h1 span {
+  margin: 0 -4px;
+  font-size: 0.8em;
+  transform: rotate(-10deg);
+}
+
+.hero p {
+  margin-top: 16px;
+  color: #adb1bd;
+  font-size: 18px;
+}
+
+/* 상단 탭 */
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100px;
+  margin-bottom: 54px;
+  overflow: hidden;
+  border-radius: 50px;
+  background: #d9d9d9;
+}
+
+.tabs button {
+  color: #a3a3a3;
+  background: transparent;
+  font-size: clamp(20px, 2.5vw, 36px);
+  font-weight: 800;
+}
+
+.tabs .activeTab {
+  color: var(--color-background);
+  border-radius: 50px;
+  background: var(--color-accent);
+}
+
+/* 날짜 */
+
+.datePicker {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid #6c6e75;
+}
+
+.datePicker button {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 20px;
+  color: var(--color-background);
+  background: transparent;
+}
+
+.datePicker span {
+  font-size: 14px;
+}
+
+.datePicker strong {
+  font-size: 22px;
+}
+
+.datePicker .activeDate {
+  color: var(--color-accent);
+}
+
+.datePicker .activeDate::after {
+  position: absolute;
+  bottom: -1px;
+  width: 74px;
+  height: 2px;
+  background: var(--color-accent);
+  content: "";
+}
+
+/* 종목 필터 */
+
+.filterWrap {
+  margin: 30px 0 48px;
+}
+
+.filterWrap > div {
+  gap: 18px;
+  font-family: inherit;
+}
+
+.filterWrap button {
+  min-width: 108px;
+  height: 48px;
+  border: 0;
+  border-radius: 24px;
+  color: var(--color-background);
+  background: #272b3a;
+  font-size: 16px;
+}
+
+.filterWrap button[aria-pressed="true"] {
+  border: 1px solid var(--color-accent);
+  background: #e27c8b;
+}
+
+/* 경기 목록 */
+
+.matchList {
+  display: grid;
+  gap: 34px;
+}
+
+.matchCard {
+  padding: 38px 46px 28px;
+  border: 1px solid #6c6e75;
+  border-radius: 20px;
+}
+
+.matchMeta,
+.matchHeading,
+.teamIdentity {
+  display: flex;
+  align-items: center;
+}
+
+.matchMeta {
+  gap: 9px;
+  margin-bottom: 18px;
+}
+
+.ball {
+  font-size: 14px;
+}
+
+.matchHeading {
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.matchHeading p {
+  font-size: 22px;
+}
+
+.matchHeading span {
+  padding: 5px 10px;
+  border-radius: 5px;
+  background: var(--color-accent);
+  font-size: 11px;
+}
+
+/* 팀 선택 */
+
+.teams {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border: 1px solid #6c6e75;
+  border-radius: 14px;
+  background: var(--color-surface-card);
+}
+
+.teamButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 92px;
+  padding: 0 28px;
+  color: var(--color-background);
+  background: transparent;
+}
+
+.teamButton + .teamButton {
+  border-left: 1px solid #6c6e75;
+}
+
+.teamButton.selected {
+  color: var(--color-accent);
+  background: var(--color-background);
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.teamButton:not(.selected) {
+  color: #a3a3a3;
+}
+
+.teamIdentity {
+  gap: 12px;
+}
+
+.teamMark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  background: var(--color-accent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.teamButton b {
+  font-size: 26px;
+}
+
+.awayTeam {
+  text-align: right;
+}
+
+.awayTeam .teamIdentity {
+  margin-left: auto;
+}
+
+.matchCard small {
+  display: block;
+  margin-top: 16px;
+}
+
+.empty {
+  padding: 80px 0;
+  color: #adb1bd;
+  text-align: center;
+}
+
+/* 모바일 */
+
+@media (max-width: 700px) {
+  .page {
+    padding: 72px 0 90px;
+  }
+
+  .hero {
+    margin-bottom: 54px;
+  }
+
+  .tabs {
+    height: 64px;
+    margin-bottom: 36px;
+  }
+
+  .filterWrap {
+    margin-bottom: 30px;
+  }
+
+  .filterWrap button {
+    min-width: 72px;
+    height: 42px;
+    padding: 0 18px;
+  }
+
+  .matchCard {
+    padding: 24px 18px 20px;
+  }
+
+  .teamButton {
+    height: 78px;
+    padding: 0 12px;
+  }
+
+  .teamMark {
+    display: none;
+  }
+
+  .teamButton b {
+    font-size: 20px;
+  }
+}
