@@ -2,8 +2,11 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 
-const KBO_SCHEDULE_URL =
-  "https://eng.koreabaseball.com/Schedule/DailySchedule.aspx";
+const KBO_SCHEDULE_API_URL =
+  "https://www.koreabaseball.com/ws/Schedule.asmx/GetScheduleList";
+
+const KBO_SCHEDULE_PAGE_URL =
+  "https://www.koreabaseball.com/Schedule/Schedule.aspx";
 
 const { SUPABASE_URL, SUPABASE_SERVER_KEY } = process.env;
 
@@ -21,13 +24,30 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVER_KEY, {
   },
 });
 
-const cleanCell = (html) => {
-  return html
+const TEAM_CODES = {
+  LG: "LG",
+  한화: "HANWHA",
+  SSG: "SSG",
+  삼성: "SAMSUNG",
+  NC: "NC",
+  KT: "KT",
+  롯데: "LOTTE",
+  KIA: "KIA",
+  두산: "DOOSAN",
+  키움: "KIWOOM",
+  나눔: "NANUM",
+  드림: "DREAM",
+};
+
+const cleanCell = (html = "") => {
+  return String(html)
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/gi, " ")
     .replace(/&amp;/gi, "&")
     .replace(/&#39;/gi, "'")
     .replace(/&quot;/gi, '"')
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
     .replace(/\s+/g, " ")
     .trim();
 };
@@ -36,114 +56,268 @@ const createSlug = (value) => {
   return value.toLowerCase().replace(/[^a-z0-9가-힣]/g, "");
 };
 
-const getStatus = (score) => {
-  if (/^\d+:\d+$/.test(score)) {
-    return "finished";
+const normalizeTeamCode = (teamName) => {
+  const matchedTeam = Object.entries(TEAM_CODES).find(([keyword]) =>
+    teamName.includes(keyword),
+  );
+
+  return matchedTeam?.[1] ?? teamName;
+};
+
+const getKoreaYearMonth = () => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+  }).formatToParts(new Date());
+
+  const year = Number(parts.find((part) => part.type === "year")?.value);
+  const month = Number(parts.find((part) => part.type === "month")?.value);
+
+  if (!year || !month) {
+    throw new Error("한국 시간 기준 현재 연월을 계산하지 못했습니다.");
   }
 
-  if (/postponed|연기/i.test(score)) {
+  return { year, month };
+};
+
+const getScheduleTargets = () => {
+  const { year, month } = getKoreaYearMonth();
+
+  return Array.from({ length: 3 }, (_, index) => {
+    /*
+     * Date의 month는 0부터 시작한다.
+     * 현재 month - 1에 index를 더해 현재 월부터 계산한다.
+     *
+     * 11월 → 12월 → 다음 해 1월처럼
+     * 연도가 넘어가는 경우도 자동 처리된다.
+     */
+    const targetDate = new Date(Date.UTC(year, month - 1 + index, 1));
+
+    return {
+      year: targetDate.getUTCFullYear(),
+      month: targetDate.getUTCMonth() + 1,
+    };
+  });
+};
+
+const fetchKboSchedule = async ({ year, month }) => {
+  const body = new URLSearchParams({
+    leId: "1",
+    srIdList: "0,1,3,4,5,6,7,9",
+    seasonId: String(year),
+    gameMonth: String(month).padStart(2, "0"),
+    teamId: "",
+  });
+
+  const response = await fetch(KBO_SCHEDULE_API_URL, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      Origin: "https://www.koreabaseball.com",
+      Referer: KBO_SCHEDULE_PAGE_URL,
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    body: body.toString(),
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (!response.ok) {
+    const targetMonth = `${year}-${String(month).padStart(2, "0")}`;
+
+    throw new Error(
+      `${targetMonth} KBO 일정 요청 실패: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const responseData = await response.json();
+
+  /*
+   * ASP.NET 응답에 따라 실제 데이터가
+   * responseData.d 안에 JSON 문자열로 들어올 수 있다.
+   */
+  if (typeof responseData.d === "string") {
+    return JSON.parse(responseData.d);
+  }
+
+  return responseData.d ?? responseData;
+};
+
+const findCellByClass = (cells, className) => {
+  return cells.find((cell) => cell?.Class === className);
+};
+
+const findCellByClasses = (cells, classNames) => {
+  return cells.find((cell) => classNames.includes(cell?.Class));
+};
+
+const parsePlayCell = (html = "") => {
+  const spans = [
+    ...String(html).matchAll(/<span\b[^>]*>([\s\S]*?)<\/span>/gi),
+  ].map((match) => cleanCell(match[1]));
+
+  const versusIndex = spans.findIndex((value) => value.toLowerCase() === "vs");
+
+  if (versusIndex < 0) {
+    return null;
+  }
+
+  const parseScore = (value) => {
+    return /^\d+$/.test(value) ? Number(value) : null;
+  };
+
+  const awayTeamName = spans[0] ?? "";
+  const homeTeamName = spans.at(-1) ?? "";
+
+  const awayScore = spans
+    .slice(1, versusIndex)
+    .map(parseScore)
+    .find((score) => score !== null);
+
+  const homeScore = spans
+    .slice(versusIndex + 1, -1)
+    .map(parseScore)
+    .find((score) => score !== null);
+
+  if (!awayTeamName || !homeTeamName) {
+    return null;
+  }
+
+  return {
+    awayTeam: normalizeTeamCode(awayTeamName),
+    homeTeam: normalizeTeamCode(homeTeamName),
+    awayScore: awayScore ?? null,
+    homeScore: homeScore ?? null,
+  };
+};
+
+const getGameStatus = ({ awayScore, homeScore, rowText }) => {
+  if (/연기|postponed/i.test(rowText)) {
     return "postponed";
   }
 
-  if (/cancelled|canceled|cancel|취소/i.test(score)) {
+  if (/취소|노게임|cancelled|canceled/i.test(rowText)) {
     return "cancelled";
+  }
+
+  if (awayScore !== null && homeScore !== null) {
+    return "finished";
   }
 
   return "scheduled";
 };
 
-const fetchKboSchedule = async () => {
-  const response = await fetch(KBO_SCHEDULE_URL, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `KBO 일정 요청 실패: ${response.status} ${response.statusText}`,
-    );
+const getGameType = ({ awayTeam, homeTeam, rowText }) => {
+  if (
+    /올스타|allstar/i.test(rowText) ||
+    [awayTeam, homeTeam].some((team) => ["NANUM", "DREAM"].includes(team))
+  ) {
+    return "ALLSTAR";
   }
 
-  return response.text();
+  if (/시범|preseason/i.test(rowText)) {
+    return "PRESEASON";
+  }
+
+  if (/포스트|와일드카드|준플레이오프|플레이오프|한국시리즈/i.test(rowText)) {
+    return "POSTSEASON";
+  }
+
+  return "REGULAR";
 };
 
-const parseKboSchedule = (html) => {
-  const rowMatches = html.match(/<tr\b[^>]*>[\s\S]*?<\/tr>/gi) ?? [];
+const parseKboSchedule = (scheduleData, targetYear) => {
+  const rows = scheduleData?.rows ?? [];
 
-  const currentYear = new Date().getFullYear();
-
-  let currentDate = null;
-  let currentGameType = null;
+  let currentMonth = null;
+  let currentDay = null;
 
   const games = [];
   const matchupCounts = new Map();
 
-  rowMatches.forEach((rowHtml) => {
-    const cellMatches = [
-      ...rowHtml.matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi),
-    ];
+  rows.forEach((rowObject) => {
+    const cells = rowObject?.row ?? [];
 
-    const cells = cellMatches.map((match) => cleanCell(match[1]));
-
-    if (cells.length < 8) {
+    if (cells.length === 0) {
       return;
     }
 
-    const hasDate = /^\d{2}\.\d{2}\([A-Z]{3}\)$/.test(cells[0]);
+    /*
+     * 같은 날짜의 첫 번째 경기 행에만 day 셀이 존재한다.
+     * 이후 경기들은 이전 날짜를 계속 사용한다.
+     */
+    const dayCell = findCellByClass(cells, "day");
 
-    let timeIndex;
-    let awayIndex;
-    let scoreIndex;
-    let homeIndex;
-    let broadcastIndex;
-    let stadiumIndex;
-    let noteIndex;
+    if (dayCell) {
+      const dayMatch = cleanCell(dayCell.Text).match(
+        /(?<month>\d{1,2})\.(?<day>\d{1,2})/,
+      );
 
-    if (hasDate) {
-      currentDate = cells[0];
-      currentGameType = cells[1];
-
-      timeIndex = 2;
-      awayIndex = 3;
-      scoreIndex = 4;
-      homeIndex = 5;
-      broadcastIndex = 6;
-      stadiumIndex = 8;
-      noteIndex = 9;
-    } else {
-      if (!currentDate || !/^\d{2}:\d{2}$/.test(cells[0])) {
-        return;
+      if (dayMatch?.groups) {
+        currentMonth = Number(dayMatch.groups.month);
+        currentDay = Number(dayMatch.groups.day);
       }
-
-      timeIndex = 0;
-      awayIndex = 1;
-      scoreIndex = 2;
-      homeIndex = 3;
-      broadcastIndex = 4;
-      stadiumIndex = 6;
-      noteIndex = 7;
     }
 
-    const dateMatch = currentDate.match(/^(?<month>\d{2})\.(?<day>\d{2})/);
-
-    if (!dateMatch?.groups) {
+    if (!currentMonth || !currentDay) {
       return;
     }
 
-    const { month, day } = dateMatch.groups;
-    const date = `${currentYear}-${month}-${day}`;
+    const timeCell = findCellByClass(cells, "time");
+    const playCell = findCellByClass(cells, "play");
+    const parsedPlay = parsePlayCell(playCell?.Text);
 
-    const time = cells[timeIndex];
-    const awayTeam = cells[awayIndex];
-    const homeTeam = cells[homeIndex];
-    const score = cells[scoreIndex] || "";
-
-    if (!/^\d{2}:\d{2}$/.test(time) || !awayTeam || !homeTeam) {
+    if (!parsedPlay) {
       return;
     }
+
+    const time = cleanCell(timeCell?.Text);
+
+    if (!/^\d{2}:\d{2}$/.test(time)) {
+      return;
+    }
+
+    const rowText = cells.map((cell) => cleanCell(cell?.Text)).join(" ");
+
+    /*
+     * 일정 응답의 마지막 두 셀은 일반적으로 구장과 비고다.
+     * 응답 구조가 짧은 경우 알려진 셀을 구장이나 비고로
+     * 잘못 인식하지 않도록 검사한다.
+     */
+    const stadiumCell = cells.at(-2);
+    const noteCell = cells.at(-1);
+
+    const broadcastCell = findCellByClasses(cells, ["broadcast", "tv"]);
+
+    const knownCells = new Set([dayCell, timeCell, playCell].filter(Boolean));
+
+    const broadcast = cleanCell(broadcastCell?.Text);
+
+    const stadium = knownCells.has(stadiumCell)
+      ? ""
+      : cleanCell(stadiumCell?.Text);
+
+    const note = knownCells.has(noteCell) ? "" : cleanCell(noteCell?.Text);
+
+    const month = String(currentMonth).padStart(2, "0");
+    const day = String(currentDay).padStart(2, "0");
+    const date = `${targetYear}-${month}-${day}`;
+
+    const { awayTeam, homeTeam, awayScore, homeScore } = parsedPlay;
+
+    const status = getGameStatus({
+      awayScore,
+      homeScore,
+      rowText,
+    });
+
+    const score =
+      awayScore !== null && homeScore !== null
+        ? `${awayScore}:${homeScore}`
+        : "";
 
     const awaySlug = createSlug(awayTeam);
     const homeSlug = createSlug(homeTeam);
@@ -169,37 +343,58 @@ const parseKboSchedule = (html) => {
       league: "KBO",
       date,
       time,
-      gameType: currentGameType,
+      gameType: getGameType({
+        awayTeam,
+        homeTeam,
+        rowText,
+      }),
       awayTeam,
       homeTeam,
       score,
-      status: getStatus(score),
-      broadcast: cells[broadcastIndex] || "",
-      stadium: cells[stadiumIndex] || "",
-      note: cells[noteIndex] || "",
+      status,
+      broadcast: broadcast === "-" ? "" : broadcast,
+      stadium: stadium === "-" ? "" : stadium,
+      note: note === "-" ? "" : note,
     });
   });
 
   return games;
 };
 
-const saveScheduleToJson = async (games) => {
-  const scheduleMonth = games[0].date.slice(0, 7);
-
+const saveSchedulesToJson = async (monthlySchedules) => {
   const dataDirectory = path.resolve("public", "data");
-
-  const outputPath = path.join(dataDirectory, `kbo-${scheduleMonth}.json`);
 
   await mkdir(dataDirectory, {
     recursive: true,
   });
 
-  await writeFile(outputPath, JSON.stringify(games, null, 2), "utf8");
+  const outputPaths = [];
 
-  return outputPath;
+  /*
+   * 다음 달 일정이 아직 공개되지 않아 빈 배열이어도
+   * 해당 월 JSON 파일을 생성한다.
+   */
+  for (const { target, games } of monthlySchedules) {
+    const scheduleMonth = `${target.year}-${String(target.month).padStart(
+      2,
+      "0",
+    )}`;
+
+    const outputPath = path.join(dataDirectory, `kbo-${scheduleMonth}.json`);
+
+    await writeFile(outputPath, JSON.stringify(games, null, 2), "utf8");
+
+    outputPaths.push(outputPath);
+  }
+
+  return outputPaths;
 };
 
 const syncScheduleToSupabase = async (games) => {
+  if (games.length === 0) {
+    return 0;
+  }
+
   const updatedAt = new Date().toISOString();
 
   const rows = games.map((game) => ({
@@ -217,7 +412,7 @@ const syncScheduleToSupabase = async (games) => {
     broadcast: game.broadcast || null,
     note: game.note || null,
     source: "KBO_OFFICIAL",
-    source_url: KBO_SCHEDULE_URL,
+    source_url: KBO_SCHEDULE_PAGE_URL,
     updated_at: updatedAt,
   }));
 
@@ -234,22 +429,58 @@ const syncScheduleToSupabase = async (games) => {
 
 const main = async () => {
   try {
-    console.log("KBO 공식 일정 페이지를 불러오는 중...");
+    const targets = getScheduleTargets();
 
-    const html = await fetchKboSchedule();
-    const games = parseKboSchedule(html);
+    console.log(
+      `KBO 일정 수집 대상: ${targets
+        .map(({ year, month }) => `${year}-${String(month).padStart(2, "0")}`)
+        .join(", ")}`,
+    );
+
+    /*
+     * 현재 월과 다음 달을 병렬로 수집한다.
+     */
+    const monthlySchedules = await Promise.all(
+      targets.map(async (target) => {
+        const scheduleData = await fetchKboSchedule(target);
+
+        const games = parseKboSchedule(scheduleData, target.year);
+
+        console.log(
+          `${target.year}-${String(target.month).padStart(
+            2,
+            "0",
+          )} 경기 ${games.length}개 추출`,
+        );
+
+        return {
+          target,
+          games,
+        };
+      }),
+    );
+
+    const games = monthlySchedules
+      .flatMap((schedule) => schedule.games)
+      .sort((firstGame, secondGame) =>
+        `${firstGame.date} ${firstGame.time}`.localeCompare(
+          `${secondGame.date} ${secondGame.time}`,
+        ),
+      );
 
     if (games.length === 0) {
-      throw new Error("추출된 KBO 경기가 없습니다.");
+      throw new Error("현재 월과 다음 달에서 추출된 KBO 경기가 없습니다.");
     }
 
-    const outputPath = await saveScheduleToJson(games);
+    const outputPaths = await saveSchedulesToJson(monthlySchedules);
 
     const syncedCount = await syncScheduleToSupabase(games);
 
-    console.log(`KBO 경기 ${games.length}개 추출 완료`);
+    console.log(`KBO 경기 총 ${games.length}개 추출 완료`);
 
-    console.log(`JSON 저장 위치: ${outputPath}`);
+    outputPaths.forEach((outputPath) => {
+      console.log(`JSON 저장 위치: ${outputPath}`);
+    });
 
     console.log(`Supabase 경기 ${syncedCount}개 동기화 완료`);
   } catch (error) {
