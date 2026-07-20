@@ -159,7 +159,7 @@ const Header = () => {
           onClick={handleLogoClick}
           aria-label="FAN PICK 홈으로 이동"
         >
-          <img src="/logos/fanpick_logo.svg" alt="FanPick" />
+          <img src="/fanpick_logo.svg" alt="FanPick" />
         </Link>
 
         <nav className={styles.navigation} aria-label="스포츠 메뉴">

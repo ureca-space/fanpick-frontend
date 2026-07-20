@@ -128,7 +128,7 @@ const getScheduleTargets = () => {
    * 현재 월부터 세 달을 수집한다.
    * 연도가 넘어가도 Date가 자동으로 처리한다.
    */
-  return Array.from({ length: 3 }, (_, index) => {
+  return Array.from({ length: 6 }, (_, index) => {
     const targetDate = new Date(Date.UTC(year, month - 1 + index, 1));
 
     return {

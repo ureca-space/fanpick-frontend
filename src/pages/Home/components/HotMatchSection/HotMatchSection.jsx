@@ -22,12 +22,12 @@ const HOT_MATCHES = [
     homeTeam: {
       name: "두산 베어스",
       shortName: "DOOSAN",
-      logo: "/images/team-logos/doosan.png",
+      logo: "logos/doosan.png",
     },
     awayTeam: {
       name: "NC 다이노스",
       shortName: "NC",
-      logo: "/images/team-logos/nc.png",
+      logo: "logos/nc.png",
     },
   },
   {
@@ -39,12 +39,12 @@ const HOT_MATCHES = [
     homeTeam: {
       name: "FC 서울",
       shortName: "SEOUL",
-      logo: "/images/team-logos/seoul.png",
+      logo: "logos/seoul.png",
     },
     awayTeam: {
       name: "수원 삼성",
       shortName: "SUWON",
-      logo: "/images/team-logos/suwon.png",
+      logo: "logos/suwon.png",
     },
   },
   {
@@ -56,12 +56,12 @@ const HOT_MATCHES = [
     homeTeam: {
       name: "서울 SK",
       shortName: "SK",
-      logo: "/images/team-logos/seoul-sk.png",
+      logo: "logos/seoul-sk.png",
     },
     awayTeam: {
       name: "수원 KT",
       shortName: "KT",
-      logo: "/images/team-logos/suwon-kt.png",
+      logo: "logos/suwon-kt.png",
     },
   },
   {
@@ -73,12 +73,12 @@ const HOT_MATCHES = [
     homeTeam: {
       name: "T1",
       shortName: "T1",
-      logo: "/images/team-logos/t1.png",
+      logo: "logos/t1.png",
     },
     awayTeam: {
       name: "젠지",
       shortName: "GEN.G",
-      logo: "/images/team-logos/geng.png",
+      logo: "logos/geng.png",
     },
   },
 ];
