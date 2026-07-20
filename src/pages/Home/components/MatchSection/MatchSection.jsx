@@ -24,12 +24,12 @@ const MATCHES = [
     homeTeam: {
       name: "두산 베어스",
       shortName: "두산",
-      logo: "/images/team-logos/doosan.png",
+      logo: "logos/doosan.png",
     },
     awayTeam: {
       name: "NC 다이노스",
       shortName: "NC",
-      logo: "/images/team-logos/nc.png",
+      logo: "logos/nc.png",
     },
     homeVotes: 634,
     awayVotes: 366,
@@ -46,12 +46,12 @@ const MATCHES = [
     homeTeam: {
       name: "FC 서울",
       shortName: "서울",
-      logo: "/images/team-logos/seoul.png",
+      logo: "logos/seoul.png",
     },
     awayTeam: {
       name: "수원 삼성",
       shortName: "수원",
-      logo: "/images/team-logos/suwon.png",
+      logo: "logos/suwon.png",
     },
     homeVotes: 572,
     awayVotes: 428,
@@ -68,12 +68,12 @@ const MATCHES = [
     homeTeam: {
       name: "서울 SK",
       shortName: "SK",
-      logo: "/images/team-logos/seoul-sk.png",
+      logo: "logos/seoul-sk.png",
     },
     awayTeam: {
       name: "수원 KT",
       shortName: "KT",
-      logo: "/images/team-logos/suwon-kt.png",
+      logo: "logos/suwon-kt.png",
     },
     homeVotes: 449,
     awayVotes: 551,
@@ -90,12 +90,12 @@ const MATCHES = [
     homeTeam: {
       name: "T1",
       shortName: "T1",
-      logo: "/images/team-logos/t1.png",
+      logo: "logos/t1.png",
     },
     awayTeam: {
       name: "젠지",
       shortName: "GEN",
-      logo: "/images/team-logos/geng.png",
+      logo: "logos/geng.png",
     },
     homeVotes: 718,
     awayVotes: 282,

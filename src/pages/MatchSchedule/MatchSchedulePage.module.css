@@ -1,0 +1,448 @@
+.schedulePage {
+  min-height: 100vh;
+  padding: var(--section-padding) 0;
+  color: var(--color-text-white);
+  background-color: var(--color-surface-dark);
+}
+
+/* 페이지 제목 */
+.pageHeader {
+  max-width: 720px;
+}
+
+.eyebrow {
+  margin-bottom: 16px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 1.4px;
+}
+
+.title {
+  position: relative;
+  width: fit-content;
+  padding-bottom: 18px;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: var(--font-size-section-title);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.title::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: var(--color-accent);
+  content: "";
+}
+
+.description {
+  max-width: 650px;
+  margin-top: 24px;
+  color: rgb(255 255 255 / 55%);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+/* 필터 / 검색 */
+.controlArea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  margin-top: 48px;
+}
+
+.filterArea {
+  flex: 1;
+  min-width: 0;
+}
+
+.searchArea {
+  flex: 0 0 420px;
+  width: 420px;
+}
+
+/* 주간 일정 */
+.schedulePanel {
+  overflow: hidden;
+  margin-top: 48px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 12px;
+  background-color: #202332;
+}
+
+.scheduleToolbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 78px;
+  padding: 14px 24px;
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+}
+
+.weekController {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrowButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 50%;
+  color: var(--color-text-white);
+  background-color: transparent;
+  font-size: 22px;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.arrowButton:hover {
+  border-color: rgb(255 255 255 / 40%);
+  background-color: rgb(255 255 255 / 7%);
+}
+
+.arrowButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+.weekRange {
+  min-width: 290px;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.currentWeekButton {
+  position: absolute;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 6px;
+  color: rgb(255 255 255 / 80%);
+  background-color: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.currentWeekButton:hover {
+  border-color: var(--color-text-white);
+  color: var(--color-surface-dark);
+  background-color: var(--color-text-white);
+}
+
+.currentWeekButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+/* 날짜 목록 */
+.dateScroller {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dateScroller::-webkit-scrollbar {
+  display: none;
+}
+
+.dateList {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(100px, 1fr));
+  min-width: 700px;
+}
+
+.dateButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 116px;
+  border-right: 1px solid rgb(255 255 255 / 7%);
+  color: rgb(255 255 255 / 48%);
+  background-color: transparent;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.dateButton:last-child {
+  border-right: 0;
+}
+
+.dateButton:hover {
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 4%);
+}
+
+.dateButton.active {
+  color: var(--color-text-white);
+  background-color: var(--color-primary-dark);
+}
+
+.dateButton.active::before {
+  position: absolute;
+  top: 0;
+  right: 18px;
+  left: 18px;
+  height: 3px;
+  background-color: var(--color-accent);
+  content: "";
+}
+
+.dateButton:focus-visible {
+  z-index: 1;
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.dayLabel {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dateNumber {
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.matchDot {
+  position: absolute;
+  bottom: 17px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+}
+
+/* 선택 날짜 경기 목록 */
+.resultHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 64px;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+}
+
+.resultDate {
+  margin-bottom: 10px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.resultTitle {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.matchCount {
+  flex-shrink: 0;
+  color: rgb(255 255 255 / 45%);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.matchList {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 52px 28px;
+}
+
+/* 경기 없음 */
+.emptyState {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 330px;
+  padding: 60px 20px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 12px;
+  background-color: rgb(255 255 255 / 2%);
+  text-align: center;
+}
+
+.emptyIcon {
+  margin-bottom: 22px;
+  color: rgb(255 255 255 / 20%);
+  font-size: 48px;
+}
+
+.emptyState strong {
+  color: rgb(255 255 255 / 78%);
+  font-size: 18px;
+}
+
+.emptyState p {
+  margin-top: 10px;
+  color: rgb(255 255 255 / 42%);
+  font-size: 14px;
+}
+
+@media (max-width: 1100px) {
+  .controlArea {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .searchArea {
+    flex-basis: auto;
+    width: min(100%, 420px);
+  }
+
+  .matchList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .description {
+    font-size: 15px;
+  }
+
+  .controlArea {
+    margin-top: 36px;
+  }
+
+  .schedulePanel {
+    margin-top: 36px;
+  }
+
+  .currentWeekButton {
+    display: none;
+  }
+
+  .weekRange {
+    min-width: 250px;
+  }
+
+  .matchList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .controlArea {
+    gap: 20px;
+  }
+
+  .searchArea {
+    width: 100%;
+  }
+
+  .scheduleToolbar {
+    min-height: 68px;
+    padding: 12px 16px;
+  }
+
+  .arrowButton {
+    width: 38px;
+    height: 38px;
+  }
+
+  .weekRange {
+    min-width: 210px;
+    font-size: 13px;
+  }
+
+  .dateList {
+    min-width: 630px;
+  }
+
+  .dateButton {
+    min-height: 104px;
+  }
+
+  .resultHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 48px;
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+  }
+
+  .resultTitle {
+    font-size: 20px;
+  }
+
+  .matchCount {
+    align-self: flex-end;
+    font-size: 10px;
+  }
+
+  .matchList {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .matchList::-webkit-scrollbar {
+    display: none;
+  }
+
+  .matchList > * {
+    flex: 0 0 calc(100% - 40px);
+    scroll-snap-align: start;
+  }
+
+  .emptyState {
+    min-height: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .weekRange {
+    min-width: 180px;
+    font-size: 12px;
+  }
+
+  .arrowButton {
+    width: 34px;
+    height: 34px;
+    font-size: 19px;
+  }
+}
