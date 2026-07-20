@@ -81,19 +81,24 @@
 .logoFallback {
   width: 54px;
   height: 54px;
-  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .teamLogo {
   display: block;
+  padding: 2px;
+  box-sizing: border-box;
   object-fit: contain;
-  background-color: var(--color-background);
+  object-position: center;
+  border-radius: 0;
+  background-color: transparent;
 }
 
 .logoFallback {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
   color: var(--color-text-white);
   background-color: #393e55;
   font-size: 13px;
