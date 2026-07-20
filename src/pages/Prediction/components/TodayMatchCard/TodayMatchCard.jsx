@@ -1,11 +1,11 @@
-import { SPORT_ICONS } from "../predictionUtils";
-import styles from "../PredictionPage.module.css";
-import TeamMark from "./TeamMark";
+import { SPORT_ICONS } from "../../predictionUtils";
+import TeamMark from "../TeamMark/TeamMark";
+import styles from "./TodayMatchCard.module.css";
 
 // - 오늘의 경기 표시
 // - 홈팀 또는 원정팀 선택 처리
 const TodayMatchCard = ({ match, selection, onSelect }) => {
-  // - 홈팀 비율이 없으면 기본값 50% 사용
+  // - API에 비율이 없으면 기본값 50% 사용
   const homeRate = match.homeRate ?? 50;
   const awayRate = 100 - homeRate;
 

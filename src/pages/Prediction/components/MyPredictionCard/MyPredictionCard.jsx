@@ -2,9 +2,9 @@ import {
   getPredictionResult,
   RESULT_LABELS,
   SPORT_ICONS,
-} from "../predictionUtils";
-import styles from "../PredictionPage.module.css";
-import TeamMark from "./TeamMark";
+} from "../../predictionUtils";
+import TeamMark from "../TeamMark/TeamMark";
+import styles from "./MyPredictionCard.module.css";
 
 // - 사용자가 선택한 경기 결과 표시
 // - 진행 중, 성공, 실패 상태에 맞는 CSS 적용
@@ -16,7 +16,7 @@ const MyPredictionCard = ({ match, selection }) => {
   const result = getPredictionResult(match, selection);
 
   return (
-    <article className={`${styles.matchCard} ${styles.myCard}`}>
+    <article className={styles.matchCard}>
       <div className={styles.matchMeta}>
         <span>{match.sportLabel}</span>
         <span>{SPORT_ICONS[match.sport]}</span>

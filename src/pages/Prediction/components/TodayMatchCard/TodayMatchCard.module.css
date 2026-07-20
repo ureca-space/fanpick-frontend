@@ -1,0 +1,100 @@
+.matchCard {
+  padding: 38px 46px 28px;
+  border: 1px solid #6c6e75;
+  border-radius: 20px;
+}
+
+.matchMeta {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 18px;
+  font-size: 16px;
+}
+
+.matchHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.matchHeading p {
+  font-size: 22px;
+}
+
+.matchHeading span {
+  padding: 5px 10px;
+  border-radius: 5px;
+  background: var(--color-accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.teams {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border: 1px solid #6c6e75;
+  border-radius: 14px;
+  background: var(--color-surface-card);
+}
+
+.teamButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  height: 92px;
+  padding: 0 28px;
+  border: 2px solid transparent;
+  color: var(--color-text-white);
+  background: transparent;
+  font-size: 17px;
+}
+
+.teamButton + .teamButton {
+  border-left: 1px solid #6c6e75;
+}
+
+.teamButton.selected {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-background);
+}
+
+.teamIdentity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.teamButton b {
+  font-size: 26px;
+}
+
+.awayTeam {
+  text-align: right;
+}
+
+.matchCard > small {
+  display: block;
+  margin-top: 16px;
+  font-size: 11px;
+}
+
+@media (max-width: 700px) {
+  .matchCard {
+    padding: 24px 18px 20px;
+    border-radius: 14px;
+  }
+
+  .teamButton {
+    height: 78px;
+    padding: 0 12px;
+  }
+
+  .teamButton b {
+    font-size: 20px;
+  }
+}

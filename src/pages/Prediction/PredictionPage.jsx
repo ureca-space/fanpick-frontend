@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import MatchFilter from "../../components/MatchFilter/MatchFilter";
 import { fetchLolMatchesByDateRange } from "../../services/lolApi";
 import { fetchEplMatchesByDateRange } from "../../services/soccerApi";
-import MyPredictionCard from "./components/MyPredictionCard";
-import TodayMatchCard from "./components/TodayMatchCard";
+import MyPredictionCard from "./components/MyPredictionCard/MyPredictionCard";
+import TodayMatchCard from "./components/TodayMatchCard/TodayMatchCard";
 import {
   createDateFilter,
   getPredictionStats,
@@ -167,7 +167,7 @@ const PredictionPage = () => {
         {activeTab === "mine" && (
           <aside className={styles.summary}>
             <span>🏅</span>
-            <strong>LoL의 신</strong>
+            <strong>역배 장인</strong>
             <p>
               나의 예측 <b>{predictionCount}회</b>
               <br />

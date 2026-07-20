@@ -1,4 +1,4 @@
-import styles from "../PredictionPage.module.css";
+import styles from "./TeamMark.module.css";
 
 // - 팀 로고가 있으면 이미지 표시
 // - 팀 로고가 없으면 팀 이름의 첫 글자 표시
