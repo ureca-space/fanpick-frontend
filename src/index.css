@@ -3,18 +3,20 @@
 @import url("https://fonts.googleapis.com/css2?family=Anton&family=Graduate&display=swap");
 
 :root {
-  font-family:
+  --font-korean:
     Pretendard,
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+  --font-display: "Graduate", var(--font-korean);
+  --font-condensed: "Anton", var(--font-korean);
+
+  font-family: var(--font-korean);
 
   color: var(--color-text-primary);
   background-color: var(--color-background);
 
-  --font-display: "Graduate", serif;
-  --font-condensed: "Anton", sans-serif;
   --font-size-section-title: clamp(38px, 4vw, 54px);
 
   --color-primary: #071a33;

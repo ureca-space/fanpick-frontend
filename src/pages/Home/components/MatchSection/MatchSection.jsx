@@ -236,36 +236,30 @@ const MatchSection = () => {
   }, [matches, activeFilter]);
 
   const totalPages = Math.ceil(filteredMatches.length / CARDS_PER_PAGE);
+  const safeCurrentPage =
+    totalPages === 0 ? 0 : Math.min(currentPage, totalPages - 1);
 
   const visibleMatches = useMemo(() => {
-    const startIndex = currentPage * CARDS_PER_PAGE;
+    const startIndex = safeCurrentPage * CARDS_PER_PAGE;
     const endIndex = startIndex + CARDS_PER_PAGE;
 
     return filteredMatches.slice(startIndex, endIndex);
-  }, [filteredMatches, currentPage]);
+  }, [filteredMatches, safeCurrentPage]);
 
-  useEffect(() => {
+  const handleFilterChange = (filterId) => {
+    setActiveFilter(filterId);
     setCurrentPage(0);
-  }, [activeFilter]);
-
-  useEffect(() => {
-    if (totalPages === 0) {
-      setCurrentPage(0);
-      return;
-    }
-
-    if (currentPage >= totalPages) {
-      setCurrentPage(totalPages - 1);
-    }
-  }, [currentPage, totalPages]);
+  };
 
   const handlePreviousPage = () => {
-    setCurrentPage((previousPage) => Math.max(previousPage - 1, 0));
+    setCurrentPage((previousPage) =>
+      Math.max(Math.min(previousPage, safeCurrentPage) - 1, 0),
+    );
   };
 
   const handleNextPage = () => {
     setCurrentPage((previousPage) =>
-      Math.min(previousPage + 1, totalPages - 1),
+      Math.min(Math.max(previousPage, safeCurrentPage) + 1, totalPages - 1),
     );
   };
 
@@ -275,7 +269,7 @@ const MatchSection = () => {
         <MatchFilter
           filters={FILTERS}
           activeFilter={activeFilter}
-          onChange={setActiveFilter}
+          onChange={handleFilterChange}
         />
 
         <header className={styles.sectionHeader}>
@@ -293,7 +287,7 @@ const MatchSection = () => {
               className={styles.navigationButton}
               aria-label="이전 경기 보기"
               onClick={handlePreviousPage}
-              disabled={currentPage === 0}
+              disabled={safeCurrentPage === 0}
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M15 5L8 12L15 19" />
@@ -305,7 +299,7 @@ const MatchSection = () => {
               className={styles.navigationButton}
               aria-label="다음 경기 보기"
               onClick={handleNextPage}
-              disabled={currentPage >= totalPages - 1}
+              disabled={safeCurrentPage >= totalPages - 1}
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M9 5L16 12L9 19" />

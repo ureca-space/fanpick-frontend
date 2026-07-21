@@ -6,8 +6,8 @@ import styles from "./Header.module.css";
 
 const menuList = [
   {
-    label: "PLAYERS",
-    path: "/players",
+    label: "TEAMS",
+    path: "/teams",
   },
   {
     label: "MATCH SCHEDULE",

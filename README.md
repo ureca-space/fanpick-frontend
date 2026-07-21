@@ -1,5 +1,12 @@
 # React + Vite
 
+## Supabase setup
+
+Run `supabase/favorite_teams.sql` in your Supabase SQL editor before using the
+Teams favorite feature across devices. The frontend falls back to local browser
+storage when the table is not available, but account-level syncing requires this
+table and its row-level security policies.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
