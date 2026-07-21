@@ -1,0 +1,576 @@
+.myPage {
+  min-height: 100vh;
+  padding: 70px 0 100px;
+  color: var(--color-text-white);
+  background-color: var(--color-surface-dark);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+}
+
+/* 페이지 제목 */
+
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pageTitle {
+  margin: 0;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: var(--font-size-section-title);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.pageDescription {
+  color: rgb(255 255 255 / 60%);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* 프로필 */
+
+.profileSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+  padding: 36px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 18px;
+  background-color: var(--color-surface-card);
+}
+
+.profileMain {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 28px;
+  min-width: 0;
+}
+
+.avatarArea {
+  flex-shrink: 0;
+}
+
+.profileAvatar {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profileAvatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileAvatarInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.profileAvatarOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--color-text-white);
+  background-color: rgb(0 0 0 / 62%);
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.profileAvatar:hover .profileAvatarOverlay,
+.profileAvatarUploading .profileAvatarOverlay {
+  opacity: 1;
+}
+
+.profileAvatarUploading {
+  cursor: wait;
+  pointer-events: none;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.nicknameRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.nickname {
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 26px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.email,
+.joinedAt {
+  overflow: hidden;
+  color: rgb(255 255 255 / 58%);
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 닉네임 수정 */
+
+.editButton,
+.cancelButton {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 6px;
+  color: rgb(255 255 255 / 70%);
+  background-color: transparent;
+  font-size: 13px;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.editButton:hover,
+.cancelButton:hover:not(:disabled) {
+  border-color: rgb(255 255 255 / 40%);
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 6%);
+}
+
+.nicknameEdit {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nicknameInput {
+  width: 220px;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 8px;
+  outline: none;
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 6%);
+  caret-color: var(--color-text-white);
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.nicknameInput:focus {
+  border-color: var(--color-accent);
+  background-color: rgb(255 255 255 / 8%);
+}
+
+.editActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.saveButton {
+  padding: 7px 14px;
+  border-radius: 6px;
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  font-size: 13px;
+  font-weight: 700;
+  transition: background-color 0.2s ease;
+}
+
+.saveButton:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+}
+
+.saveButton:disabled,
+.cancelButton:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.editButton:focus-visible,
+.saveButton:focus-visible,
+.cancelButton:focus-visible,
+.nicknameInput:focus-visible,
+.profileAvatar:focus-visible {
+  outline: 2px solid var(--color-text-white);
+  outline-offset: 3px;
+}
+
+/* 프로필 내부 종목별 배지 */
+
+.profileBadges {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr));
+  gap: 14px;
+  width: min(100%, 650px);
+}
+
+.profileBadge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 88px;
+  padding: 16px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 12px;
+  background-color: rgb(255 255 255 / 4%);
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.profileBadge:hover {
+  border-color: rgb(255 255 255 / 18%);
+  background-color: rgb(255 255 255 / 7%);
+  transform: translateY(-2px);
+}
+
+.profileBadgeIcon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 50%;
+  background-color: rgb(255 255 255 / 5%);
+  font-size: 22px;
+}
+
+.profileBadge > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.profileBadgeSport {
+  color: rgb(255 255 255 / 45%);
+  font-family: var(--font-display);
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+}
+
+.profileBadgeTitle {
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileBadgeAccuracy {
+  overflow: hidden;
+  color: rgb(255 255 255 / 48%);
+  font-size: 12px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 공통 섹션 */
+
+.statisticsSection,
+.historySection {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sectionDescription {
+  color: rgb(255 255 255 / 55%);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* 예측 통계 */
+
+.statisticsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.statisticCard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 150px;
+  padding: 26px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 16px;
+  background-color: var(--color-surface-card);
+}
+
+.statisticLabel {
+  color: rgb(255 255 255 / 52%);
+  font-family: var(--font-display);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.statisticValue {
+  margin-top: auto;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 1;
+}
+
+.statisticUnit {
+  margin-left: 6px;
+  color: rgb(255 255 255 / 60%);
+  font-family: inherit;
+  font-size: 15px;
+}
+
+/* 예측 기록 빈 상태 */
+
+.emptyHistory {
+  display: flex;
+  min-height: 280px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 18px;
+  background-color: var(--color-surface-card);
+  text-align: center;
+}
+
+.emptyTitle {
+  color: var(--color-text-white);
+  font-size: 20px;
+}
+
+.emptyDescription {
+  margin-top: 10px;
+  color: rgb(255 255 255 / 52%);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.moveButton {
+  min-width: 190px;
+  height: 50px;
+  margin-top: 26px;
+  padding: 0 24px;
+  border-radius: 10px;
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  font-weight: 700;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.moveButton:hover {
+  background-color: var(--color-accent-hover);
+  transform: translateY(-2px);
+}
+
+.moveButton:active {
+  transform: translateY(0);
+}
+
+.moveButton:focus-visible {
+  outline: 2px solid var(--color-text-white);
+  outline-offset: 3px;
+}
+
+/* 로딩 및 오류 */
+
+.stateMessage {
+  padding: 160px 20px;
+  color: rgb(255 255 255 / 58%);
+  text-align: center;
+}
+
+/* 작은 데스크톱 */
+
+@media (max-width: 1180px) {
+  .profileSection {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .profileBadges {
+    width: 100%;
+  }
+}
+
+/* 태블릿 */
+
+@media (max-width: 1000px) {
+  .statisticsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 모바일 */
+
+@media (max-width: 700px) {
+  .myPage {
+    padding: 48px 0 72px;
+  }
+
+  .inner {
+    gap: 52px;
+  }
+
+  .profileSection {
+    gap: 28px;
+    padding: 26px 22px;
+  }
+
+  .profileMain {
+    align-items: flex-start;
+    gap: 18px;
+    width: 100%;
+  }
+
+  .profileAvatar {
+    width: 76px;
+    height: 76px;
+    font-size: 30px;
+  }
+
+  .profileAvatarOverlay {
+    font-size: 11px;
+  }
+
+  .profileInfo {
+    max-width: calc(100% - 94px);
+  }
+
+  .nicknameRow {
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .nickname {
+    font-size: 21px;
+  }
+
+  .email,
+  .joinedAt {
+    font-size: 13px;
+  }
+
+  .nicknameInput {
+    width: min(100%, 200px);
+  }
+
+  .profileBadges {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .profileBadge {
+    min-height: 80px;
+    padding: 15px;
+  }
+
+  .profileBadgeIcon {
+    width: 40px;
+    height: 40px;
+    font-size: 21px;
+  }
+
+  .profileBadgeTitle {
+    font-size: 14px;
+  }
+
+  .sectionTitle {
+    font-size: 25px;
+  }
+
+  .statisticsGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .statisticCard {
+    min-height: 125px;
+    padding: 22px;
+  }
+
+  .statisticValue {
+    font-size: 34px;
+  }
+
+  .emptyHistory {
+    min-height: 240px;
+    padding: 34px 20px;
+  }
+
+  .moveButton {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .stateMessage {
+    padding: 120px 16px;
+  }
+}

@@ -13,6 +13,10 @@ const FILTERS = [
   { id: "esports", label: "LOL" },
 ];
 
+const SUPPORTED_SPORT_IDS = new Set(
+  FILTERS.filter((filter) => filter.id !== "all").map((filter) => filter.id),
+);
+
 const DAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 
 const SPORT_LABELS = {
@@ -498,7 +502,10 @@ const MatchSchedulePage = () => {
         const normalizedMatches = (data ?? [])
           .filter(
             (match) =>
-              match.match_date && match.home_team_code && match.away_team_code,
+              SUPPORTED_SPORT_IDS.has(match.sport) &&
+              match.match_date &&
+              match.home_team_code &&
+              match.away_team_code,
           )
           .map(normalizeSupabaseMatch);
 
