@@ -5,7 +5,6 @@ const WIKIPEDIA_LANGUAGES = ["ko", "en"];
 const SPORT_NAME_MAP = {
   soccer: "soccer",
   baseball: "baseball",
-  basketball: "basketball",
   lol: "esports",
 };
 
