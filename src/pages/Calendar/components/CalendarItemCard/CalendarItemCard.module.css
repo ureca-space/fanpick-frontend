@@ -118,6 +118,10 @@
     font-size: 0.65rem;
   }
 
+  .matchupText {
+    font-size: 10px;
+  }
+
   .teamName {
     max-width: 48px;
   }
@@ -127,5 +131,34 @@
   .teamFallback,
   .matchupSeparator {
     font-size: 0.5rem;
+  }
+
+  .teamName {
+    max-width: 40px;
+  }
+}
+
+@media (max-width: 520px) {
+  .matchupText {
+    gap: 6px;
+    font-size: 9px;
+  }
+
+  .teamName {
+    display: none;
+  }
+
+  .teamGroup {
+    gap: 0;
+  }
+
+  .teamLogo,
+  .teamFallback {
+    width: 24px;
+    height: 24px;
+  }
+
+  .teamName {
+    max-width: 0;
   }
 }

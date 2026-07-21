@@ -47,6 +47,7 @@ const CalendarFilter = ({
                   <button
                     key={team.code}
                     type="button"
+                    aria-label={team.name || team.shortName || team.code}
                     className={
                       selectedTeamCode === team.code
                         ? css.teamFilterChipActive
@@ -54,7 +55,17 @@ const CalendarFilter = ({
                     }
                     onClick={() => onSelectTeamCode(team.code)}
                   >
-                    {team.shortName || team.name}
+                    {team.logo ? (
+                      <img
+                        className={css.teamFilterChipLogo}
+                        src={team.logo}
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                    <span className={css.teamFilterChipLabel}>
+                      {team.shortName || team.name}
+                    </span>
                   </button>
                 ))}
               </div>

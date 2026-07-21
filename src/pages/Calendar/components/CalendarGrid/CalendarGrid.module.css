@@ -47,13 +47,20 @@
 @media (max-width: 900px) {
   .weekday {
     padding: 14px 6px;
-    font-size: 14px;
+    font-size: 13px;
   }
 }
 
 @media (max-width: 720px) {
   .weekday {
     padding: 12px 4px;
-    font-size: 12px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 520px) {
+  .weekday {
+    padding: 10px 2px;
+    font-size: 10px;
   }
 }

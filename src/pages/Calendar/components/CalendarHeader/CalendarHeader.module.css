@@ -45,13 +45,13 @@
   }
 
   .calendarTitle {
-    font-size: clamp(28px, 6vw, 42px);
+    font-size: clamp(24px, 5.5vw, 36px);
   }
 
   .navButton {
-    width: 30px;
-    height: 30px;
-    font-size: 20px;
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
   }
 }
 
@@ -61,12 +61,28 @@
   }
 
   .calendarTitle {
-    font-size: 26px;
+    font-size: 22px;
   }
 
   .navButton {
-    width: 38px;
-    height: 38px;
-    font-size: 28px;
+    width: 34px;
+    height: 34px;
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 520px) {
+  .calendarHeader {
+    gap: 8px;
+  }
+
+  .calendarTitle {
+    font-size: 20px;
+  }
+
+  .navButton {
+    width: 32px;
+    height: 32px;
+    font-size: 22px;
   }
 }

@@ -31,14 +31,14 @@
 }
 
 .sportButton {
-  background-color: rgb(255 255 255 / 4%);
-  color: rgb(255 255 255 / 68%);
+  background-color: var(--color-primary);
+  color: (var(--color-text-secondary)/ 68%);
 }
 
 .sportButtonActive {
   background-color: var(--color-accent);
   color: var(--color-text-white);
-  border-color: rgb(255 255 255 / 28%);
+  border-color: var(--color-text-secondary);
 }
 
 .statusMessage,
@@ -48,7 +48,7 @@
 }
 
 .statusMessage {
-  color: rgb(255 255 255 / 78%);
+  color: (var(--color-text-secondary) / 78%);
 }
 
 .statusMessageError {
@@ -65,5 +65,31 @@
 @media (max-width: 720px) {
   .calendarPage {
     padding-top: 12px;
+  }
+
+  .selectSportBtn button {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+
+  .statusMessage,
+  .statusMessageError {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 520px) {
+  .selectSportBtn {
+    gap: 8px;
+  }
+
+  .selectSportBtn button {
+    padding: 7px 10px;
+    font-size: 10px;
+  }
+
+  .statusMessage,
+  .statusMessageError {
+    font-size: 11px;
   }
 }

@@ -60,10 +60,19 @@
   }
 
   .dayNumber {
-    font-size: 16px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 520px) {
+  .dayCell {
+    min-height: 128px;
+    padding: 9px 6px 7px;
   }
 
-
+  .dayNumber {
+    font-size: 13px;
+  }
 }
 
 
