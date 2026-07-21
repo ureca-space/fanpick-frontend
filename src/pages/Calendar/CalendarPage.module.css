@@ -1,46 +1,95 @@
-.page {
-  min-height: 100vh;
-  padding: var(--section-padding) 0;
+.calendarPage {
+  width: 100%;
+
+  min-height: calc(100vh - var(--header-height));
+  margin: 0 auto;
+  padding: 20px 12px 36px;
   color: var(--color-text-white);
-  background-color: var(--color-surface-dark);
+  background: var(--color-surface-dark);
+  box-sizing: border-box;
 }
 
-.inner {
-  display: grid;
-  gap: 48px;
-}
-
-.pageHeader {
-  max-width: 720px;
-}
-
-.eyebrow {
+.selectSportBtn {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-bottom: 16px;
-  color: var(--color-accent);
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: 1.4px;
 }
 
-.title {
-  position: relative;
-  width: fit-content;
-  padding-bottom: 18px;
-  color: var(--color-text-white);
-  font-family: var(--font-display);
-  font-size: var(--font-size-section-title);
-  font-weight: 700;
-  line-height: 1;
+.selectSportBtn button {
+  border-radius: 30px;
+  font-size: 12px;
 }
 
-.title::after {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 3px;
+.sportButton,
+.sportButtonActive {
+  padding: 10px 16px;
+  border-radius: 40px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.sportButton {
+  background-color: var(--color-primary);
+  color: (var(--color-text-secondary)/ 68%);
+}
+
+.sportButtonActive {
   background-color: var(--color-accent);
-  content: "";
+  color: var(--color-text-white);
+  border-color: var(--color-text-secondary);
+}
+
+.statusMessage,
+.statusMessageError {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.statusMessage {
+  color: (var(--color-text-secondary) / 78%);
+}
+
+.statusMessageError {
+  color: #ffb4b4;
+}
+
+@media (max-width: 1100px) {
+  .calendarPage {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+@media (max-width: 720px) {
+  .calendarPage {
+    padding-top: 12px;
+  }
+
+  .selectSportBtn button {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+
+  .statusMessage,
+  .statusMessageError {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 520px) {
+  .selectSportBtn {
+    gap: 8px;
+  }
+
+  .selectSportBtn button {
+    padding: 7px 10px;
+    font-size: 10px;
+  }
+
+  .statusMessage,
+  .statusMessageError {
+    font-size: 11px;
+  }
 }
