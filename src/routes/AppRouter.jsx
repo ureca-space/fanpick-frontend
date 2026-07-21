@@ -1,12 +1,13 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout/MainLayout";
 
 import ProtectedRoute from "./ProtectedRoute";
 import ScrollToTop from "./ScrollToTop";
 
 const HomePage = lazy(() => import("../pages/Home/HomePage"));
-const PlayersPage = lazy(() => import("../pages/Players/PlayersPage"));
+const TeamsPage = lazy(() => import("../pages/Teams/TeamsPage"));
+const TeamDetailPage = lazy(() => import("../pages/Teams/TeamDetailPage"));
 const MatchSchedulePage = lazy(
   () => import("../pages/MatchSchedule/MatchSchedulePage"),
 );
@@ -39,7 +40,9 @@ const AppRouter = () => {
             {/* 누구나 접근 가능 */}
             <Route path="/" element={<HomePage />} />
 
-            <Route path="/players" element={<PlayersPage />} />
+            <Route path="/teams" element={<TeamsPage />} />
+            <Route path="/teams/:teamId" element={<TeamDetailPage />} />
+            <Route path="/players" element={<Navigate to="/teams" replace />} />
             <Route path="/matches" element={<MatchSchedulePage />} />
 
             <Route path="/login" element={<LoginPage />} />
