@@ -13,7 +13,6 @@ const FILTERS = [
   { id: "all", label: "ALL" },
   { id: "baseball", label: "BASEBALL" },
   { id: "soccer", label: "SOCCER" },
-  { id: "basketball", label: "BASKETBALL" },
   { id: "lol", label: "LOL" },
 ];
 
