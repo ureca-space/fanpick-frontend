@@ -31,6 +31,11 @@
   font-weight: 700;
 }
 
+/* - 종료된 경기: 예측 실패 배지와 같은 색상 */
+.matchHeading span.finished {
+  background: #777b88;
+}
+
 .teams {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -38,6 +43,20 @@
   border: 1px solid #6c6e75;
   border-radius: 14px;
   background: var(--color-surface-card);
+}
+
+/* - 종료된 경기 결과판 */
+.finishedTeams {
+  border-color: #aeb0b6;
+  background: #f5f5f5;
+}
+
+.finishedTeams .teamButton {
+  color: #aeb0b6;
+}
+
+.finishedTeams .teamButton + .teamButton {
+  border-left-color: #aeb0b6;
 }
 
 .teamButton {
@@ -51,6 +70,10 @@
   color: var(--color-text-white);
   background: transparent;
   font-size: 17px;
+}
+
+.teamButton:disabled {
+  cursor: default;
 }
 
 .teamButton + .teamButton {
@@ -69,12 +92,26 @@
   gap: 12px;
 }
 
+.teamText {
+  display: flex;
+  flex-direction: column;
+}
+
+.teamText small {
+  margin-top: 3px;
+  font-size: 13px;
+}
+
 .teamButton b {
   font-size: 26px;
 }
 
 .awayTeam {
   text-align: right;
+}
+
+.awayTeam .teamIdentity {
+  margin-left: auto;
 }
 
 .matchCard > small {

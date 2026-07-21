@@ -1,19 +1,15 @@
-import {
-  getPredictionResult,
-  RESULT_LABELS,
-  SPORT_ICONS,
-} from "../../predictionUtils";
+import { RESULT_LABELS, RESULT_STYLES, SPORT_ICONS } from "../../predictionUtils";
 import TeamMark from "../TeamMark/TeamMark";
 import styles from "./MyPredictionCard.module.css";
 
 // - 사용자가 선택한 경기 결과 표시
 // - 진행 중, 성공, 실패 상태에 맞는 CSS 적용
-const MyPredictionCard = ({ match, selection }) => {
+const MyPredictionCard = ({ match, selection, result = "pending" }) => {
   // - API에 비율이 없으면 기본값 50% 사용
   const homeRate = match.homeRate ?? 50;
-  const awayRate = 100 - homeRate;
+  const awayRate = match.awayRate ?? 50;
   const isAwaySelected = selection === "away";
-  const result = getPredictionResult(match, selection);
+  const resultStyle = RESULT_STYLES[result] ?? "waiting";
 
   return (
     <article className={styles.matchCard}>
@@ -25,12 +21,13 @@ const MyPredictionCard = ({ match, selection }) => {
 
       <div className={styles.matchHeading}>
         <p>
-          <strong>{match.time}</strong> 경기예정
+          <strong>{match.time}</strong>{" "}
+          {match.isFinished ? "경기종료" : "경기예정"}
         </p>
-        <span className={styles[result]}>{RESULT_LABELS[result]}</span>
+        <span className={styles[resultStyle]}>{RESULT_LABELS[result]}</span>
       </div>
 
-      <div className={`${styles.scoreBoard} ${styles[result]}`}>
+      <div className={`${styles.scoreBoard} ${styles[resultStyle]}`}>
         <div
           className={`${styles.scoreTeam} ${!isAwaySelected ? styles.myPick : ""}`}
         >
