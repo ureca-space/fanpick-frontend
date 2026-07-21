@@ -1,0 +1,59 @@
+.tableShell {
+  overflow-x: auto;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 24px;
+  background: var(--color-primary);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 26%);
+}
+
+.table {
+  width: 100%;
+  min-width: 1080px;
+  border-collapse: collapse;
+  color: var(--color-text-white);
+}
+
+.headerCell {
+  padding: 16px 14px 14px;
+  color: rgb(255 255 255 / 78%);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  background: rgb(255 255 255 / 2%);
+}
+
+.bodyCell {
+  padding: 14px;
+  color: rgb(255 255 255 / 88%);
+  font-size: 14px;
+  line-height: 1.35;
+  border-bottom: 1px solid rgb(255 255 255 / 6%);
+  white-space: nowrap;
+}
+
+.row:nth-child(odd) .bodyCell {
+  background: rgb(255 255 255 / 2%);
+}
+
+.row:nth-child(even) .bodyCell {
+  background: rgb(255 255 255 / 4%);
+}
+
+.row:hover .bodyCell {
+  background: rgb(227 27 54 / 8%);
+}
+
+.alignCenter {
+  text-align: center;
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.alignLeft {
+  text-align: left;
+}

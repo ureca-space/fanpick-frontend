@@ -7,6 +7,7 @@ import ScrollToTop from "./ScrollToTop";
 
 const HomePage = lazy(() => import("../pages/Home/HomePage"));
 const PlayersPage = lazy(() => import("../pages/Players/PlayersPage"));
+const TeamRecordPage = lazy(() => import("../pages/TeamRecord/TeamRecordPage"));
 const MatchSchedulePage = lazy(
   () => import("../pages/MatchSchedule/MatchSchedulePage"),
 );
@@ -40,6 +41,7 @@ const AppRouter = () => {
             <Route path="/" element={<HomePage />} />
 
             <Route path="/players" element={<PlayersPage />} />
+            <Route path="/team-record" element={<TeamRecordPage />} />
             <Route path="/matches" element={<MatchSchedulePage />} />
 
             <Route path="/login" element={<LoginPage />} />
