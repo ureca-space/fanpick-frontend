@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync:kbo": "node --env-file=.env.sync scripts/sync-kbo-schedule.mjs",
+    "sync:kleague": "node --env-file=.env.sync scripts/sync-kleague-schedule.mjs",
+    "sync:lck": "node --env-file=.env.sync scripts/sync-lck-schedule.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.2",
