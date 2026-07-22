@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import EmptyState from "../../components/EmptyState/EmptyState";
+import FanPickDialog from "../../components/FanPickDialog/FanPickDialog";
 import MatchFilter from "../../components/MatchFilter/MatchFilter";
 import SearchInput from "../../components/SearchInput/SearchInput";
+import SubNav from "../../components/SubNav/SubNav";
 import WeekDateSelector from "../../components/WeekDateSelector/WeekDateSelector";
+import { MATCH_CENTER_SUB_NAV_ITEMS } from "../../constants/matchCenterNav";
 import useAuth from "../../contexts/useAuth";
 import { supabase } from "../../lib/supabase";
 import {
@@ -17,6 +20,7 @@ import {
   canChangePredictionByBeginAt,
   createMatchBeginAt,
 } from "../../utils/predictionDeadline";
+import { createPredictionLocation } from "../../utils/predictionPath";
 import MyPredictionCard, {
   MyPredictionCardSkeleton,
 } from "./components/MyPredictionCard/MyPredictionCard";
@@ -268,8 +272,11 @@ const fetchPredictionMatches = async (startDate, endDate) => {
 };
 
 const PredictionPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, isAuthLoading } = useAuth();
+  const requestedTab = searchParams.get("tab");
   const targetMatchId = searchParams.get("matchId")?.replace(/^match-/, "");
   const targetTeamCode = searchParams.get("team")?.trim().toUpperCase() ?? "";
   const handledAutoPredictionRef = useRef("");
@@ -282,7 +289,11 @@ const PredictionPage = () => {
   // - 화면 상태
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState("");
-  const [activeTab, setActiveTab] = useState("today");
+  const [activeTab, setActiveTab] = useState(() =>
+    requestedTab === "mine" ? "mine" : "today",
+  );
+  const visibleTab =
+    !isAuthLoading && !user && activeTab === "mine" ? "today" : activeTab;
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [weekStart, setWeekStart] = useState(() => getMonday(createToday()));
@@ -297,6 +308,57 @@ const PredictionPage = () => {
   const [sportStats, setSportStats] = useState([]);
   const [savingMatchId, setSavingMatchId] = useState(null);
   const [currentTime, setCurrentTime] = useState(() => Date.now());
+  const [loginDialogState, setLoginDialogState] = useState({
+    description: "",
+    from: null,
+    isOpen: false,
+  });
+
+  const openLoginDialog = useCallback((description, from) => {
+    setLoginDialogState({
+      description,
+      from,
+      isOpen: true,
+    });
+  }, []);
+
+  const closeLoginDialog = () => {
+    setLoginDialogState((previous) => ({
+      ...previous,
+      isOpen: false,
+    }));
+  };
+
+  const handleMoveToLogin = () => {
+    const from =
+      loginDialogState.from ?? {
+        pathname: location.pathname,
+        search: location.search,
+      };
+
+    setLoginDialogState((previous) => ({
+      ...previous,
+      isOpen: false,
+    }));
+
+    navigate("/login", {
+      state: {
+        from,
+      },
+    });
+  };
+
+  const handleTabClick = (tabId) => {
+    if (tabId === "mine" && !isAuthLoading && !user) {
+      openLoginDialog("나의 예측을 확인하려면 먼저 로그인해 주세요.", {
+        pathname: "/prediction",
+        search: "?tab=mine",
+      });
+      return;
+    }
+
+    setActiveTab(tabId);
+  };
 
   useEffect(() => {
     if (!targetMatchId) {
@@ -496,8 +558,16 @@ const PredictionPage = () => {
   // - 기존 예측은 경기 시작 30분 전까지만 변경 가능
   const handlePrediction = useCallback(
     async (match, selection) => {
+      const selectedTeamCode =
+        selection === "home" ? match.homeTeam.id : match.awayTeam.id;
+
       if (!user) {
-        alert("로그인 후 예측할 수 있습니다.");
+        openLoginDialog("승부 예측에 참여하려면 먼저 로그인해 주세요.", {
+          ...createPredictionLocation({
+            matchId: match.databaseId,
+            teamCode: selectedTeamCode,
+          }),
+        });
         return;
       }
 
@@ -519,9 +589,6 @@ const PredictionPage = () => {
         alert("경기 시작 30분 전부터는 투표를 변경할 수 없습니다.");
         return;
       }
-
-      const selectedTeamCode =
-        selection === "home" ? match.homeTeam.id : match.awayTeam.id;
 
       setSavingMatchId(match.id);
 
@@ -570,7 +637,7 @@ const PredictionPage = () => {
         console.error("경기 투표 통계 조회 오류:", statsError);
       }
     },
-    [predictions, savingMatchId, user],
+    [openLoginDialog, predictions, savingMatchId, user],
   );
 
   useEffect(() => {
@@ -676,7 +743,7 @@ const PredictionPage = () => {
             (activeFilter === "all" || match.sport === activeFilter) &&
             (!normalizedKeyword ||
               searchableText.includes(normalizedKeyword)) &&
-            (activeTab === "today" || predictions[match.id])
+            (visibleTab === "today" || predictions[match.id])
           );
         })
         .map((match) => ({
@@ -691,7 +758,7 @@ const PredictionPage = () => {
       selectedDate,
       activeFilter,
       searchKeyword,
-      activeTab,
+      visibleTab,
       predictions,
       currentTime,
     ],
@@ -702,7 +769,7 @@ const PredictionPage = () => {
       !targetMatchId ||
       isLoading ||
       apiError ||
-      activeTab !== "today" ||
+      visibleTab !== "today" ||
       scrolledTargetMatchRef.current === targetMatchId
     ) {
       return undefined;
@@ -726,7 +793,7 @@ const PredictionPage = () => {
     }, 120);
 
     return () => window.clearTimeout(scrollTimer);
-  }, [activeTab, apiError, filteredMatches, isLoading, targetMatchId]);
+  }, [apiError, filteredMatches, isLoading, targetMatchId, visibleTab]);
 
   const handleMoveWeek = (weekAmount) => {
     const nextWeekStart = addDays(weekStart, weekAmount * 7);
@@ -752,7 +819,6 @@ const PredictionPage = () => {
     activeFilter === "all"
       ? ["soccer", "baseball", "esports"]
       : [activeFilter];
-
   const displayedBadges = badgeSports.map((sport) => {
     const stats = sportStats.find((stat) => stat.sport === sport);
     const totalCount = Number(stats?.total_count ?? 0);
@@ -768,18 +834,25 @@ const PredictionPage = () => {
 
   const emptyMessage = searchKeyword.trim()
     ? "검색 조건에 맞는 경기가 없습니다."
-    : activeTab === "mine"
+    : visibleTab === "mine"
       ? "이 날짜에 예측한 경기가 없습니다."
       : "이 날짜에 예정된 경기가 없습니다.";
   const emptyDescription = searchKeyword.trim()
     ? "검색어를 바꾸거나 필터를 전체로 변경해 보세요."
-    : activeTab === "mine"
+    : visibleTab === "mine"
       ? "오늘의 경기에서 승부예측에 참여해 보세요."
       : "다른 날짜 또는 종목을 선택해 보세요.";
 
   return (
-    <section className={styles.page}>
-      <div className={`container ${styles.inner}`}>
+    <>
+      <SubNav
+        activeItemId="prediction"
+        ariaLabel="매치 센터 메뉴"
+        items={MATCH_CENTER_SUB_NAV_ITEMS}
+      />
+
+      <section className={styles.page}>
+        <div className={`container ${styles.inner}`}>
         <header className={styles.hero}>
           <p className={styles.eyebrow}>FANPICK PREDICTION</p>
 
@@ -792,15 +865,15 @@ const PredictionPage = () => {
 
         <div className={styles.tabs} role="tablist" aria-label="예측 보기">
           <button
-            className={activeTab === "today" ? styles.activeTab : ""}
-            onClick={() => setActiveTab("today")}
+            className={visibleTab === "today" ? styles.activeTab : ""}
+            onClick={() => handleTabClick("today")}
             type="button"
           >
             오늘의 경기
           </button>
           <button
-            className={activeTab === "mine" ? styles.activeTab : ""}
-            onClick={() => setActiveTab("mine")}
+            className={visibleTab === "mine" ? styles.activeTab : ""}
+            onClick={() => handleTabClick("mine")}
             type="button"
           >
             나의 예측
@@ -838,7 +911,7 @@ const PredictionPage = () => {
         </div>
 
         <div className={styles.contentArea}>
-          {activeTab === "mine" && (
+          {visibleTab === "mine" && (
             <aside className={styles.summary}>
               {displayedBadges.map((badge) => {
                 const SportIcon = badge.SportIcon;
@@ -871,7 +944,7 @@ const PredictionPage = () => {
           {isLoading && (
             <div className={styles.matchList} aria-label="예측 경기 로딩 중">
               {Array.from({ length: 3 }, (_, index) =>
-                activeTab === "today" ? (
+                visibleTab === "today" ? (
                   <TodayMatchCardSkeleton key={index} />
                 ) : (
                   <MyPredictionCardSkeleton key={index} />
@@ -890,7 +963,7 @@ const PredictionPage = () => {
           {!isLoading && !apiError && filteredMatches.length > 0 && (
             <div className={styles.matchList}>
               {filteredMatches.map((match) => {
-                if (activeTab === "today") {
+                if (visibleTab === "today") {
                   const isTargetMatch =
                     String(match.databaseId) === String(targetMatchId);
 
@@ -927,8 +1000,19 @@ const PredictionPage = () => {
             <EmptyState title={emptyMessage} description={emptyDescription} />
           )}
         </div>
-      </div>
-    </section>
+        </div>
+      </section>
+
+      <FanPickDialog
+        isOpen={loginDialogState.isOpen}
+        title="로그인이 필요합니다"
+        description={loginDialogState.description}
+        confirmText="로그인하기"
+        cancelText="취소"
+        onClose={closeLoginDialog}
+        onConfirm={handleMoveToLogin}
+      />
+    </>
   );
 };
 

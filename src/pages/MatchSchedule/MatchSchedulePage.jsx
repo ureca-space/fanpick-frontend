@@ -5,7 +5,9 @@ import MatchCard from "../../components/MatchCard/MatchCard";
 import MatchCardSkeleton from "../../components/MatchCard/MatchCardSkeleton";
 import MatchFilter from "../../components/MatchFilter/MatchFilter";
 import SearchInput from "../../components/SearchInput/SearchInput";
+import SubNav from "../../components/SubNav/SubNav";
 import WeekDateSelector from "../../components/WeekDateSelector/WeekDateSelector";
+import { MATCH_CENTER_SUB_NAV_ITEMS } from "../../constants/matchCenterNav";
 import useAuth from "../../contexts/useAuth";
 import { supabase } from "../../lib/supabase";
 import { subscribeToMatchChanges } from "../../services/matchRealtime";
@@ -601,93 +603,100 @@ const MatchSchedulePage = () => {
   };
 
   return (
-    <section className={styles.schedulePage}>
-      <div className="container">
-        <header className={styles.pageHeader}>
-          <p className={styles.eyebrow}>FANPICK MATCH CENTER</p>
+    <>
+      <SubNav
+        ariaLabel="매치 센터 메뉴"
+        items={MATCH_CENTER_SUB_NAV_ITEMS}
+      />
 
-          <h1 className={styles.title}>MATCH SCHEDULE</h1>
+      <section className={styles.schedulePage}>
+        <div className="container">
+          <header className={styles.pageHeader}>
+            <p className={styles.eyebrow}>FANPICK MATCH CENTER</p>
 
-          <p className={styles.description}>
-            주요 경기 일정을 확인하고 원하는 경기를 선택해 보세요.
-          </p>
-        </header>
+            <h1 className={styles.title}>MATCH SCHEDULE</h1>
 
-        <div className={styles.controlArea}>
-          <div className={styles.filterArea}>
-            <MatchFilter
-              filters={FILTERS}
-              activeFilter={activeFilter}
-              onChange={setActiveFilter}
-            />
-          </div>
-
-          <div className={styles.searchArea}>
-            <SearchInput
-              value={searchKeyword}
-              onChange={setSearchKeyword}
-              placeholder="팀 이름을 검색해보세요"
-              ariaLabel="경기 검색"
-              debounceDelay={500}
-            />
-          </div>
-        </div>
-
-        <WeekDateSelector
-          className={styles.schedulePanel}
-          dates={weekDates}
-          selectedDate={selectedDate}
-          onMoveWeek={handleMoveWeek}
-          onMoveToCurrentWeek={handleMoveToCurrentWeek}
-          onSelectDate={setSelectedDate}
-          hasItemOnDate={hasMatchOnDate}
-        />
-
-        <div className={styles.resultHeader}>
-          <div>
-            <p className={styles.resultDate}>
-              {selectedDate.replaceAll("-", ".")}
+            <p className={styles.description}>
+              주요 경기 일정을 확인하고 원하는 경기를 선택해 보세요.
             </p>
+          </header>
 
-            <h2 className={styles.resultTitle}>MATCHES</h2>
+          <div className={styles.controlArea}>
+            <div className={styles.filterArea}>
+              <MatchFilter
+                filters={FILTERS}
+                activeFilter={activeFilter}
+                onChange={setActiveFilter}
+              />
+            </div>
+
+            <div className={styles.searchArea}>
+              <SearchInput
+                value={searchKeyword}
+                onChange={setSearchKeyword}
+                placeholder="팀 이름을 검색해보세요"
+                ariaLabel="경기 검색"
+                debounceDelay={500}
+              />
+            </div>
           </div>
 
-          <span className={styles.matchCount}>
-            {filteredMatches.length} MATCHES
-          </span>
+          <WeekDateSelector
+            className={styles.schedulePanel}
+            dates={weekDates}
+            selectedDate={selectedDate}
+            onMoveWeek={handleMoveWeek}
+            onMoveToCurrentWeek={handleMoveToCurrentWeek}
+            onSelectDate={setSelectedDate}
+            hasItemOnDate={hasMatchOnDate}
+          />
+
+          <div className={styles.resultHeader}>
+            <div>
+              <p className={styles.resultDate}>
+                {selectedDate.replaceAll("-", ".")}
+              </p>
+
+              <h2 className={styles.resultTitle}>MATCHES</h2>
+            </div>
+
+            <span className={styles.matchCount}>
+              {filteredMatches.length} MATCHES
+            </span>
+          </div>
+
+          {isLoading ? (
+            <div className={styles.matchList} aria-label="경기 일정 로딩 중">
+              {Array.from({ length: 8 }, (_, index) => (
+                <MatchCardSkeleton key={index} />
+              ))}
+            </div>
+          ) : loadError ? (
+            <EmptyState
+              icon={FiCalendar}
+              title={loadError}
+              description="Supabase 연결 상태와 조회 권한을 확인해 주세요."
+            />
+          ) : filteredMatches.length > 0 ? (
+            <div className={styles.matchList}>
+              {filteredMatches.map((match) => (
+                <MatchCard key={match.id} match={match} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={FiCalendar}
+              title={
+                searchKeyword.trim()
+                  ? "검색 조건에 맞는 경기가 없습니다."
+                  : "예정된 경기가 없습니다."
+              }
+              description="다른 날짜, 종목 또는 검색어를 선택해 주세요."
+            />
+          )}
         </div>
-
-        {isLoading ? (
-          <div className={styles.matchList} aria-label="경기 일정 로딩 중">
-            {Array.from({ length: 8 }, (_, index) => (
-              <MatchCardSkeleton key={index} />
-            ))}
-          </div>
-        ) : loadError ? (
-          <EmptyState
-            icon={FiCalendar}
-            title={loadError}
-            description="Supabase 연결 상태와 조회 권한을 확인해 주세요."
-          />
-        ) : filteredMatches.length > 0 ? (
-          <div className={styles.matchList}>
-            {filteredMatches.map((match) => (
-              <MatchCard key={match.id} match={match} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            icon={FiCalendar}
-            title={
-              searchKeyword.trim()
-                ? "검색 조건에 맞는 경기가 없습니다."
-                : "예정된 경기가 없습니다."
-            }
-            description="다른 날짜, 종목 또는 검색어를 선택해 주세요."
-          />
-        )}
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 
