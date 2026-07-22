@@ -101,7 +101,7 @@
 .outline[aria-disabled="true"] {
   border-color: transparent;
   color: rgb(255 255 255 / 55%);
-  background-color: #343849;
+  background-color: var(--color-surface-muted);
 }
 
 .button:focus-visible {

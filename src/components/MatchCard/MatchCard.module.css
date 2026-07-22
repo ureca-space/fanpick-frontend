@@ -16,6 +16,15 @@
   transform: translateY(-4px);
 }
 
+.skeletonCard {
+  pointer-events: none;
+}
+
+.skeletonCard:hover {
+  border-color: transparent;
+  transform: none;
+}
+
 .cardHeader {
   display: flex;
   align-items: center;
@@ -126,7 +135,7 @@
   justify-content: center;
   border-radius: 50%;
   color: var(--color-text-white);
-  background-color: #393e55;
+  background-color: var(--color-surface-fallback);
   font-size: 13px;
   font-weight: 800;
 }
@@ -185,19 +194,70 @@
   height: 7px;
   overflow: hidden;
   border-radius: 999px;
-  background-color: #373b4d;
+  background-color: var(--color-prediction-track);
 }
 
 .homeVoteBar {
   height: 100%;
-  background-color: #6176ff;
+  background-color: var(--color-prediction-home);
   transition: width 0.3s ease;
 }
 
 .awayVoteBar {
   height: 100%;
-  background-color: #df5d76;
+  background-color: var(--color-prediction-away);
   transition: width 0.3s ease;
+}
+
+.skeletonBadge {
+  width: 72px;
+  height: 22px;
+  border-radius: 3px;
+}
+
+.skeletonLeague {
+  width: 52px;
+  height: 12px;
+}
+
+.skeletonDate {
+  width: 118px;
+  height: 28px;
+  margin-bottom: 9px;
+}
+
+.skeletonTime {
+  width: 74%;
+  height: 12px;
+}
+
+.skeletonLogo {
+  width: 54px;
+  height: 54px;
+}
+
+.skeletonTeamName {
+  width: 76%;
+  height: 15px;
+}
+
+.skeletonVs {
+  width: 26px;
+  height: 12px;
+}
+
+.skeletonVoteLabel {
+  width: 36%;
+  height: 12px;
+}
+
+.skeletonVoteBar {
+  height: 7px;
+}
+
+.skeletonButton {
+  height: 40px;
+  border-radius: 6px;
 }
 
 @media (max-width: 480px) {

@@ -1,9 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
+import EmptyState from "../../../../components/EmptyState/EmptyState";
 import MatchCard from "../../../../components/MatchCard/MatchCard";
+import MatchCardSkeleton from "../../../../components/MatchCard/MatchCardSkeleton";
 import MatchFilter from "../../../../components/MatchFilter/MatchFilter";
+import PaginationControls from "../../../../components/PaginationControls/PaginationControls";
 import ViewAllLink from "../../../../components/ViewAllLink/ViewAllLink";
 import { getTeamInfo } from "../../../../constants/teamInfo";
+import useAuth from "../../../../contexts/useAuth";
 import { supabase } from "../../../../lib/supabase";
+import {
+  applyPredictionStatsToMatches,
+  fetchMatchPredictionStats,
+  fetchMyPredictionSelections,
+  markPredictedMatches,
+} from "../../../../services/predictionApi";
 import { subscribeToMatchChanges } from "../../../../services/matchRealtime";
 import styles from "./MatchSection.module.css";
 
@@ -84,7 +94,8 @@ const normalizeSupabaseMatch = (match) => {
   const matchDate = parseDateKey(match.match_date);
 
   return {
-    id: match.external_id,
+    id: match.external_id ?? `match-${match.id}`,
+    databaseId: match.id,
     dateKey: match.match_date,
 
     sport: match.sport,
@@ -157,6 +168,9 @@ const sortHomeMatches = (firstMatch, secondMatch) => {
 };
 
 const MatchSection = () => {
+  const { user } = useAuth();
+  const userId = user?.id || "";
+
   const [matches, setMatches] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(0);
@@ -187,6 +201,7 @@ const MatchSection = () => {
           .from("matches")
           .select(
             `
+              id,
               external_id,
               sport,
               league,
@@ -229,7 +244,29 @@ const MatchSection = () => {
           )
           .map(normalizeSupabaseMatch);
 
-        setMatches(normalizedMatches);
+        const [predictionStats, myPredictions] = await Promise.all([
+          fetchMatchPredictionStats(),
+          userId
+            ? fetchMyPredictionSelections(
+                userId,
+                normalizedMatches.map((match) => match.databaseId),
+              ).catch((error) => {
+                console.error("홈 예측 여부 조회 실패", error);
+                return [];
+              })
+            : Promise.resolve([]),
+        ]);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setMatches(
+          markPredictedMatches(
+            applyPredictionStatsToMatches(normalizedMatches, predictionStats),
+            myPredictions,
+          ),
+        );
       } catch (error) {
         console.error("홈 경기 일정 불러오기 실패", error);
 
@@ -261,7 +298,7 @@ const MatchSection = () => {
       isMounted = false;
       unsubscribe();
     };
-  }, [todayInfo]);
+  }, [todayInfo, userId]);
 
   const filteredMatches = useMemo(() => {
     const nextMatches =
@@ -316,31 +353,16 @@ const MatchSection = () => {
             <p className={styles.dateRange}>{todayInfo.label}</p>
           </div>
 
-          <div className={styles.navigationControls}>
-            <button
-              type="button"
-              className={styles.navigationButton}
-              aria-label="이전 경기 보기"
-              onClick={handlePreviousPage}
-              disabled={safeCurrentPage === 0}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M15 5L8 12L15 19" />
-              </svg>
-            </button>
-
-            <button
-              type="button"
-              className={styles.navigationButton}
-              aria-label="다음 경기 보기"
-              onClick={handleNextPage}
-              disabled={safeCurrentPage >= totalPages - 1}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M9 5L16 12L9 19" />
-              </svg>
-            </button>
-          </div>
+          <PaginationControls
+            ariaLabel="홈 경기 페이지 이동"
+            className={styles.navigationControls}
+            currentPage={safeCurrentPage}
+            nextLabel="다음 경기 보기"
+            onNext={handleNextPage}
+            onPrevious={handlePreviousPage}
+            previousLabel="이전 경기 보기"
+            totalPages={totalPages}
+          />
         </header>
 
         <div className={styles.viewAllRow}>
@@ -348,9 +370,16 @@ const MatchSection = () => {
         </div>
 
         {isLoading ? (
-          <p className={styles.emptyMessage}>경기 일정을 불러오는 중입니다.</p>
+          <div className={styles.matchList} aria-label="경기 일정 로딩 중">
+            {Array.from({ length: CARDS_PER_PAGE }, (_, index) => (
+              <MatchCardSkeleton key={index} />
+            ))}
+          </div>
         ) : loadError ? (
-          <p className={styles.emptyMessage}>{loadError}</p>
+          <EmptyState
+            title={loadError}
+            description="잠시 후 다시 시도해 주세요."
+          />
         ) : filteredMatches.length > 0 ? (
           <div className={styles.matchList}>
             {visibleMatches.map((match) => (
@@ -358,7 +387,10 @@ const MatchSection = () => {
             ))}
           </div>
         ) : (
-          <p className={styles.emptyMessage}>오늘 예정된 경기가 없습니다.</p>
+          <EmptyState
+            title="오늘 예정된 경기가 없습니다."
+            description="전체 경기 일정에서 다른 날짜를 확인해 주세요."
+          />
         )}
       </div>
     </section>

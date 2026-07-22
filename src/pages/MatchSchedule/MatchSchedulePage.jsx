@@ -1,10 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { FiCalendar, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiCalendar } from "react-icons/fi";
+import EmptyState from "../../components/EmptyState/EmptyState";
 import MatchCard from "../../components/MatchCard/MatchCard";
+import MatchCardSkeleton from "../../components/MatchCard/MatchCardSkeleton";
 import MatchFilter from "../../components/MatchFilter/MatchFilter";
 import SearchInput from "../../components/SearchInput/SearchInput";
+import WeekDateSelector from "../../components/WeekDateSelector/WeekDateSelector";
+import useAuth from "../../contexts/useAuth";
 import { supabase } from "../../lib/supabase";
 import { subscribeToMatchChanges } from "../../services/matchRealtime";
+import {
+  applyPredictionStatsToMatches,
+  fetchMatchPredictionStats,
+  fetchMyPredictionSelections,
+  markPredictedMatches,
+} from "../../services/predictionApi";
 import styles from "./MatchSchedulePage.module.css";
 
 const FILTERS = [
@@ -338,25 +348,6 @@ const getMonday = (date) => {
   return currentDate;
 };
 
-const formatWeekRange = (dates) => {
-  const firstDate = dates[0];
-  const lastDate = dates[dates.length - 1];
-
-  const firstText = [
-    firstDate.getFullYear(),
-    padNumber(firstDate.getMonth() + 1),
-    padNumber(firstDate.getDate()),
-  ].join(".");
-
-  const lastText = [
-    lastDate.getFullYear(),
-    padNumber(lastDate.getMonth() + 1),
-    padNumber(lastDate.getDate()),
-  ].join(".");
-
-  return `${firstText} - ${lastText}`;
-};
-
 const getTeamInfo = (teamCode, sport) => {
   const normalizedCode = teamCode?.trim().toUpperCase();
 
@@ -387,7 +378,8 @@ const normalizeSupabaseMatch = (match) => {
   const awayTeam = getTeamInfo(match.away_team_code, match.sport);
 
   return {
-    id: match.external_id,
+    id: match.external_id ?? `match-${match.id}`,
+    databaseId: match.id,
     dateKey: match.match_date,
 
     sport: match.sport,
@@ -406,11 +398,6 @@ const normalizeSupabaseMatch = (match) => {
     homeTeam,
     awayTeam,
 
-    /*
-     * 아직 투표 테이블을 연결하지 않았으므로 임시값이다.
-     * 0:0이면 MatchCard 계산에서 NaN이 발생할 수 있어
-     * 기본 비율을 50:50으로 지정한다.
-     */
     homeVotes: 50,
     awayVotes: 50,
 
@@ -446,6 +433,9 @@ const includesSearchKeyword = (match, searchKeyword) => {
 };
 
 const MatchSchedulePage = () => {
+  const { user } = useAuth();
+  const userId = user?.id || "";
+
   const [matches, setMatches] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -472,6 +462,7 @@ const MatchSchedulePage = () => {
           .from("matches")
           .select(
             `
+              id,
               external_id,
               sport,
               league,
@@ -512,7 +503,29 @@ const MatchSchedulePage = () => {
           )
           .map(normalizeSupabaseMatch);
 
-        setMatches(normalizedMatches);
+        const [predictionStats, myPredictions] = await Promise.all([
+          fetchMatchPredictionStats(),
+          userId
+            ? fetchMyPredictionSelections(
+                userId,
+                normalizedMatches.map((match) => match.databaseId),
+              ).catch((error) => {
+                console.error("경기 일정 예측 여부 조회 실패", error);
+                return [];
+              })
+            : Promise.resolve([]),
+        ]);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setMatches(
+          markPredictedMatches(
+            applyPredictionStatsToMatches(normalizedMatches, predictionStats),
+            myPredictions,
+          ),
+        );
       } catch (error) {
         console.error("경기 일정 불러오기 실패", error);
 
@@ -537,7 +550,7 @@ const MatchSchedulePage = () => {
       isMounted = false;
       unsubscribe();
     };
-  }, []);
+  }, [userId]);
 
   const weekDates = useMemo(() => {
     return Array.from({ length: 7 }, (_, index) => {
@@ -620,74 +633,15 @@ const MatchSchedulePage = () => {
           </div>
         </div>
 
-        <div className={styles.schedulePanel}>
-          <div className={styles.scheduleToolbar}>
-            <div className={styles.weekController}>
-              <button
-                className={styles.arrowButton}
-                type="button"
-                aria-label="이전 주 보기"
-                onClick={() => handleMoveWeek(-1)}
-              >
-                <FiChevronLeft aria-hidden="true" />
-              </button>
-
-              <strong className={styles.weekRange}>
-                {formatWeekRange(weekDates.map((weekDate) => weekDate.date))}
-              </strong>
-
-              <button
-                className={styles.arrowButton}
-                type="button"
-                aria-label="다음 주 보기"
-                onClick={() => handleMoveWeek(1)}
-              >
-                <FiChevronRight aria-hidden="true" />
-              </button>
-            </div>
-
-            <button
-              className={styles.currentWeekButton}
-              type="button"
-              onClick={handleMoveToCurrentWeek}
-            >
-              <FiCalendar aria-hidden="true" />
-              이번 주
-            </button>
-          </div>
-
-          <div className={styles.dateScroller}>
-            <div className={styles.dateList}>
-              {weekDates.map(({ date, dateKey, dayLabel }) => {
-                const isSelected = selectedDate === dateKey;
-                const hasMatch = hasMatchOnDate(dateKey);
-
-                return (
-                  <button
-                    key={dateKey}
-                    className={`${styles.dateButton} ${
-                      isSelected ? styles.active : ""
-                    }`}
-                    type="button"
-                    aria-label={`${date.getMonth() + 1}월 ${date.getDate()}일 ${dayLabel}요일`}
-                    aria-pressed={isSelected}
-                    onClick={() => setSelectedDate(dateKey)}
-                  >
-                    <span className={styles.dayLabel}>{dayLabel}</span>
-
-                    <strong className={styles.dateNumber}>
-                      {date.getDate()}
-                    </strong>
-
-                    {hasMatch && (
-                      <span className={styles.matchDot} aria-hidden="true" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+        <WeekDateSelector
+          className={styles.schedulePanel}
+          dates={weekDates}
+          selectedDate={selectedDate}
+          onMoveWeek={handleMoveWeek}
+          onMoveToCurrentWeek={handleMoveToCurrentWeek}
+          onSelectDate={setSelectedDate}
+          hasItemOnDate={hasMatchOnDate}
+        />
 
         <div className={styles.resultHeader}>
           <div>
@@ -704,19 +658,17 @@ const MatchSchedulePage = () => {
         </div>
 
         {isLoading ? (
-          <div className={styles.emptyState}>
-            <FiCalendar className={styles.emptyIcon} aria-hidden="true" />
-
-            <strong>경기 일정을 불러오는 중입니다.</strong>
+          <div className={styles.matchList} aria-label="경기 일정 로딩 중">
+            {Array.from({ length: 8 }, (_, index) => (
+              <MatchCardSkeleton key={index} />
+            ))}
           </div>
         ) : loadError ? (
-          <div className={styles.emptyState}>
-            <FiCalendar className={styles.emptyIcon} aria-hidden="true" />
-
-            <strong>{loadError}</strong>
-
-            <p>Supabase 연결 상태와 조회 권한을 확인해 주세요.</p>
-          </div>
+          <EmptyState
+            icon={FiCalendar}
+            title={loadError}
+            description="Supabase 연결 상태와 조회 권한을 확인해 주세요."
+          />
         ) : filteredMatches.length > 0 ? (
           <div className={styles.matchList}>
             {filteredMatches.map((match) => (
@@ -724,17 +676,15 @@ const MatchSchedulePage = () => {
             ))}
           </div>
         ) : (
-          <div className={styles.emptyState}>
-            <FiCalendar className={styles.emptyIcon} aria-hidden="true" />
-
-            <strong>
-              {searchKeyword.trim()
+          <EmptyState
+            icon={FiCalendar}
+            title={
+              searchKeyword.trim()
                 ? "검색 조건에 맞는 경기가 없습니다."
-                : "예정된 경기가 없습니다."}
-            </strong>
-
-            <p>다른 날짜, 종목 또는 검색어를 선택해 주세요.</p>
-          </div>
+                : "예정된 경기가 없습니다."
+            }
+            description="다른 날짜, 종목 또는 검색어를 선택해 주세요."
+          />
         )}
       </div>
     </section>

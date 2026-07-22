@@ -1,26 +1,42 @@
-import { useEffect, useMemo, useState } from "react";
-import { FiCalendar, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import EmptyState from "../../components/EmptyState/EmptyState";
 import MatchFilter from "../../components/MatchFilter/MatchFilter";
+import SearchInput from "../../components/SearchInput/SearchInput";
+import WeekDateSelector from "../../components/WeekDateSelector/WeekDateSelector";
 import useAuth from "../../contexts/useAuth";
 import { supabase } from "../../lib/supabase";
 import {
+  applyPredictionStatsToMatches,
+  createSettledPredictionSportStats,
   fetchMatchPredictionStats,
-  fetchMyPredictionStats,
+  fetchMyPredictions,
 } from "../../services/predictionApi";
-import { getPredictionBadge } from "../../utils/predictionBadge";
-import MyPredictionCard from "./components/MyPredictionCard/MyPredictionCard";
-import TodayMatchCard from "./components/TodayMatchCard/TodayMatchCard";
+import { getPredictionBadgeMeta } from "../../utils/predictionBadge";
+import {
+  canChangePredictionByBeginAt,
+  createMatchBeginAt,
+} from "../../utils/predictionDeadline";
+import MyPredictionCard, {
+  MyPredictionCardSkeleton,
+} from "./components/MyPredictionCard/MyPredictionCard";
+import TodayMatchCard, {
+  TodayMatchCardSkeleton,
+} from "./components/TodayMatchCard/TodayMatchCard";
 import styles from "./PredictionPage.module.css";
 
 const DAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 
 // - 종목 필터 버튼 목록
 const FILTERS = [
-  { id: "all", label: "전체" },
-  { id: "soccer", label: "축구" },
-  { id: "baseball", label: "야구" },
-  { id: "esports", label: "LoL" },
+  { id: "all", label: "ALL" },
+  { id: "soccer", label: "SOCCER" },
+  { id: "baseball", label: "BASEBALL" },
+  { id: "esports", label: "LOL" },
 ];
+const PREDICTION_SPORTS = FILTERS.filter((filter) => filter.id !== "all").map(
+  (filter) => filter.id,
+);
 
 // - MatchSchedulePage의 팀 코드와 동일한 KBO/LCK 팀 정보
 const KBO_TEAMS = {
@@ -134,6 +150,12 @@ const formatDateKey = (date) => {
   return `${year}-${month}-${day}`;
 };
 
+const parseDateKey = (dateKey) => {
+  const [year, month, day] = dateKey.split("-").map(Number);
+
+  return new Date(year, month - 1, day, 12);
+};
+
 const addDays = (date, amount) => {
   const nextDate = new Date(date);
   nextDate.setDate(nextDate.getDate() + amount);
@@ -148,17 +170,6 @@ const getMonday = (date) => {
   currentDate.setDate(currentDate.getDate() + difference);
   currentDate.setHours(12, 0, 0, 0);
   return currentDate;
-};
-
-const formatWeekRange = (dates) => {
-  const formatDate = (date) =>
-    [
-      date.getFullYear(),
-      padNumber(date.getMonth() + 1),
-      padNumber(date.getDate()),
-    ].join(".");
-
-  return `${formatDate(dates[0])} - ${formatDate(dates[dates.length - 1])}`;
 };
 
 const getTeamInfo = (teamCode, sport) => {
@@ -201,10 +212,13 @@ const normalizeSupabaseMatch = (match) => {
     id: `match-${match.id}`,
     databaseId: match.id,
     dateKey: match.match_date,
-    beginAt: `${match.match_date}T${time === "--:--" ? "00:00" : time}:00+09:00`,
+    beginAt: createMatchBeginAt(
+      match.match_date,
+      time === "--:--" ? "00:00" : time,
+    ),
     sport,
     sportLabel:
-      sport === "esports" ? "LoL" : sport === "soccer" ? "축구" : "야구",
+      sport === "esports" ? "LOL" : sport === "soccer" ? "SOCCER" : "BASEBALL",
     league: match.league,
     time,
     status: match.status,
@@ -253,26 +267,14 @@ const fetchPredictionMatches = async (startDate, endDate) => {
     .map(normalizeSupabaseMatch);
 };
 
-// - 경기 목록에 서버가 계산한 참여자 수와 투표 비율 합치기
-const addPredictionStats = (matches, stats) => {
-  const statsByMatchId = Object.fromEntries(
-    stats.map((item) => [String(item.match_id), item]),
-  );
-
-  return matches.map((match) => {
-    const matchStats = statsByMatchId[String(match.databaseId)];
-
-    return {
-      ...match,
-      participants: Number(matchStats?.participant_count ?? 0),
-      homeRate: Number(matchStats?.home_rate ?? 50),
-      awayRate: Number(matchStats?.away_rate ?? 50),
-    };
-  });
-};
-
 const PredictionPage = () => {
+  const [searchParams] = useSearchParams();
   const { user, isAuthLoading } = useAuth();
+  const targetMatchId = searchParams.get("matchId")?.replace(/^match-/, "");
+  const targetTeamCode = searchParams.get("team")?.trim().toUpperCase() ?? "";
+  const handledAutoPredictionRef = useRef("");
+  const targetMatchCardRef = useRef(null);
+  const scrolledTargetMatchRef = useRef("");
 
   // - API 경기 목록
   const [matches, setMatches] = useState([]);
@@ -282,6 +284,7 @@ const PredictionPage = () => {
   const [apiError, setApiError] = useState("");
   const [activeTab, setActiveTab] = useState("today");
   const [activeFilter, setActiveFilter] = useState("all");
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [weekStart, setWeekStart] = useState(() => getMonday(createToday()));
   const [selectedDate, setSelectedDate] = useState(() =>
     formatDateKey(createToday()),
@@ -290,9 +293,51 @@ const PredictionPage = () => {
   // - 사용자가 선택한 예측
   const [predictions, setPredictions] = useState({});
   const [predictionResults, setPredictionResults] = useState({});
+  const [arePredictionsLoading, setArePredictionsLoading] = useState(false);
   const [sportStats, setSportStats] = useState([]);
   const [savingMatchId, setSavingMatchId] = useState(null);
-  const [currentTime, setCurrentTime] = useState(Date.now());
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!targetMatchId) {
+      return undefined;
+    }
+
+    let isMounted = true;
+
+    const openTargetMatchWeek = async () => {
+      const { data, error } = await supabase
+        .from("matches")
+        .select("match_date")
+        .eq("id", targetMatchId)
+        .maybeSingle();
+
+      if (error) {
+        console.error("예측 대상 경기 조회 오류:", error);
+        return;
+      }
+
+      if (!isMounted || !data?.match_date) {
+        return;
+      }
+
+      const matchDate = parseDateKey(data.match_date);
+
+      setActiveTab("today");
+      setWeekStart(getMonday(matchDate));
+      setSelectedDate(data.match_date);
+    };
+
+    openTargetMatchWeek();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [targetMatchId]);
+
+  useEffect(() => {
+    scrolledTargetMatchRef.current = "";
+  }, [targetMatchId]);
 
   // - 경기 시작 시간이 되면 서버 갱신을 기다리지 않고 화면을 바로 변경
   useEffect(() => {
@@ -314,9 +359,13 @@ const PredictionPage = () => {
       }
 
       try {
-        const data = await fetchMyPredictionStats();
+        const data = await fetchMyPredictions(user.id);
 
-        if (isMounted) setSportStats(data);
+        if (isMounted) {
+          setSportStats(
+            createSettledPredictionSportStats(data, PREDICTION_SPORTS),
+          );
+        }
       } catch (error) {
         console.error("예측 통계 조회 오류:", error);
       }
@@ -339,8 +388,11 @@ const PredictionPage = () => {
       if (!user) {
         setPredictions({});
         setPredictionResults({});
+        setArePredictionsLoading(false);
         return;
       }
+
+      setArePredictionsLoading(true);
 
       const { data, error } = await supabase
         .from("predictions")
@@ -356,6 +408,9 @@ const PredictionPage = () => {
 
       if (error) {
         console.error("예측 조회 오류:", error);
+        if (isMounted) {
+          setArePredictionsLoading(false);
+        }
         return;
       }
 
@@ -380,6 +435,7 @@ const PredictionPage = () => {
 
       setPredictions(savedPredictions);
       setPredictionResults(savedResults);
+      setArePredictionsLoading(false);
     };
 
     fetchPredictions();
@@ -409,9 +465,10 @@ const PredictionPage = () => {
         if (!isMounted) return;
 
         setMatches(
-          addPredictionStats(supabaseMatches, predictionStats).sort(
-            (a, b) => new Date(a.beginAt) - new Date(b.beginAt),
-          ),
+          applyPredictionStatsToMatches(supabaseMatches, predictionStats, {
+            awayRateKey: "awayRate",
+            homeRateKey: "homeRate",
+          }).sort((a, b) => new Date(a.beginAt) - new Date(b.beginAt)),
         );
       } catch (error) {
         console.error("경기 API 호출 오류:", error);
@@ -436,65 +493,149 @@ const PredictionPage = () => {
     };
   }, [weekStart]);
 
-  // - 예측은 한 번만 Supabase에 저장하고 수정하지 않음
-  const handlePrediction = async (match, selection) => {
-    if (!user) {
-      alert("로그인 후 예측할 수 있습니다.");
-      return;
-    }
+  // - 기존 예측은 경기 시작 30분 전까지만 변경 가능
+  const handlePrediction = useCallback(
+    async (match, selection) => {
+      if (!user) {
+        alert("로그인 후 예측할 수 있습니다.");
+        return;
+      }
 
+      const hasExistingPrediction = Boolean(predictions[match.id]);
+      const matchBeginTime = new Date(match.beginAt).getTime();
+
+      if (
+        savingMatchId === match.id ||
+        !Number.isFinite(matchBeginTime) ||
+        Date.now() >= matchBeginTime
+      ) {
+        return;
+      }
+
+      if (
+        hasExistingPrediction &&
+        !canChangePredictionByBeginAt(match.beginAt)
+      ) {
+        alert("경기 시작 30분 전부터는 투표를 변경할 수 없습니다.");
+        return;
+      }
+
+      const selectedTeamCode =
+        selection === "home" ? match.homeTeam.id : match.awayTeam.id;
+
+      setSavingMatchId(match.id);
+
+      const { data, error } = await supabase
+        .from("predictions")
+        .upsert(
+          {
+            user_id: user.id,
+            match_id: match.databaseId,
+            selected_team_code: selectedTeamCode,
+          },
+          {
+            onConflict: "user_id,match_id",
+          },
+        )
+        .select("result")
+        .single();
+
+      setSavingMatchId(null);
+
+      if (error) {
+        console.error("예측 저장 오류:", error);
+        alert(`예측을 저장하지 못했습니다.\n${error.message}`);
+        return;
+      }
+
+      setPredictions((previous) => ({
+        ...previous,
+        [match.id]: selection,
+      }));
+      setPredictionResults((previous) => ({
+        ...previous,
+        [match.id]: data.result,
+      }));
+
+      // - 저장 직후 서버에서 최신 참여자 수와 투표 비율 다시 받기
+      try {
+        const latestStats = await fetchMatchPredictionStats();
+        setMatches((previous) =>
+          applyPredictionStatsToMatches(previous, latestStats, {
+            awayRateKey: "awayRate",
+            homeRateKey: "homeRate",
+          }),
+        );
+      } catch (statsError) {
+        console.error("경기 투표 통계 조회 오류:", statsError);
+      }
+    },
+    [predictions, savingMatchId, user],
+  );
+
+  useEffect(() => {
     if (
-      predictions[match.id] ||
-      savingMatchId === match.id ||
-      Date.now() >= new Date(match.beginAt).getTime()
+      !targetMatchId ||
+      !targetTeamCode ||
+      isAuthLoading ||
+      !user ||
+      isLoading ||
+      arePredictionsLoading ||
+      savingMatchId
     ) {
       return;
     }
 
-    const selectedTeamCode =
-      selection === "home" ? match.homeTeam.id : match.awayTeam.id;
+    const targetMatch = matches.find(
+      (match) => String(match.databaseId) === String(targetMatchId),
+    );
 
-    setSavingMatchId(match.id);
-
-    const { data, error } = await supabase
-      .from("predictions")
-      .insert({
-        user_id: user.id,
-        match_id: match.databaseId,
-        selected_team_code: selectedTeamCode,
-      })
-      .select("result")
-      .single();
-
-    setSavingMatchId(null);
-
-    if (error) {
-      if (error.code === "23505") {
-        alert("이미 예측을 완료한 경기입니다.");
-      } else {
-        console.error("예측 저장 오류:", error);
-        alert(`예측을 저장하지 못했습니다.\n${error.message}`);
-      }
+    if (!targetMatch) {
       return;
     }
 
-    setPredictions((previous) => ({
-      ...previous,
-      [match.id]: selection,
-    }));
-    setPredictionResults((previous) => ({
-      ...previous,
-      [match.id]: data.result,
-    }));
+    const selection =
+      targetTeamCode === targetMatch.homeTeam.id
+        ? "home"
+        : targetTeamCode === targetMatch.awayTeam.id
+          ? "away"
+          : "";
 
-    // - 저장 직후 서버에서 최신 참여자 수와 투표 비율 다시 받기
-    try {
-      const latestStats = await fetchMatchPredictionStats();
-      setMatches((previous) => addPredictionStats(previous, latestStats));
-    } catch (statsError) {
-      console.error("경기 투표 통계 조회 오류:", statsError);
+    if (!selection) {
+      return;
     }
-  };
+
+    if (predictions[targetMatch.id] === selection) {
+      return;
+    }
+
+    if (
+      predictions[targetMatch.id] &&
+      !canChangePredictionByBeginAt(targetMatch.beginAt)
+    ) {
+      return;
+    }
+
+    const autoPredictionKey = `${targetMatchId}:${targetTeamCode}`;
+
+    if (handledAutoPredictionRef.current === autoPredictionKey) {
+      return;
+    }
+
+    handledAutoPredictionRef.current = autoPredictionKey;
+    handlePrediction(targetMatch, selection);
+  }, [
+    arePredictionsLoading,
+    handlePrediction,
+    isAuthLoading,
+    isLoading,
+    matches,
+    predictions,
+    savingMatchId,
+    targetMatchId,
+    targetTeamCode,
+    user,
+  ]);
 
   // - 선택한 주의 월요일부터 일요일까지 생성
   const weekDates = useMemo(
@@ -511,31 +652,81 @@ const PredictionPage = () => {
     [weekStart],
   );
 
-  // - 선택한 날짜, 종목, 탭에 맞는 경기만 표시
+  // - 선택한 날짜, 종목, 검색어, 탭에 맞는 경기만 표시
   const filteredMatches = useMemo(
-    () =>
-      matches
-        .filter(
-          (match) =>
+    () => {
+      const normalizedKeyword = searchKeyword.trim().toLowerCase();
+
+      return matches
+        .filter((match) => {
+          const searchableText = [
+            match.homeTeam?.name,
+            match.homeTeam?.shortName,
+            match.awayTeam?.name,
+            match.awayTeam?.shortName,
+            match.league,
+            match.sportLabel,
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+
+          return (
             match.dateKey === selectedDate &&
             (activeFilter === "all" || match.sport === activeFilter) &&
-            (activeTab === "today" || predictions[match.id]),
-        )
+            (!normalizedKeyword ||
+              searchableText.includes(normalizedKeyword)) &&
+            (activeTab === "today" || predictions[match.id])
+          );
+        })
         .map((match) => ({
           ...match,
           // - DB가 scheduled여도 경기 시작 시각이 지나면 예측 마감
           isFinished:
             match.isFinished || currentTime >= new Date(match.beginAt).getTime(),
-        })),
+        }));
+    },
     [
       matches,
       selectedDate,
       activeFilter,
+      searchKeyword,
       activeTab,
       predictions,
       currentTime,
     ],
   );
+
+  useEffect(() => {
+    if (
+      !targetMatchId ||
+      isLoading ||
+      apiError ||
+      activeTab !== "today" ||
+      scrolledTargetMatchRef.current === targetMatchId
+    ) {
+      return undefined;
+    }
+
+    const hasTargetMatch = filteredMatches.some(
+      (match) => String(match.databaseId) === String(targetMatchId),
+    );
+
+    if (!hasTargetMatch) {
+      return undefined;
+    }
+
+    const scrollTimer = window.setTimeout(() => {
+      targetMatchCardRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      targetMatchCardRef.current?.focus({ preventScroll: true });
+      scrolledTargetMatchRef.current = targetMatchId;
+    }, 120);
+
+    return () => window.clearTimeout(scrollTimer);
+  }, [activeTab, apiError, filteredMatches, isLoading, targetMatchId]);
 
   const handleMoveWeek = (weekAmount) => {
     const nextWeekStart = addDays(weekStart, weekAmount * 7);
@@ -571,18 +762,32 @@ const PredictionPage = () => {
       sport,
       totalCount,
       accuracyRate,
-      name: getPredictionBadge(sport, totalCount, accuracyRate),
+      ...getPredictionBadgeMeta(sport, totalCount, accuracyRate),
     };
   });
+
+  const emptyMessage = searchKeyword.trim()
+    ? "검색 조건에 맞는 경기가 없습니다."
+    : activeTab === "mine"
+      ? "이 날짜에 예측한 경기가 없습니다."
+      : "이 날짜에 예정된 경기가 없습니다.";
+  const emptyDescription = searchKeyword.trim()
+    ? "검색어를 바꾸거나 필터를 전체로 변경해 보세요."
+    : activeTab === "mine"
+      ? "오늘의 경기에서 승부예측에 참여해 보세요."
+      : "다른 날짜 또는 종목을 선택해 보세요.";
 
   return (
     <section className={styles.page}>
       <div className={`container ${styles.inner}`}>
         <header className={styles.hero}>
-          <h1>
-            승부<span>🎯</span>예측
-          </h1>
-          <p>오늘도 예측 완료!</p>
+          <p className={styles.eyebrow}>FANPICK PREDICTION</p>
+
+          <h1 className={styles.title}>PREDICTION</h1>
+
+          <p className={styles.description}>
+            오늘의 경기와 나의 승부 예측 기록을 확인해 보세요.
+          </p>
         </header>
 
         <div className={styles.tabs} role="tablist" aria-label="예측 보기">
@@ -602,128 +807,126 @@ const PredictionPage = () => {
           </button>
         </div>
 
-        <div className={styles.schedulePanel}>
-          <div className={styles.scheduleToolbar}>
-            <div className={styles.weekController}>
-              <button
-                className={styles.arrowButton}
-                type="button"
-                aria-label="이전 주 보기"
-                onClick={() => handleMoveWeek(-1)}
-              >
-                <FiChevronLeft aria-hidden="true" />
-              </button>
+        <WeekDateSelector
+          className={styles.schedulePanel}
+          dates={weekDates}
+          selectedDate={selectedDate}
+          onMoveWeek={handleMoveWeek}
+          onMoveToCurrentWeek={handleMoveToCurrentWeek}
+          onSelectDate={setSelectedDate}
+          hasItemOnDate={hasMatchOnDate}
+        />
 
-              <strong className={styles.weekRange}>
-                {formatWeekRange(weekDates.map((weekDate) => weekDate.date))}
-              </strong>
-
-              <button
-                className={styles.arrowButton}
-                type="button"
-                aria-label="다음 주 보기"
-                onClick={() => handleMoveWeek(1)}
-              >
-                <FiChevronRight aria-hidden="true" />
-              </button>
-            </div>
-
-            <button
-              className={styles.currentWeekButton}
-              type="button"
-              onClick={handleMoveToCurrentWeek}
-            >
-              <FiCalendar aria-hidden="true" />
-              이번 주
-            </button>
+        <div className={styles.controlArea}>
+          <div className={styles.filterArea}>
+            <MatchFilter
+              filters={FILTERS}
+              activeFilter={activeFilter}
+              onChange={setActiveFilter}
+            />
           </div>
 
-          <div className={styles.dateScroller}>
-            <div className={styles.dateList}>
-              {weekDates.map(({ date, dateKey, dayLabel }) => {
-                const isSelected = selectedDate === dateKey;
-                const hasMatch = hasMatchOnDate(dateKey);
+          <div className={styles.searchArea}>
+            <SearchInput
+              value={searchKeyword}
+              onChange={setSearchKeyword}
+              placeholder="팀 이름, 리그를 검색해보세요"
+              ariaLabel="예측 경기 검색"
+              debounceDelay={500}
+            />
+          </div>
+        </div>
+
+        <div className={styles.contentArea}>
+          {activeTab === "mine" && (
+            <aside className={styles.summary}>
+              {displayedBadges.map((badge) => {
+                const SportIcon = badge.SportIcon;
+                const TierIcon = badge.TierIcon;
 
                 return (
-                  <button
-                    key={dateKey}
-                    className={`${styles.dateButton} ${isSelected ? styles.active : ""}`}
-                    type="button"
-                    aria-label={`${date.getMonth() + 1}월 ${date.getDate()}일 ${dayLabel}요일`}
-                    aria-pressed={isSelected}
-                    onClick={() => setSelectedDate(dateKey)}
-                  >
-                    <span className={styles.dayLabel}>{dayLabel}</span>
-                    <strong className={styles.dateNumber}>
-                      {date.getDate()}
-                    </strong>
-                    {hasMatch && (
-                      <span className={styles.matchDot} aria-hidden="true" />
-                    )}
-                  </button>
+                  <div className={styles.badgeItem} key={badge.sport}>
+                    <span
+                      className={styles.summaryIcon}
+                      data-tier={badge.tier}
+                      aria-hidden="true"
+                    >
+                      <SportIcon />
+                      <span className={styles.summaryTierIcon}>
+                        <TierIcon />
+                      </span>
+                    </span>
+                    <strong>{badge.name}</strong>
+                    <p>
+                      나의 예측 <b>{badge.totalCount}회</b>
+                      <br />
+                      예측 성공률 <b>{badge.accuracyRate}%</b>
+                    </p>
+                  </div>
                 );
               })}
-            </div>
-          </div>
-        </div>
+            </aside>
+          )}
 
-        <div className={styles.filterWrap}>
-          <MatchFilter
-            filters={FILTERS}
-            activeFilter={activeFilter}
-            onChange={setActiveFilter}
-          />
-        </div>
-
-        {activeTab === "mine" && (
-          <aside className={styles.summary}>
-            {displayedBadges.map((badge) => (
-              <div className={styles.badgeItem} key={badge.sport}>
-                <span>🏅</span>
-                <strong>{badge.name}</strong>
-                <p>
-                  나의 예측 <b>{badge.totalCount}회</b>
-                  <br />
-                  예측 성공률 <b>{badge.accuracyRate}%</b>
-                </p>
-              </div>
-            ))}
-          </aside>
-        )}
-
-        {isLoading && <p className={styles.empty}>경기를 불러오는 중입니다.</p>}
-        {!isLoading && apiError && <p className={styles.empty}>{apiError}</p>}
-
-        {!isLoading && !apiError && (
-          <div className={styles.matchList}>
-            {filteredMatches.length > 0 ? (
-              filteredMatches.map((match) =>
+          {isLoading && (
+            <div className={styles.matchList} aria-label="예측 경기 로딩 중">
+              {Array.from({ length: 3 }, (_, index) =>
                 activeTab === "today" ? (
-                  <TodayMatchCard
-                    key={match.id}
-                    match={match}
-                    selection={predictions[match.id]}
-                    isSaving={savingMatchId === match.id}
-                    onSelect={handlePrediction}
-                  />
+                  <TodayMatchCardSkeleton key={index} />
                 ) : (
+                  <MyPredictionCardSkeleton key={index} />
+                ),
+              )}
+            </div>
+          )}
+
+          {!isLoading && apiError && (
+            <EmptyState
+              title={apiError}
+              description="잠시 후 다시 시도해 주세요."
+            />
+          )}
+
+          {!isLoading && !apiError && filteredMatches.length > 0 && (
+            <div className={styles.matchList}>
+              {filteredMatches.map((match) => {
+                if (activeTab === "today") {
+                  const isTargetMatch =
+                    String(match.databaseId) === String(targetMatchId);
+
+                  return (
+                    <TodayMatchCard
+                      key={match.id}
+                      ref={isTargetMatch ? targetMatchCardRef : null}
+                      match={match}
+                      selection={predictions[match.id]}
+                      canChangePrediction={canChangePredictionByBeginAt(
+                        match.beginAt,
+                        currentTime,
+                      )}
+                      isSaving={savingMatchId === match.id}
+                      isTarget={isTargetMatch}
+                      onSelect={handlePrediction}
+                    />
+                  );
+                }
+
+                return (
                   <MyPredictionCard
                     key={match.id}
                     match={match}
                     selection={predictions[match.id]}
                     result={predictionResults[match.id]}
                   />
-                ),
-              )
-            ) : (
-              <p className={styles.empty}>
-                {activeTab === "mine"
-                  ? "이 날짜에 예측한 경기가 없습니다."
-                  : "이 날짜에 예정된 경기가 없습니다."}
-              </p>
-            )}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          )}
+
+          {!isLoading && !apiError && filteredMatches.length === 0 && (
+            <EmptyState title={emptyMessage} description={emptyDescription} />
+          )}
+        </div>
       </div>
     </section>
   );
