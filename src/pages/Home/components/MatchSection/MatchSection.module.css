@@ -47,11 +47,8 @@
 }
 
 .navigationControls {
-  display: flex;
   grid-area: navigation;
-  align-items: center;
   justify-self: end;
-  gap: 14px;
 }
 
 .viewAllRow {
@@ -60,63 +57,10 @@
   margin: 0 0 22px;
 }
 
-.navigationButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  border: 0;
-  color: var(--color-text-white);
-  background-color: transparent;
-  cursor: pointer;
-  opacity: 0.8;
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-}
-
-.navigationButton:hover:not(:disabled) {
-  opacity: 1;
-  transform: scale(1.12);
-}
-
-.navigationButton:active:not(:disabled) {
-  transform: scale(0.96);
-}
-
-.navigationButton:focus-visible {
-  border-radius: 4px;
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
-}
-
-.navigationButton:disabled {
-  cursor: default;
-  opacity: 0.2;
-}
-
-.navigationButton svg {
-  width: 26px;
-  height: 26px;
-  fill: none;
-  stroke: currentcolor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.8;
-}
-
 .matchList {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 32px;
-}
-
-.emptyMessage {
-  padding: 80px 20px;
-  color: rgb(255 255 255 / 55%);
-  text-align: center;
 }
 
 @media (max-width: 1100px) {
@@ -141,22 +85,8 @@
     line-height: 36px;
   }
 
-  .navigationControls {
-    gap: 2px;
-  }
-
   .viewAllRow {
     margin-bottom: 16px;
-  }
-
-  .navigationButton {
-    width: 36px;
-    height: 36px;
-  }
-
-  .navigationButton svg {
-    width: 22px;
-    height: 22px;
   }
 
   .matchList {
@@ -179,7 +109,4 @@
     scroll-snap-align: start;
   }
 
-  .emptyMessage {
-    padding: 60px 16px;
-  }
 }

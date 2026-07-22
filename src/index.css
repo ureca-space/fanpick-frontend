@@ -32,12 +32,20 @@
   --color-background-light: #f4f6f8;
   --color-surface-dark: #181a29;
   --color-surface-card: #252838;
+  --color-surface-section: #151726;
+  --color-surface-card-strong: #181a2a;
+  --color-surface-muted: #343849;
+  --color-surface-fallback: #393e55;
+  --color-surface-media: #292d3d;
 
   --color-text-primary: #111827;
   --color-text-secondary: #667085;
   --color-text-white: #ffffff;
 
   --color-border: #e5e7eb;
+  --color-prediction-track: #373b4d;
+  --color-prediction-home: #6176ff;
+  --color-prediction-away: #df5d76;
 
   --content-width: 1280px;
   --header-height: 88px;
@@ -58,6 +66,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
+  overflow-x: hidden;
 }
 
 h1,

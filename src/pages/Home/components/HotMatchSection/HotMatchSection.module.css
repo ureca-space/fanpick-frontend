@@ -1,7 +1,7 @@
 .hotMatchSection {
   position: relative;
   color: var(--color-text-white);
-  background-color: #151726;
+  background-color: var(--color-surface-section);
 }
 
 .sectionHeader {
@@ -66,6 +66,24 @@
   transform: translateY(-4px);
 }
 
+.selectedTeamCard,
+.selectedTeamCard:hover {
+  border-color: var(--color-accent);
+  box-shadow:
+    0 0 0 1px var(--color-accent),
+    0 14px 30px rgb(0 0 0 / 22%);
+}
+
+.hotMatchSkeleton {
+  pointer-events: none;
+}
+
+.skeletonTeamCard:hover {
+  border-color: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
 .logoBox {
   display: flex;
   flex: 1;
@@ -91,7 +109,7 @@
   height: 68px;
   margin-top: auto;
   border-radius: 8px;
-  background-color: #181a2a;
+  background-color: var(--color-surface-card-strong);
 }
 
 .teamName {
@@ -154,10 +172,57 @@
   font-weight: 500;
 }
 
-.emptyMessage {
-  padding: 100px 20px;
-  color: rgb(255 255 255 / 55%);
-  text-align: center;
+.participants {
+  margin-top: 12px;
+  color: var(--color-accent);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.skeletonHotLogo {
+  width: min(100%, 150px);
+  height: 150px;
+}
+
+.skeletonHotTeamName {
+  width: 68%;
+  height: 24px;
+}
+
+.skeletonSelectButton {
+  width: 112px;
+  height: 43px;
+  margin-top: 30px;
+  border-radius: 6px;
+}
+
+.skeletonHotLeague {
+  width: 72px;
+  height: 16px;
+  margin-bottom: 24px;
+}
+
+.skeletonHotVs {
+  width: 78px;
+  height: 52px;
+  border-radius: 4px;
+}
+
+.skeletonHotDate {
+  width: 112px;
+  height: 27px;
+}
+
+.skeletonHotTime {
+  width: 72px;
+  height: 16px;
+  margin-top: 6px;
+}
+
+.skeletonHotParticipants {
+  width: 82px;
+  height: 13px;
+  margin-top: 12px;
 }
 
 @media (max-width: 1000px) {
@@ -195,6 +260,11 @@
 
   .date {
     font-size: 23px;
+  }
+
+  .skeletonHotLogo {
+    width: 128px;
+    height: 128px;
   }
 }
 
@@ -263,6 +333,21 @@
   .time {
     font-size: 13px;
   }
+
+  .participants {
+    margin-top: 10px;
+    font-size: 12px;
+  }
+
+  .skeletonHotLogo {
+    width: 104px;
+    height: 104px;
+  }
+
+  .skeletonHotVs {
+    width: 50px;
+    height: 34px;
+  }
 }
 
 @media (max-width: 560px) {
@@ -317,5 +402,39 @@
   .time {
     margin-top: 4px;
     font-size: 12px;
+  }
+
+  .participants {
+    font-size: 11px;
+  }
+
+  .skeletonHotLogo {
+    width: 82px;
+    height: 82px;
+  }
+
+  .skeletonHotTeamName {
+    height: 18px;
+  }
+
+  .skeletonSelectButton {
+    width: 80px;
+    height: 36px;
+  }
+
+  .skeletonHotDate {
+    width: 76px;
+    height: 18px;
+  }
+
+  .skeletonHotTime {
+    width: 54px;
+    height: 12px;
+  }
+
+  .skeletonHotParticipants {
+    width: 62px;
+    height: 11px;
+    margin-top: 10px;
   }
 }

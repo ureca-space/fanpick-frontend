@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../../../components/Button/Button";
+import EmptyState from "../../../../components/EmptyState/EmptyState";
 import FanPickDialog from "../../../../components/FanPickDialog/FanPickDialog";
 import MatchFilter from "../../../../components/MatchFilter/MatchFilter";
+import Skeleton from "../../../../components/Skeleton/Skeleton";
 import { getTeamInfo } from "../../../../constants/teamInfo";
 import useAuth from "../../../../contexts/useAuth";
 import { supabase } from "../../../../lib/supabase";
+import {
+  fetchMatchPredictionStats,
+  fetchMyPredictionSelections,
+  markPredictedMatches,
+} from "../../../../services/predictionApi";
 import { subscribeToMatchChanges } from "../../../../services/matchRealtime";
 import {
   createPredictionLocation,
@@ -20,6 +27,8 @@ const FILTERS = [
 ];
 
 const padNumber = (number) => String(number).padStart(2, "0");
+const normalizeTeamCode = (teamCode) => teamCode?.trim().toUpperCase() ?? "";
+const HOT_MATCH_REFRESH_DEBOUNCE_MS = 500;
 
 const formatDateKey = (date) => {
   const year = date.getFullYear();
@@ -59,8 +68,21 @@ const createMatchDateTime = (matchDate, matchTime) => {
   return Number.isNaN(dateTime.getTime()) ? null : dateTime;
 };
 
-const normalizeHotMatch = (match) => ({
-  id: match.external_id,
+const createPredictionStatsByMatchId = (predictionStats) =>
+  new Map(
+    predictionStats.map((stat) => [
+      String(stat.match_id),
+      {
+        awayRate: Number(stat.away_rate ?? 50),
+        homeRate: Number(stat.home_rate ?? 50),
+        participants: Number(stat.participant_count ?? 0),
+      },
+    ]),
+  );
+
+const normalizeHotMatch = (match, predictionStats) => ({
+  id: match.external_id ?? `match-${match.id}`,
+  databaseId: match.id,
   sport: match.sport,
   league: match.league,
 
@@ -76,15 +98,19 @@ const normalizeHotMatch = (match) => ({
   status: match.status,
   venue: match.venue,
   broadcast: match.broadcast,
+  participants: predictionStats?.participants ?? 0,
+  homeRate: predictionStats?.homeRate ?? 50,
+  awayRate: predictionStats?.awayRate ?? 50,
 });
 
-const fetchNearestMatch = async (sport, now) => {
+const fetchHotMatch = async (sport, now, predictionStatsByMatchId) => {
   const todayKey = formatDateKey(now);
 
   const { data, error } = await supabase
     .from("matches")
     .select(
       `
+        id,
         external_id,
         sport,
         league,
@@ -105,32 +131,95 @@ const fetchNearestMatch = async (sport, now) => {
     })
     .order("match_time", {
       ascending: true,
-    })
-    .limit(30);
+    });
 
   if (error) {
     throw error;
   }
 
-  const nearestMatch = (data ?? []).find((match) => {
-    if (!match.home_team_code || !match.away_team_code) {
-      return false;
-    }
+  const hotMatchCandidate = (data ?? [])
+    .map((match) => {
+      const matchDateTime = createMatchDateTime(
+        match.match_date,
+        match.match_time,
+      );
+      const stats = predictionStatsByMatchId.get(String(match.id));
 
-    const matchDateTime = createMatchDateTime(
-      match.match_date,
-      match.match_time,
-    );
+      return {
+        match,
+        matchDateTime,
+        participants: stats?.participants ?? 0,
+        stats,
+      };
+    })
+    .filter(
+      ({ match, matchDateTime }) =>
+        match.home_team_code &&
+        match.away_team_code &&
+        matchDateTime &&
+        matchDateTime.getTime() > now.getTime(),
+    )
+    .sort(
+      (current, next) =>
+        next.participants - current.participants ||
+        current.matchDateTime.getTime() - next.matchDateTime.getTime(),
+    )[0];
 
-    return matchDateTime && matchDateTime.getTime() > now.getTime();
-  });
-
-  return nearestMatch ? normalizeHotMatch(nearestMatch) : null;
+  return hotMatchCandidate
+    ? normalizeHotMatch(hotMatchCandidate.match, hotMatchCandidate.stats)
+    : null;
 };
+
+const HotMatchSkeleton = () => (
+  <article
+    className={`${styles.hotMatch} ${styles.hotMatchSkeleton}`}
+    aria-label="핫매치 로딩 중"
+  >
+    <div className={styles.teamColumn}>
+      <div className={`${styles.teamCard} ${styles.skeletonTeamCard}`}>
+        <div className={styles.logoBox}>
+          <Skeleton.Circle className={styles.skeletonHotLogo} />
+        </div>
+
+        <div className={styles.teamNameBox}>
+          <Skeleton.Line className={styles.skeletonHotTeamName} />
+        </div>
+      </div>
+
+      <Skeleton.Line className={styles.skeletonSelectButton} />
+    </div>
+
+    <div className={styles.matchInfo}>
+      <Skeleton.Line className={styles.skeletonHotLeague} />
+      <Skeleton.Line className={styles.skeletonHotVs} />
+
+      <div className={styles.schedule}>
+        <Skeleton.Line className={styles.skeletonHotDate} />
+        <Skeleton.Line className={styles.skeletonHotTime} />
+        <Skeleton.Line className={styles.skeletonHotParticipants} />
+      </div>
+    </div>
+
+    <div className={styles.teamColumn}>
+      <div className={`${styles.teamCard} ${styles.skeletonTeamCard}`}>
+        <div className={styles.logoBox}>
+          <Skeleton.Circle className={styles.skeletonHotLogo} />
+        </div>
+
+        <div className={styles.teamNameBox}>
+          <Skeleton.Line className={styles.skeletonHotTeamName} />
+        </div>
+      </div>
+
+      <Skeleton.Line className={styles.skeletonSelectButton} />
+    </div>
+  </article>
+);
 
 const HotMatchSection = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, isAuthLoading } = useAuth();
+  const { user, isLoggedIn, isAuthLoading } = useAuth();
+  const userId = user?.id || "";
 
   const [hotMatches, setHotMatches] = useState({});
   const [activeFilter, setActiveFilter] = useState("baseball");
@@ -141,6 +230,14 @@ const HotMatchSection = () => {
   const [pendingVote, setPendingVote] = useState(null);
 
   const hotMatch = hotMatches[activeFilter] ?? null;
+  const selectedTeamCode =
+    hotMatch?.myPrediction?.selectedTeamCode ?? "";
+  const isHotMatchPredicted = Boolean(hotMatch?.isPredicted);
+  const isHomeSelected =
+    selectedTeamCode === normalizeTeamCode(hotMatch?.homeTeamCode);
+  const isAwaySelected =
+    selectedTeamCode === normalizeTeamCode(hotMatch?.awayTeamCode);
+  const voteButtonLabel = isHotMatchPredicted ? "투표완료" : "투표하기";
 
   useEffect(() => {
     let isMounted = true;
@@ -153,10 +250,17 @@ const HotMatchSection = () => {
         }
 
         const now = new Date();
+        const predictionStatsByMatchId = createPredictionStatsByMatchId(
+          await fetchMatchPredictionStats(),
+        );
 
         const results = await Promise.all(
           FILTERS.map(async ({ id }) => {
-            const match = await fetchNearestMatch(id, now);
+            const match = await fetchHotMatch(
+              id,
+              now,
+              predictionStatsByMatchId,
+            );
 
             return [id, match];
           }),
@@ -165,16 +269,39 @@ const HotMatchSection = () => {
         if (!isMounted) return;
 
         const nextHotMatches = Object.fromEntries(results);
+        const availableHotMatches = Object.values(nextHotMatches).filter(Boolean);
+        const myPredictions = userId
+          ? await fetchMyPredictionSelections(
+              userId,
+              availableHotMatches.map((match) => match.databaseId),
+            ).catch((error) => {
+              console.error("핫매치 예측 여부 조회 실패", error);
+              return [];
+            })
+          : [];
+        const markedHotMatches = markPredictedMatches(
+          availableHotMatches,
+          myPredictions,
+        );
+        const markedHotMatchesById = new Map(
+          markedHotMatches.map((match) => [match.databaseId, match]),
+        );
+        const nextHotMatchesWithPredictions = Object.fromEntries(
+          Object.entries(nextHotMatches).map(([sport, match]) => [
+            sport,
+            match ? markedHotMatchesById.get(match.databaseId) ?? match : null,
+          ]),
+        );
 
-        setHotMatches(nextHotMatches);
+        setHotMatches(nextHotMatchesWithPredictions);
 
         setActiveFilter((previousFilter) => {
-          if (nextHotMatches[previousFilter]) {
+          if (nextHotMatchesWithPredictions[previousFilter]) {
             return previousFilter;
           }
 
           const firstAvailableFilter = FILTERS.find(
-            ({ id }) => nextHotMatches[id],
+            ({ id }) => nextHotMatchesWithPredictions[id],
           );
 
           return firstAvailableFilter?.id ?? previousFilter;
@@ -194,30 +321,63 @@ const HotMatchSection = () => {
 
     loadHotMatches();
 
-    const unsubscribe = subscribeToMatchChanges({
+    const unsubscribeMatches = subscribeToMatchChanges({
       channelName: "home-hot-matches",
       onChange: () => loadHotMatches({ showLoading: false }),
       shouldHandlePayload: ({ new: nextMatch }) =>
         !nextMatch?.sport || FILTERS.some(({ id }) => id === nextMatch.sport),
     });
+    let predictionRefreshTimerId = null;
+    const schedulePredictionRefresh = () => {
+      if (predictionRefreshTimerId) {
+        window.clearTimeout(predictionRefreshTimerId);
+      }
+
+      predictionRefreshTimerId = window.setTimeout(() => {
+        loadHotMatches({ showLoading: false });
+      }, HOT_MATCH_REFRESH_DEBOUNCE_MS);
+    };
+    const predictionChannel = supabase
+      .channel("home-hot-match-predictions")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "predictions",
+        },
+        schedulePredictionRefresh,
+      )
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR") {
+          console.error("핫매치 예측 실시간 구독 연결에 실패했습니다.");
+        }
+      });
 
     return () => {
       isMounted = false;
-      unsubscribe();
+      unsubscribeMatches();
+
+      if (predictionRefreshTimerId) {
+        window.clearTimeout(predictionRefreshTimerId);
+      }
+
+      supabase.removeChannel(predictionChannel);
     };
-  }, []);
+  }, [userId]);
 
   const handleVoteClick = (selectedTeamCode) => {
-    if (isAuthLoading || !hotMatch) return;
+    if (isAuthLoading || !hotMatch || hotMatch.isPredicted) return;
 
+    const predictionMatchId = hotMatch.databaseId ?? hotMatch.id;
     const predictionPath = createPredictionPath({
-      matchId: hotMatch.id,
+      matchId: predictionMatchId,
       teamCode: selectedTeamCode,
     });
 
     if (!isLoggedIn) {
       setPendingVote({
-        matchId: hotMatch.id,
+        matchId: predictionMatchId,
         selectedTeamCode,
       });
 
@@ -269,13 +429,20 @@ const HotMatchSection = () => {
 
           <div className={styles.content}>
             {isLoading ? (
-              <p className={styles.emptyMessage}>핫매치를 불러오는 중입니다.</p>
+              <HotMatchSkeleton />
             ) : loadError ? (
-              <p className={styles.emptyMessage}>{loadError}</p>
+              <EmptyState
+                title={loadError}
+                description="잠시 후 다시 시도해 주세요."
+              />
             ) : hotMatch ? (
               <article className={styles.hotMatch}>
                 <div className={styles.teamColumn}>
-                  <div className={styles.teamCard}>
+                  <div
+                    className={`${styles.teamCard} ${
+                      isHomeSelected ? styles.selectedTeamCard : ""
+                    }`}
+                  >
                     <div className={styles.logoBox}>
                       {hotMatch.homeTeam.logo ? (
                         <img
@@ -296,12 +463,12 @@ const HotMatchSection = () => {
 
                   <Button
                     className={styles.selectButton}
-                    disabled={isAuthLoading}
+                    disabled={isAuthLoading || isHotMatchPredicted}
                     onClick={() => handleVoteClick(hotMatch.homeTeamCode)}
                     size="sm"
                     variant="outline"
                   >
-                    투표하기
+                    {voteButtonLabel}
                   </Button>
                 </div>
 
@@ -314,11 +481,19 @@ const HotMatchSection = () => {
                     <span className={styles.date}>{hotMatch.date}</span>
 
                     <span className={styles.time}>{hotMatch.time}</span>
+
+                    <span className={styles.participants}>
+                      {hotMatch.participants.toLocaleString()}명 참여
+                    </span>
                   </div>
                 </div>
 
                 <div className={styles.teamColumn}>
-                  <div className={styles.teamCard}>
+                  <div
+                    className={`${styles.teamCard} ${
+                      isAwaySelected ? styles.selectedTeamCard : ""
+                    }`}
+                  >
                     <div className={styles.logoBox}>
                       {hotMatch.awayTeam.logo ? (
                         <img
@@ -339,19 +514,20 @@ const HotMatchSection = () => {
 
                   <Button
                     className={styles.selectButton}
-                    disabled={isAuthLoading}
+                    disabled={isAuthLoading || isHotMatchPredicted}
                     onClick={() => handleVoteClick(hotMatch.awayTeamCode)}
                     size="sm"
                     variant="outline"
                   >
-                    투표하기
+                    {voteButtonLabel}
                   </Button>
                 </div>
               </article>
             ) : (
-              <p className={styles.emptyMessage}>
-                예정된 주요 경기가 없습니다.
-              </p>
+              <EmptyState
+                title="예정된 주요 경기가 없습니다."
+                description="필터를 바꾸거나 전체 경기 일정을 확인해 주세요."
+              />
             )}
           </div>
         </div>

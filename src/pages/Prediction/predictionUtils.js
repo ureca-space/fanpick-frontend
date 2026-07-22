@@ -1,8 +1,14 @@
+import {
+  TbBallBaseball,
+  TbBallFootball,
+  TbDeviceGamepad2,
+} from "react-icons/tb";
+
 // - 종목별 아이콘
 export const SPORT_ICONS = {
-  soccer: "⚽",
-  baseball: "⚾",
-  esports: "🎮",
+  soccer: TbBallFootball,
+  baseball: TbBallBaseball,
+  esports: TbDeviceGamepad2,
 };
 
 // - 예측 결과별 화면 문구

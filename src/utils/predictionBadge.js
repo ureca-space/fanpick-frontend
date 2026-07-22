@@ -1,4 +1,33 @@
-// - 종목별 적중률 배지 이름
+import {
+  TbBallBaseball,
+  TbBallFootball,
+  TbCrown,
+  TbDeviceGamepad2,
+  TbSeedling,
+  TbShield,
+  TbStar,
+  TbTargetOff,
+  TbTrophy,
+} from "react-icons/tb";
+
+const PREDICTION_SPORT_META = {
+  soccer: {
+    label: "SOCCER",
+    koreanName: "축구",
+    SportIcon: TbBallFootball,
+  },
+  baseball: {
+    label: "BASEBALL",
+    koreanName: "야구",
+    SportIcon: TbBallBaseball,
+  },
+  esports: {
+    label: "LOL",
+    koreanName: "롤",
+    SportIcon: TbDeviceGamepad2,
+  },
+};
+
 const BADGES = {
   soccer: {
     beginner: "축구 입문자",
@@ -26,16 +55,67 @@ const BADGES = {
   },
 };
 
-// - Supabase가 계산한 경기 수와 적중률로 배지 결정
-export const getPredictionBadge = (sport, totalCount, accuracyRate) => {
-  const badges = BADGES[sport];
+const BADGE_TIERS = [
+  {
+    id: "beginner",
+    label: "입문",
+    Icon: TbSeedling,
+    matches: (totalCount) => totalCount < 5,
+  },
+  {
+    id: "god",
+    label: "마스터",
+    Icon: TbCrown,
+    matches: (_, accuracyRate) => accuracyRate >= 80,
+  },
+  {
+    id: "expert",
+    label: "고수",
+    Icon: TbTrophy,
+    matches: (_, accuracyRate) => accuracyRate >= 60,
+  },
+  {
+    id: "normal",
+    label: "팬",
+    Icon: TbStar,
+    matches: (_, accuracyRate) => accuracyRate >= 40,
+  },
+  {
+    id: "poor",
+    label: "도전",
+    Icon: TbShield,
+    matches: (_, accuracyRate) => accuracyRate >= 20,
+  },
+  {
+    id: "worst",
+    label: "역배",
+    Icon: TbTargetOff,
+    matches: () => true,
+  },
+];
 
-  if (!badges) return "";
-  if (totalCount < 5) return badges.beginner;
-  if (accuracyRate >= 80) return badges.god;
-  if (accuracyRate >= 60) return badges.expert;
-  if (accuracyRate >= 40) return badges.normal;
-  if (accuracyRate >= 20) return badges.poor;
+const getPredictionBadgeTier = (totalCount, accuracyRate) =>
+  BADGE_TIERS.find((tier) => tier.matches(totalCount, accuracyRate)) ??
+  BADGE_TIERS[BADGE_TIERS.length - 1];
 
-  return badges.worst;
+export const getPredictionBadgeMeta = (sport, totalCount, accuracyRate) => {
+  const sportMeta = PREDICTION_SPORT_META[sport] ?? {
+    label: "SPORT",
+    koreanName: "스포츠",
+    SportIcon: TbTrophy,
+  };
+
+  const badges = BADGES[sport] ?? {};
+  const tier = getPredictionBadgeTier(totalCount, accuracyRate);
+
+  return {
+    sport,
+    sportLabel: sportMeta.label,
+    sportName: sportMeta.koreanName,
+    name: badges[tier.id] ?? `${sportMeta.koreanName} ${tier.label}`,
+    tier: tier.id,
+    tierLabel: tier.label,
+    SportIcon: sportMeta.SportIcon,
+    TierIcon: tier.Icon,
+  };
 };

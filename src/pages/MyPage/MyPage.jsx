@@ -1,12 +1,29 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Button from "../../components/Button/Button.jsx";
+import EmptyState from "../../components/EmptyState/EmptyState.jsx";
+import PaginationControls from "../../components/PaginationControls/PaginationControls.jsx";
+import Skeleton from "../../components/Skeleton/Skeleton.jsx";
+import { getTeamInfo } from "../../constants/teamInfo.js";
 import {
   FAVORITE_TEAMS_CHANGED_EVENT,
   fetchFavoriteTeamIds,
   getFavoriteTeamIds,
 } from "../../services/favoriteTeams.js";
+import {
+  createSettledPredictionSummary,
+  fetchMatchPredictionStats,
+  fetchMyPredictions,
+} from "../../services/predictionApi.js";
 import { supabase } from "../../lib/supabase.js";
+import { getPredictionBadgeMeta } from "../../utils/predictionBadge.js";
+import {
+  canChangePredictionByBeginAt,
+  createMatchBeginAt,
+} from "../../utils/predictionDeadline.js";
+import { createPredictionPath } from "../../utils/predictionPath.js";
 import { getTeamsByIds, TEAM_LEAGUE_LABELS } from "../Teams/data/teams.js";
+import { RESULT_LABELS } from "../Prediction/predictionUtils.js";
 import styles from "./MyPage.module.css";
 
 const INITIAL_USER_INFO = {
@@ -17,24 +34,6 @@ const INITIAL_USER_INFO = {
   avatarUrl: "",
 };
 
-const SPORT_BADGE_INFO = {
-  soccer: {
-    label: "SOCCER",
-    koreanName: "축구",
-    icon: "⚽",
-  },
-  baseball: {
-    label: "BASEBALL",
-    koreanName: "야구",
-    icon: "⚾",
-  },
-  esports: {
-    label: "LOL",
-    koreanName: "롤",
-    icon: "🎮",
-  },
-};
-
 const ALLOWED_IMAGE_TYPES = {
   "image/jpeg": "jpg",
   "image/png": "png",
@@ -42,6 +41,154 @@ const ALLOWED_IMAGE_TYPES = {
 };
 
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+const FAVORITE_TEAMS_PAGE_SIZE = 6;
+const PICK_HISTORY_PAGE_SIZE = 4;
+const PREDICTION_SPORTS = ["soccer", "baseball", "esports"];
+const SPORT_LABELS = {
+  baseball: "BASEBALL",
+  esports: "LOL",
+  soccer: "SOCCER",
+};
+const EMPTY_PREDICTION_SUMMARY = {
+  total: 0,
+  correct: 0,
+  incorrect: 0,
+  accuracy: 0,
+};
+
+const MyPageSkeleton = () => (
+  <main className={styles.myPage}>
+    <div
+      className={`container ${styles.inner}`}
+      aria-label="마이페이지 로딩 중"
+    >
+      <header className={styles.pageHeader}>
+        <Skeleton.Line className={styles.skeletonEyebrow} />
+        <Skeleton.Line className={styles.skeletonPageTitle} />
+        <Skeleton.Line className={styles.skeletonPageDescription} />
+      </header>
+
+      <section className={styles.profileSection}>
+        <div className={styles.profileMain}>
+          <Skeleton.Circle className={styles.skeletonProfileAvatar} />
+
+          <div className={styles.profileInfo}>
+            <Skeleton.Line className={styles.skeletonNickname} />
+            <Skeleton.Line className={styles.skeletonEmail} />
+            <Skeleton.Line className={styles.skeletonJoinedAt} />
+          </div>
+        </div>
+
+        <div className={styles.profileBadges}>
+          {PREDICTION_SPORTS.map((sport) => (
+            <article
+              key={sport}
+              className={`${styles.profileBadge} ${styles.skeletonStaticCard}`}
+            >
+              <Skeleton.Circle className={styles.skeletonBadgeIcon} />
+
+              <div className={styles.skeletonBadgeInfo}>
+                <Skeleton.Line className={styles.skeletonBadgeSport} />
+                <Skeleton.Line className={styles.skeletonBadgeTitle} />
+                <Skeleton.Line className={styles.skeletonBadgeText} />
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.statisticsSection}>
+        <div className={styles.sectionHeader}>
+          <Skeleton.Line className={styles.skeletonSectionTitle} />
+          <Skeleton.Line className={styles.skeletonSectionDescription} />
+        </div>
+
+        <div className={styles.statisticsGrid}>
+          {Array.from({ length: 4 }, (_, index) => (
+            <article
+              key={index}
+              className={`${styles.statisticCard} ${styles.skeletonStaticCard}`}
+            >
+              <Skeleton.Line className={styles.skeletonStatLabel} />
+              <Skeleton.Line className={styles.skeletonStatValue} />
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.favoriteTeamsSection}>
+        <div className={styles.sectionHeader}>
+          <Skeleton.Line className={styles.skeletonSectionTitle} />
+          <Skeleton.Line className={styles.skeletonSectionDescription} />
+        </div>
+
+        <div className={styles.favoriteTeamsGrid}>
+          {Array.from({ length: 3 }, (_, index) => (
+            <article
+              key={index}
+              className={`${styles.favoriteTeamCard} ${styles.skeletonStaticCard}`}
+            >
+              <Skeleton.Box className={styles.skeletonFavoriteLogoBox} />
+
+              <div className={styles.favoriteTeamInfo}>
+                <Skeleton.Line className={styles.skeletonFavoriteLeague} />
+                <Skeleton.Line className={styles.skeletonFavoriteName} />
+                <Skeleton.Line className={styles.skeletonFavoriteTone} />
+                <Skeleton.Line className={styles.skeletonFavoriteToneShort} />
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.historySection}>
+        <div className={styles.sectionHeader}>
+          <Skeleton.Line className={styles.skeletonSectionTitle} />
+          <Skeleton.Line className={styles.skeletonSectionDescription} />
+        </div>
+
+        <div className={styles.historyList}>
+          {Array.from({ length: 2 }, (_, index) => (
+            <article
+              key={index}
+              className={`${styles.historyCard} ${styles.skeletonStaticCard}`}
+            >
+              <div className={styles.historyMeta}>
+                <Skeleton.Line className={styles.skeletonHistoryMeta} />
+                <Skeleton.Line className={styles.skeletonHistoryResult} />
+              </div>
+
+              <div className={styles.historyDate}>
+                <Skeleton.Line className={styles.skeletonHistoryDate} />
+                <Skeleton.Line className={styles.skeletonHistoryTime} />
+              </div>
+
+              <div className={styles.historyTeams}>
+                <Skeleton.Line className={styles.skeletonHistoryTeam} />
+                <Skeleton.Line className={styles.skeletonHistoryScore} />
+                <Skeleton.Line className={styles.skeletonHistoryTeam} />
+              </div>
+
+              <div className={styles.historyPrediction}>
+                <div className={styles.historyPredictionLabels}>
+                  <Skeleton.Line className={styles.skeletonPredictionLabel} />
+                  <Skeleton.Line className={styles.skeletonPredictionLabel} />
+                </div>
+
+                <Skeleton.Line className={styles.skeletonPredictionBar} />
+              </div>
+
+              <div className={styles.historyFooter}>
+                <Skeleton.Line className={styles.skeletonHistoryPick} />
+                <Skeleton.Line className={styles.skeletonHistoryButton} />
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    </div>
+  </main>
+);
 
 const formatJoinedDate = (date) => {
   if (!date) return "-";
@@ -53,43 +200,135 @@ const formatJoinedDate = (date) => {
   }).format(new Date(date));
 };
 
-const getBadgeTitle = (sport, total, accuracy) => {
-  const sportName = SPORT_BADGE_INFO[sport].koreanName;
+const normalizeTeamCode = (teamCode) => teamCode?.trim().toUpperCase() || "";
 
-  if (total < 5) {
-    return `${sportName} 입문자`;
+const parseScore = (score) => {
+  if (!score) {
+    return {
+      awayScore: null,
+      homeScore: null,
+    };
   }
 
-  if (accuracy >= 80) {
-    if (sport === "esports") {
-      return "롤도사";
-    }
+  const [awayScore, homeScore] = score.split(":").map(Number);
 
-    return `${sportName}의 신`;
-  }
-
-  if (accuracy >= 60) {
-    return `${sportName}잘알`;
-  }
-
-  if (accuracy >= 40) {
-    return `평범한 ${sportName}팬`;
-  }
-
-  if (accuracy >= 20) {
-    return `${sportName}알못`;
-  }
-
-  if (sport === "soccer") {
-    return "축구 반대로 가는 자";
-  }
-
-  if (sport === "baseball") {
-    return "역배 장인";
-  }
-
-  return "브론즈 예언가";
+  return {
+    awayScore: Number.isFinite(awayScore) ? awayScore : null,
+    homeScore: Number.isFinite(homeScore) ? homeScore : null,
+  };
 };
+
+const formatMatchDate = (dateKey) => {
+  if (!dateKey) {
+    return "날짜 미정";
+  }
+
+  const [, month, day] = dateKey.split("-");
+
+  return `${month}.${day}`;
+};
+
+const createFallbackSportSummaries = (predictions) =>
+  Object.fromEntries(
+    PREDICTION_SPORTS.map((sport) => {
+      const sportPredictions = predictions.filter(
+        (prediction) => prediction.matches?.sport === sport,
+      );
+
+      return [sport, createSettledPredictionSummary(sportPredictions)];
+    }),
+  );
+
+const createSportStatistics = (predictions) => {
+  const fallbackSummaries = createFallbackSportSummaries(predictions);
+
+  return PREDICTION_SPORTS.map((sport) => {
+    const fallbackStats = fallbackSummaries[sport] ?? EMPTY_PREDICTION_SUMMARY;
+
+    return {
+      sport,
+      total: fallbackStats.total,
+      correct: fallbackStats.correct,
+      accuracy: fallbackStats.accuracy,
+    };
+  });
+};
+
+const getPredictionRates = (predictionStats, matchId) => {
+  const matchStats = predictionStats.find(
+    (stat) => String(stat.match_id) === String(matchId),
+  );
+
+  return {
+    awayRate: Number(matchStats?.away_rate ?? 50),
+    homeRate: Number(matchStats?.home_rate ?? 50),
+    participants: Number(matchStats?.participant_count ?? 0),
+  };
+};
+
+const normalizePredictionHistory = (
+  predictions,
+  predictionStats,
+  currentTime,
+) =>
+  predictions
+    .map((prediction) => {
+      const match = prediction.matches;
+
+      if (!match) {
+        return null;
+      }
+
+      const sport = match.sport;
+      const homeTeamCode = normalizeTeamCode(match.home_team_code);
+      const awayTeamCode = normalizeTeamCode(match.away_team_code);
+      const selectedTeamCode = normalizeTeamCode(prediction.selected_team_code);
+      const selectedSide =
+        selectedTeamCode === homeTeamCode
+          ? "home"
+          : selectedTeamCode === awayTeamCode
+            ? "away"
+            : "";
+      const homeTeam = getTeamInfo(homeTeamCode, sport);
+      const awayTeam = getTeamInfo(awayTeamCode, sport);
+      const selectedTeam =
+        selectedSide === "home"
+          ? homeTeam
+          : selectedSide === "away"
+            ? awayTeam
+            : getTeamInfo(selectedTeamCode, sport);
+      const { awayScore, homeScore } = parseScore(match.score);
+      const hasScore =
+        ["live", "finished"].includes(match.status) &&
+        homeScore !== null &&
+        awayScore !== null;
+      const matchTime = match.match_time?.slice(0, 5) ?? "미정";
+      const beginAt = createMatchBeginAt(match.match_date, matchTime);
+      const rates = getPredictionRates(predictionStats, prediction.match_id);
+
+      return {
+        id: `${prediction.match_id}-${selectedTeamCode}`,
+        matchId: prediction.match_id,
+        dateLabel: formatMatchDate(match.match_date),
+        time: matchTime,
+        sportLabel: SPORT_LABELS[sport] ?? sport?.toUpperCase() ?? "",
+        league: match.league ?? "",
+        result: prediction.result ?? "pending",
+        resultLabel: RESULT_LABELS[prediction.result] ?? "예측진행중",
+        selectedSide,
+        selectedTeam,
+        homeTeam,
+        awayTeam,
+        beginAt,
+        canChange:
+          match.status === "scheduled" &&
+          canChangePredictionByBeginAt(beginAt, currentTime),
+        ...rates,
+        scoreText: hasScore ? `${homeScore} : ${awayScore}` : "VS",
+        status: match.status,
+      };
+    })
+    .filter(Boolean);
 
 const FavoriteTeamLogo = ({ team }) => {
   const [hasError, setHasError] = useState(false);
@@ -118,14 +357,26 @@ const MyPage = () => {
 
   const [userInfo, setUserInfo] = useState(INITIAL_USER_INFO);
   const [favoriteTeamIds, setFavoriteTeamIds] = useState([]);
+  const [predictionRecords, setPredictionRecords] = useState([]);
+  const [matchPredictionStats, setMatchPredictionStats] = useState([]);
+  const [predictionError, setPredictionError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [favoriteTeamsPage, setFavoriteTeamsPage] = useState(0);
+  const [historyPage, setHistoryPage] = useState(0);
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
 
   const [isEditingNickname, setIsEditingNickname] = useState(false);
   const [nicknameInput, setNicknameInput] = useState("");
   const [isSavingNickname, setIsSavingNickname] = useState(false);
 
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Date.now()), 30_000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -158,7 +409,21 @@ const MyPage = () => {
           joinedAt: formatJoinedDate(user.created_at),
           avatarUrl: user.user_metadata?.avatar_url || "",
         };
-        const nextFavoriteTeamIds = await fetchFavoriteTeamIds(user.id);
+        let nextPredictionError = "";
+
+        const [nextFavoriteTeamIds, nextPredictionRecords, nextPredictionStats] =
+          await Promise.all([
+            fetchFavoriteTeamIds(user.id),
+            fetchMyPredictions(user.id).catch((error) => {
+              console.error("예측 기록 조회 오류:", error);
+              nextPredictionError = "승부예측 정보를 불러오지 못했습니다.";
+              return [];
+            }),
+            fetchMatchPredictionStats().catch((error) => {
+              console.error("예측률 조회 오류:", error);
+              return [];
+            }),
+          ]);
 
         if (!isMounted) {
           return;
@@ -166,6 +431,9 @@ const MyPage = () => {
 
         setUserInfo(nextUserInfo);
         setFavoriteTeamIds(nextFavoriteTeamIds);
+        setPredictionRecords(nextPredictionRecords);
+        setMatchPredictionStats(nextPredictionStats);
+        setPredictionError(nextPredictionError);
       } catch (error) {
         console.error("회원 정보 조회 오류:", error);
 
@@ -396,20 +664,17 @@ const MyPage = () => {
   };
 
   if (isLoading) {
-    return (
-      <main className={styles.myPage}>
-        <div className="container">
-          <p className={styles.stateMessage}>회원 정보를 불러오는 중입니다.</p>
-        </div>
-      </main>
-    );
+    return <MyPageSkeleton />;
   }
 
   if (loadError) {
     return (
       <main className={styles.myPage}>
         <div className="container">
-          <p className={styles.stateMessage}>{loadError}</p>
+          <EmptyState
+            title={loadError}
+            description="로그인 상태와 Supabase 연결 상태를 확인해 주세요."
+          />
         </div>
       </main>
     );
@@ -418,38 +683,13 @@ const MyPage = () => {
   const profileInitial =
     userInfo.nickname.trim().charAt(0).toUpperCase() || "F";
 
-  const predictionSummary = {
-    total: 0,
-    correct: 0,
-    incorrect: 0,
-    accuracy: 0,
-  };
-
-  const sportStatistics = [
-    {
-      sport: "soccer",
-      total: 0,
-      correct: 0,
-      accuracy: 0,
-    },
-    {
-      sport: "baseball",
-      total: 0,
-      correct: 0,
-      accuracy: 0,
-    },
-    {
-      sport: "esports",
-      total: 0,
-      correct: 0,
-      accuracy: 0,
-    },
-  ];
+  const predictionSummary = createSettledPredictionSummary(predictionRecords);
+  const sportStatistics = createSportStatistics(predictionRecords);
 
   const predictionStats = [
     {
       id: "total",
-      label: "TOTAL PICKS",
+      label: "SETTLED PICKS",
       value: predictionSummary.total,
       unit: "회",
     },
@@ -474,11 +714,56 @@ const MyPage = () => {
   ];
 
   const favoriteTeams = getTeamsByIds(favoriteTeamIds);
+  const favoriteTeamsPageCount = Math.ceil(
+    favoriteTeams.length / FAVORITE_TEAMS_PAGE_SIZE,
+  );
+  const safeFavoriteTeamsPage =
+    favoriteTeamsPageCount === 0
+      ? 0
+      : Math.min(favoriteTeamsPage, favoriteTeamsPageCount - 1);
+  const visibleFavoriteTeams = favoriteTeams.slice(
+    safeFavoriteTeamsPage * FAVORITE_TEAMS_PAGE_SIZE,
+    (safeFavoriteTeamsPage + 1) * FAVORITE_TEAMS_PAGE_SIZE,
+  );
+  const predictionHistory = normalizePredictionHistory(
+    predictionRecords,
+    matchPredictionStats,
+    currentTime,
+  );
+  const historyPageCount = Math.ceil(
+    predictionHistory.length / PICK_HISTORY_PAGE_SIZE,
+  );
+  const safeHistoryPage =
+    historyPageCount === 0 ? 0 : Math.min(historyPage, historyPageCount - 1);
+  const visiblePredictionHistory = predictionHistory.slice(
+    safeHistoryPage * PICK_HISTORY_PAGE_SIZE,
+    (safeHistoryPage + 1) * PICK_HISTORY_PAGE_SIZE,
+  );
+
+  const handlePreviousFavoriteTeamsPage = () => {
+    setFavoriteTeamsPage(Math.max(safeFavoriteTeamsPage - 1, 0));
+  };
+
+  const handleNextFavoriteTeamsPage = () => {
+    setFavoriteTeamsPage(
+      Math.min(safeFavoriteTeamsPage + 1, favoriteTeamsPageCount - 1),
+    );
+  };
+
+  const handlePreviousHistoryPage = () => {
+    setHistoryPage(Math.max(safeHistoryPage - 1, 0));
+  };
+
+  const handleNextHistoryPage = () => {
+    setHistoryPage(Math.min(safeHistoryPage + 1, historyPageCount - 1));
+  };
 
   return (
     <main className={styles.myPage}>
       <div className={`container ${styles.inner}`}>
         <header className={styles.pageHeader}>
+          <p className={styles.eyebrow}>FANPICK ACCOUNT</p>
+
           <h1 className={styles.pageTitle}>MY PAGE</h1>
 
           <p className={styles.pageDescription}>
@@ -581,31 +866,38 @@ const MyPage = () => {
 
           <div className={styles.profileBadges}>
             {sportStatistics.map((statistic) => {
-              const sportInfo = SPORT_BADGE_INFO[statistic.sport];
-
-              const badgeTitle = getBadgeTitle(
+              const badgeMeta = getPredictionBadgeMeta(
                 statistic.sport,
                 statistic.total,
                 statistic.accuracy,
               );
+              const SportIcon = badgeMeta.SportIcon;
+              const TierIcon = badgeMeta.TierIcon;
 
               return (
                 <article
                   key={statistic.sport}
                   className={styles.profileBadge}
-                  aria-label={`${sportInfo.koreanName} 배지 ${badgeTitle}`}
+                  aria-label={`${badgeMeta.sportName} ${badgeMeta.tierLabel} 배지 ${badgeMeta.name}`}
                 >
-                  <span className={styles.profileBadgeIcon} aria-hidden="true">
-                    {sportInfo.icon}
+                  <span
+                    className={styles.profileBadgeIcon}
+                    data-tier={badgeMeta.tier}
+                    aria-hidden="true"
+                  >
+                    <SportIcon />
+                    <span className={styles.profileBadgeTierIcon}>
+                      <TierIcon />
+                    </span>
                   </span>
 
                   <div>
                     <span className={styles.profileBadgeSport}>
-                      {sportInfo.label}
+                      {badgeMeta.sportLabel}
                     </span>
 
                     <strong className={styles.profileBadgeTitle}>
-                      {badgeTitle}
+                      {badgeMeta.name}
                     </strong>
 
                     <span className={styles.profileBadgeAccuracy}>
@@ -616,67 +908,6 @@ const MyPage = () => {
               );
             })}
           </div>
-        </section>
-
-        <section
-          className={styles.favoriteTeamsSection}
-          aria-labelledby="favorite-teams-title"
-        >
-          <div className={styles.sectionHeader}>
-            <h2 id="favorite-teams-title" className={styles.sectionTitle}>
-              FAVORITE TEAMS
-            </h2>
-
-            <p className={styles.sectionDescription}>
-              Teams 페이지에서 관심을 누른 팀들이 여기에 모입니다.
-            </p>
-          </div>
-
-          {favoriteTeams.length > 0 ? (
-            <div className={styles.favoriteTeamsGrid}>
-              {favoriteTeams.map((team) => (
-                <Link
-                  key={team.id}
-                  className={styles.favoriteTeamCard}
-                  to={`/teams/${team.id}`}
-                >
-                  <div className={styles.favoriteTeamLogoBox}>
-                    <FavoriteTeamLogo team={team} />
-                  </div>
-
-                  <div className={styles.favoriteTeamInfo}>
-                    <span className={styles.favoriteTeamLeague}>
-                      {TEAM_LEAGUE_LABELS[team.league]} · {team.home}
-                    </span>
-
-                    <strong className={styles.favoriteTeamName}>
-                      {team.name}
-                    </strong>
-
-                    <p className={styles.favoriteTeamTone}>{team.tone}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className={styles.emptyFavoriteTeams}>
-              <strong className={styles.emptyTitle}>
-                아직 저장한 관심 팀이 없습니다.
-              </strong>
-
-              <p className={styles.emptyDescription}>
-                KBO, K리그, LCK 팀을 둘러보고 마음이 가는 팀을 저장해 보세요.
-              </p>
-
-              <button
-                type="button"
-                className={styles.moveButton}
-                onClick={() => navigate("/teams")}
-              >
-                관심 팀 찾기
-              </button>
-            </div>
-          )}
         </section>
 
         <section
@@ -712,36 +943,214 @@ const MyPage = () => {
         </section>
 
         <section
+          className={styles.favoriteTeamsSection}
+          aria-labelledby="favorite-teams-title"
+        >
+          <div className={styles.sectionHeaderWithNavigation}>
+            <div className={styles.sectionHeader}>
+              <h2 id="favorite-teams-title" className={styles.sectionTitle}>
+                FAVORITE TEAMS
+              </h2>
+
+              <p className={styles.sectionDescription}>
+                Teams 페이지에서 관심을 누른 팀들이 여기에 모입니다.
+              </p>
+            </div>
+
+            {favoriteTeamsPageCount > 1 && (
+              <PaginationControls
+                ariaLabel="관심 팀 페이지 이동"
+                className={styles.sectionNavigation}
+                currentPage={safeFavoriteTeamsPage}
+                nextLabel="다음 관심 팀 보기"
+                onNext={handleNextFavoriteTeamsPage}
+                onPrevious={handlePreviousFavoriteTeamsPage}
+                previousLabel="이전 관심 팀 보기"
+                totalPages={favoriteTeamsPageCount}
+              />
+            )}
+          </div>
+
+          {favoriteTeams.length > 0 ? (
+            <div className={styles.favoriteTeamsGrid}>
+              {visibleFavoriteTeams.map((team) => (
+                <Link
+                  key={team.id}
+                  className={styles.favoriteTeamCard}
+                  to={`/teams/${team.id}`}
+                >
+                  <div className={styles.favoriteTeamLogoBox}>
+                    <FavoriteTeamLogo team={team} />
+                  </div>
+
+                  <div className={styles.favoriteTeamInfo}>
+                    <span className={styles.favoriteTeamLeague}>
+                      {TEAM_LEAGUE_LABELS[team.league]} · {team.home}
+                    </span>
+
+                    <strong className={styles.favoriteTeamName}>
+                      {team.name}
+                    </strong>
+
+                    <p className={styles.favoriteTeamTone}>{team.tone}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              title="아직 저장한 관심 팀이 없습니다."
+              description="KBO, K리그, LCK 팀을 둘러보고 마음이 가는 팀을 저장해 보세요."
+              action={
+                <Button size="lg" to="/teams">
+                  관심 팀 찾기
+                </Button>
+              }
+            />
+          )}
+        </section>
+
+        <section
           className={styles.historySection}
           aria-labelledby="prediction-history-title"
         >
-          <div className={styles.sectionHeader}>
-            <h2 id="prediction-history-title" className={styles.sectionTitle}>
-              PICK HISTORY
-            </h2>
+          <div className={styles.sectionHeaderWithNavigation}>
+            <div className={styles.sectionHeader}>
+              <h2 id="prediction-history-title" className={styles.sectionTitle}>
+                PICK HISTORY
+              </h2>
 
-            <p className={styles.sectionDescription}>
-              최근 참여한 승부예측을 확인할 수 있습니다.
-            </p>
+              <p className={styles.sectionDescription}>
+                참여한 승부예측을 확인할 수 있습니다.
+              </p>
+            </div>
+
+            {historyPageCount > 1 && (
+              <PaginationControls
+                ariaLabel="승부예측 기록 페이지 이동"
+                className={styles.sectionNavigation}
+                currentPage={safeHistoryPage}
+                nextLabel="다음 승부예측 기록 보기"
+                onNext={handleNextHistoryPage}
+                onPrevious={handlePreviousHistoryPage}
+                previousLabel="이전 승부예측 기록 보기"
+                totalPages={historyPageCount}
+              />
+            )}
           </div>
 
-          <div className={styles.emptyHistory}>
-            <strong className={styles.emptyTitle}>
-              아직 참여한 승부예측이 없습니다.
-            </strong>
+          {predictionError ? (
+            <EmptyState
+              title={predictionError}
+              description="잠시 후 다시 시도해 주세요."
+            />
+          ) : predictionHistory.length > 0 ? (
+            <div className={styles.historyList}>
+              {visiblePredictionHistory.map((prediction) => (
+                <article
+                  key={prediction.id}
+                  className={styles.historyCard}
+                >
+                  <div className={styles.historyMeta}>
+                    <span>
+                      {prediction.sportLabel} · {prediction.league}
+                    </span>
 
-            <p className={styles.emptyDescription}>
-              경기의 승리 팀을 선택하고 첫 번째 예측에 참여해 보세요.
-            </p>
+                    <strong
+                      className={styles.historyResult}
+                      data-result={prediction.result}
+                    >
+                      {prediction.resultLabel}
+                    </strong>
+                  </div>
 
-            <button
-              type="button"
-              className={styles.moveButton}
-              onClick={() => navigate("/prediction")}
-            >
-              승부예측 참여하기
-            </button>
-          </div>
+                  <div className={styles.historyDate}>
+                    <strong>{prediction.dateLabel}</strong>
+                    <span>{prediction.time}</span>
+                  </div>
+
+                  <div className={styles.historyTeams}>
+                    <span
+                      className={`${styles.historyTeam} ${
+                        prediction.selectedSide === "home"
+                          ? styles.historyPick
+                          : ""
+                      }`}
+                    >
+                      {prediction.homeTeam.name}
+                    </span>
+
+                    <strong className={styles.historyScore}>
+                      {prediction.scoreText}
+                    </strong>
+
+                    <span
+                      className={`${styles.historyTeam} ${
+                        prediction.selectedSide === "away"
+                          ? styles.historyPick
+                          : ""
+                      }`}
+                    >
+                      {prediction.awayTeam.name}
+                    </span>
+                  </div>
+
+                  <div className={styles.historyPrediction}>
+                    <div className={styles.historyPredictionLabels}>
+                      <span>
+                        {prediction.homeTeam.name}
+                        <strong>{prediction.homeRate}%</strong>
+                      </span>
+
+                      <span>
+                        <strong>{prediction.awayRate}%</strong>
+                        {prediction.awayTeam.name}
+                      </span>
+                    </div>
+
+                    <div className={styles.historyPredictionBar}>
+                      <span
+                        className={styles.historyHomePredictionBar}
+                        style={{ width: `${prediction.homeRate}%` }}
+                      />
+
+                      <span
+                        className={styles.historyAwayPredictionBar}
+                        style={{ width: `${prediction.awayRate}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.historyFooter}>
+                    <p className={styles.historySelectedTeam}>
+                      내 선택 {prediction.selectedTeam.name} ·{" "}
+                      {prediction.participants.toLocaleString()}명 참여
+                    </p>
+
+                    <Button
+                      className={styles.historyChangeButton}
+                      disabled={!prediction.canChange}
+                      size="sm"
+                      to={createPredictionPath({ matchId: prediction.matchId })}
+                      variant="outline"
+                    >
+                      {prediction.canChange ? "투표 변경" : "변경 마감"}
+                    </Button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              title="아직 참여한 승부예측이 없습니다."
+              description="경기의 승리 팀을 선택하고 첫 번째 예측에 참여해 보세요."
+              action={
+                <Button size="lg" to="/prediction">
+                  승부예측 참여하기
+                </Button>
+              }
+            />
+          )}
         </section>
       </div>
     </main>
