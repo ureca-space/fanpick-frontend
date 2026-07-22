@@ -10,6 +10,7 @@ export const RESULT_LABELS = {
   pending: "예측진행중",
   correct: "예측성공",
   incorrect: "예측실패",
+  cancelled: "경기취소",
   void: "무승부",
 };
 
@@ -19,20 +20,4 @@ export const RESULT_STYLES = {
   correct: "correct",
   incorrect: "incorrect",
   void: "finished",
-};
-
-// - Supabase에 저장된 결과로 전체 예측 횟수와 성공률 계산
-export const getPredictionStats = (predictions, predictionResults) => {
-  const results = Object.values(predictionResults);
-  const finishedResults = results.filter((result) =>
-    ["correct", "incorrect"].includes(result),
-  );
-  const correctCount = results.filter((result) => result === "correct").length;
-
-  return {
-    predictionCount: Object.keys(predictions).length,
-    successRate: finishedResults.length
-      ? Math.round((correctCount / finishedResults.length) * 100)
-      : 0,
-  };
 };

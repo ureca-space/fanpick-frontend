@@ -200,7 +200,6 @@ const normalizeSupabaseMatch = (match) => {
   return {
     id: `match-${match.id}`,
     databaseId: match.id,
-    sourceId: match.external_id,
     dateKey: match.match_date,
     beginAt: `${match.match_date}T${time === "--:--" ? "00:00" : time}:00+09:00`,
     sport,
@@ -226,7 +225,6 @@ const fetchPredictionMatches = async (startDate, endDate) => {
     .select(
       `
         id,
-        external_id,
         sport,
         league,
         match_date,
@@ -248,7 +246,6 @@ const fetchPredictionMatches = async (startDate, endDate) => {
   return (data ?? [])
     .filter(
       (match) =>
-        match.external_id &&
         match.match_date &&
         match.home_team_code &&
         match.away_team_code,
@@ -295,6 +292,14 @@ const PredictionPage = () => {
   const [predictionResults, setPredictionResults] = useState({});
   const [sportStats, setSportStats] = useState([]);
   const [savingMatchId, setSavingMatchId] = useState(null);
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  // - 경기 시작 시간이 되면 서버 갱신을 기다리지 않고 화면을 바로 변경
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Date.now()), 1_000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   // - 페이지 진입 및 탭 이동 시 Supabase에서 최신 통계 조회
   useEffect(() => {
@@ -438,7 +443,13 @@ const PredictionPage = () => {
       return;
     }
 
-    if (predictions[match.id] || savingMatchId === match.id) return;
+    if (
+      predictions[match.id] ||
+      savingMatchId === match.id ||
+      Date.now() >= new Date(match.beginAt).getTime()
+    ) {
+      return;
+    }
 
     const selectedTeamCode =
       selection === "home" ? match.homeTeam.id : match.awayTeam.id;
@@ -503,13 +514,27 @@ const PredictionPage = () => {
   // - 선택한 날짜, 종목, 탭에 맞는 경기만 표시
   const filteredMatches = useMemo(
     () =>
-      matches.filter(
-        (match) =>
-          match.dateKey === selectedDate &&
-          (activeFilter === "all" || match.sport === activeFilter) &&
-          (activeTab === "today" || predictions[match.id]),
-      ),
-    [matches, selectedDate, activeFilter, activeTab, predictions],
+      matches
+        .filter(
+          (match) =>
+            match.dateKey === selectedDate &&
+            (activeFilter === "all" || match.sport === activeFilter) &&
+            (activeTab === "today" || predictions[match.id]),
+        )
+        .map((match) => ({
+          ...match,
+          // - DB가 scheduled여도 경기 시작 시각이 지나면 예측 마감
+          isFinished:
+            match.isFinished || currentTime >= new Date(match.beginAt).getTime(),
+        })),
+    [
+      matches,
+      selectedDate,
+      activeFilter,
+      activeTab,
+      predictions,
+      currentTime,
+    ],
   );
 
   const handleMoveWeek = (weekAmount) => {
