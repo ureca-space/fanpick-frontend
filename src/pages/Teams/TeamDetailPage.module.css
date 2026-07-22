@@ -138,57 +138,8 @@
   padding-top: 30px;
 }
 
-.favoriteButton,
-.scheduleLink {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.heroActionButton {
   min-width: 158px;
-  height: 48px;
-  padding: 0 20px;
-  border-radius: 6px;
-  font-weight: 800;
-}
-
-.favoriteButton {
-  color: var(--color-text-white);
-  background-color: var(--color-accent);
-  transition:
-    background-color 0.2s ease,
-    opacity 0.2s ease;
-}
-
-.favoriteButton:hover {
-  background-color: var(--color-accent-hover);
-}
-
-.favoriteButton:disabled {
-  cursor: wait;
-  opacity: 0.68;
-}
-
-.favoriteButtonActive {
-  background-color: rgb(255 255 255 / 10%);
-}
-
-.favoriteButtonActive:hover {
-  background-color: rgb(255 255 255 / 16%);
-}
-
-.scheduleLink {
-  border: 1px solid rgb(255 255 255 / 18%);
-  color: rgb(255 255 255 / 78%);
-  background-color: transparent;
-  transition:
-    border-color 0.2s ease,
-    color 0.2s ease,
-    background-color 0.2s ease;
-}
-
-.scheduleLink:hover {
-  border-color: var(--color-text-white);
-  color: var(--color-surface-dark);
-  background-color: var(--color-text-white);
 }
 
 .ratingSummary {
@@ -408,6 +359,12 @@
   text-align: center;
 }
 
+.matchTeams > .matchScore {
+  color: var(--color-text-white);
+  font-size: 15px;
+  font-weight: 900;
+}
+
 .matchLogo,
 .matchLogoFallback {
   width: 42px;
@@ -446,6 +403,39 @@
   margin-top: auto;
 }
 
+.matchMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.matchMeta .matchLeague {
+  margin-top: 0;
+}
+
+.matchAction {
+  margin-top: 2px;
+}
+
+.matchStatus {
+  padding: 4px 7px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 999px;
+  color: rgb(255 255 255 / 66%);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.matchStatusLive {
+  border-color: transparent;
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+}
+
 .stateMessage {
   padding: 56px 16px;
   color: rgb(255 255 255 / 54%);
@@ -455,32 +445,63 @@
 
 .ratingList {
   display: grid;
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
 }
 
 .ratingRow {
-  display: grid;
-  grid-template-columns: 108px minmax(0, 1fr) 24px;
-  gap: 14px;
-  align-items: center;
+  display: flex;
+  min-width: 0;
+  min-height: 82px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 8px;
+  background-color: rgb(255 255 255 / 4%);
 }
 
-.ratingRow span,
-.ratingRow strong {
+.ratingMeta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ratingMeta span {
+  min-width: 0;
   color: rgb(255 255 255 / 68%);
   font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
-.ratingRow strong {
+.ratingMeta strong {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  min-width: 40px;
   color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1;
   text-align: right;
+}
+
+.ratingMeta small {
+  margin-left: 2px;
+  color: rgb(255 255 255 / 42%);
+  font-family: var(--font-korean);
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .ratingTrack {
   overflow: hidden;
   height: 8px;
   border-radius: 999px;
-  background-color: rgb(255 255 255 / 12%);
+  background-color: rgb(255 255 255 / 11%);
 }
 
 .ratingTrack span {
@@ -490,9 +511,7 @@
   background-color: var(--color-accent);
 }
 
-.backLink:focus-visible,
-.favoriteButton:focus-visible,
-.scheduleLink:focus-visible {
+.backLink:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 4px;
 }
@@ -578,13 +597,11 @@
     flex-direction: column;
   }
 
-  .favoriteButton,
-  .scheduleLink {
+  .heroActionButton {
     width: 100%;
   }
 
-  .ratingRow {
-    grid-template-columns: 92px minmax(0, 1fr) 22px;
-    gap: 10px;
+  .ratingList {
+    grid-template-columns: 1fr;
   }
 }

@@ -3,6 +3,7 @@ import CalendarFilter from "./components/CalendarFilter/CalendarFilter";
 import CalendarGrid from "./components/CalendarGrid/CalendarGrid";
 import CalendarHeader from "./components/CalendarHeader/CalendarHeader";
 import { fetchKBOSchedule } from "./api/getSportSchedule";
+import { getTeamInfo } from "../../constants/teamInfo";
 import css from "./CalendarPage.module.css";
 
 const SPORT_OPTIONS = [
@@ -10,8 +11,6 @@ const SPORT_OPTIONS = [
   { label: "SOCCER", value: "soccer" },
   { label: "LOL", value: "lol" },
 ];
-
-const SUPPORTED_SPORTS = new Set(["baseball", "soccer", "lol"]);
 
 const BASEBALL_TEAM_OPTIONS = [
   { code: "DOOSAN", name: "두산 베어스", shortName: "DOOSAN" },
@@ -66,6 +65,45 @@ const addTeamLogo = (team) => ({
   logo: team.logo || TEAM_LOGOS[team.code] || "",
 });
 
+const SOCCER_TEAM_CODES = [
+  "K01",
+  "K02",
+  "K03",
+  "K04",
+  "K05",
+  "K06",
+  "K07",
+  "K08",
+  "K09",
+  "K10",
+  "K17",
+  "K18",
+  "K20",
+  "K21",
+  "K22",
+  "K26",
+  "K27",
+  "K29",
+  "K31",
+  "K32",
+  "K34",
+  "K35",
+  "K36",
+  "K37",
+  "K38",
+  "K39",
+  "K40",
+  "K41",
+  "K42",
+];
+
+const SOCCER_TEAM_OPTIONS = SOCCER_TEAM_CODES.map((code) => ({
+  code,
+  ...getTeamInfo(code, "soccer"),
+}));
+
+const SUPPORTED_SPORTS = new Set(["baseball", "soccer", "lol"]);
+
 const getMonthRange = (date) => {
   const year = date.getFullYear();
   const month = date.getMonth();
@@ -106,12 +144,7 @@ const isMatchingTeam = (team, selectedTeamCode) => {
   }
 
   const target = normalizeTeamValue(selectedTeamCode);
-  const teamValues = [
-    team.code,
-    team.shortName,
-    team.name,
-    team.alias,
-  ]
+  const teamValues = [team.code, team.shortName, team.name, team.alias]
     .filter(Boolean)
     .map(normalizeTeamValue);
 
@@ -147,18 +180,12 @@ const CalendarPage = () => {
   const month = currentMonth.getMonth();
   const isSupportedSport = SUPPORTED_SPORTS.has(selectedSport);
 
-  useEffect(() => {
+  const handleSelectSport = (sport) => {
+    setSelectedSport(sport);
     setSelectedTeamCode("all");
-  }, [selectedSport]);
+  };
 
   useEffect(() => {
-    if (!isSupportedSport) {
-      setMatches([]);
-      setLoading(false);
-      setError("");
-      return;
-    }
-
     const controller = new AbortController();
 
     const loadSchedule = async () => {
@@ -171,6 +198,10 @@ const CalendarPage = () => {
           ...getMonthRange(currentMonth),
           signal: controller.signal,
         });
+
+        if (controller.signal.aborted) {
+          return;
+        }
 
         setMatches(nextMatches);
       } catch (fetchError) {
@@ -193,7 +224,9 @@ const CalendarPage = () => {
   }, [currentMonth, isSupportedSport, selectedSport]);
 
   const visibleMatches = useMemo(() => {
-    const sportMatches = matches.filter((match) => match.sport === selectedSport);
+    const sportMatches = matches.filter(
+      (match) => match.sport === selectedSport,
+    );
 
     if (!isSupportedSport || selectedTeamCode === "all") {
       return sportMatches;
@@ -211,7 +244,9 @@ const CalendarPage = () => {
       return [];
     }
 
-    const sportMatches = matches.filter((match) => match.sport === selectedSport);
+    const sportMatches = matches.filter(
+      (match) => match.sport === selectedSport,
+    );
 
     if (selectedSport === "baseball") {
       const teamsFromMatches = getUniqueTeams(sportMatches);
@@ -231,6 +266,16 @@ const CalendarPage = () => {
       }
 
       return LOL_TEAM_OPTIONS.map(addTeamLogo);
+    }
+
+    if (selectedSport === "soccer") {
+      const teamsFromMatches = getUniqueTeams(sportMatches);
+
+      if (teamsFromMatches.length > 0) {
+        return teamsFromMatches.map(addTeamLogo);
+      }
+
+      return SOCCER_TEAM_OPTIONS.map(addTeamLogo);
     }
 
     return getUniqueTeams(sportMatches).map(addTeamLogo);
@@ -273,7 +318,7 @@ const CalendarPage = () => {
           <button
             key={sport.value}
             type="button"
-            onClick={() => setSelectedSport(sport.value)}
+            onClick={() => handleSelectSport(sport.value)}
             className={
               selectedSport === sport.value
                 ? css.sportButtonActive
@@ -297,7 +342,9 @@ const CalendarPage = () => {
         formatMatchLabel={formatMatchLabel}
       />
 
-      {loading ? <p className={css.statusMessage}>Loading schedule...</p> : null}
+      {loading ? (
+        <p className={css.statusMessage}>Loading schedule...</p>
+      ) : null}
       {error ? <p className={css.statusMessageError}>{error}</p> : null}
 
       <CalendarHeader

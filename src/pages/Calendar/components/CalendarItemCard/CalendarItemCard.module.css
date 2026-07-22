@@ -123,7 +123,7 @@
   }
 
   .teamName {
-    max-width: 48px;
+    display: none;
   }
 }
 
@@ -142,10 +142,6 @@
   .matchupText {
     gap: 6px;
     font-size: 9px;
-  }
-
-  .teamName {
-    display: none;
   }
 
   .teamGroup {

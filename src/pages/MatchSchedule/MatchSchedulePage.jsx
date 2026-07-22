@@ -4,6 +4,7 @@ import MatchCard from "../../components/MatchCard/MatchCard";
 import MatchFilter from "../../components/MatchFilter/MatchFilter";
 import SearchInput from "../../components/SearchInput/SearchInput";
 import { supabase } from "../../lib/supabase";
+import { subscribeToMatchChanges } from "../../services/matchRealtime";
 import styles from "./MatchSchedulePage.module.css";
 
 const FILTERS = [
@@ -460,10 +461,12 @@ const MatchSchedulePage = () => {
   useEffect(() => {
     let isMounted = true;
 
-    const loadMatches = async () => {
+    const loadMatches = async ({ showLoading = true } = {}) => {
       try {
-        setIsLoading(true);
-        setLoadError("");
+        if (showLoading) {
+          setIsLoading(true);
+          setLoadError("");
+        }
 
         const { data, error } = await supabase
           .from("matches")
@@ -513,11 +516,11 @@ const MatchSchedulePage = () => {
       } catch (error) {
         console.error("경기 일정 불러오기 실패", error);
 
-        if (isMounted) {
+        if (isMounted && showLoading) {
           setLoadError("경기 일정을 불러오지 못했습니다.");
         }
       } finally {
-        if (isMounted) {
+        if (isMounted && showLoading) {
           setIsLoading(false);
         }
       }
@@ -525,8 +528,14 @@ const MatchSchedulePage = () => {
 
     loadMatches();
 
+    const unsubscribe = subscribeToMatchChanges({
+      channelName: "match-schedule-matches",
+      onChange: () => loadMatches({ showLoading: false }),
+    });
+
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, []);
 

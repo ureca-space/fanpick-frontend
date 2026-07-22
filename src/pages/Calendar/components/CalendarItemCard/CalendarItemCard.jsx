@@ -38,8 +38,8 @@ const CalendarItemCard = ({ match, onClick }) => {
         <span className={css.matchupSeparator}>vs</span>
 
         <span className={css.teamGroup}>
-          <span className={css.teamName}>{match.awayTeam.name}</span>
           <TeamBadge team={match.awayTeam} />
+          <span className={css.teamName}>{match.awayTeam.name}</span>
         </span>
       </div>
     </button>

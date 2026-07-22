@@ -204,6 +204,15 @@ const getGameStatus = ({ awayScore, homeScore, rowText }) => {
   }
 
   if (awayScore !== null && homeScore !== null) {
+    if (
+      /경기중|진행|라이브|live|playing|in progress|\d+\s*회(?:초|말)/i.test(
+        rowText,
+      ) &&
+      !/종료|final|finished/i.test(rowText)
+    ) {
+      return "live";
+    }
+
     return "finished";
   }
 

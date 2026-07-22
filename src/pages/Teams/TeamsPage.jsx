@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import Button from "../../components/Button/Button";
 import FanPickDialog from "../../components/FanPickDialog/FanPickDialog";
 import MatchFilter from "../../components/MatchFilter/MatchFilter";
 import SearchInput from "../../components/SearchInput/SearchInput";
+import ViewAllLink from "../../components/ViewAllLink/ViewAllLink";
 import useAuth from "../../contexts/useAuth";
 import {
   FAVORITE_TEAMS_CHANGED_EVENT,
@@ -134,16 +136,15 @@ const TeamCard = ({
         </div>
       </button>
 
-      <button
-        type="button"
-        className={`${styles.favoriteButton} ${
-          isFavorite ? styles.favoriteButtonActive : ""
-        }`}
+      <Button
+        className={styles.favoriteButton}
         disabled={isSaving}
+        fullWidth
         onClick={() => onFavoriteClick(team.id)}
+        variant={isFavorite ? "primary" : "ghost"}
       >
         {isSaving ? "저장 중..." : isFavorite ? "관심 팀 해제" : "관심 팀 등록"}
-      </button>
+      </Button>
     </article>
   );
 };
@@ -410,13 +411,7 @@ const TeamsPage = () => {
                     {section.label}
                   </h2>
 
-                  <button
-                    type="button"
-                    className={styles.viewMoreButton}
-                    onClick={() => handleFilterChange(section.id)}
-                  >
-                    VIEW ALL
-                  </button>
+                  <ViewAllLink onClick={() => handleFilterChange(section.id)} />
                 </div>
 
                 {renderTeamGrid(section.teams)}
