@@ -985,8 +985,8 @@
     "gameType": "REGULAR",
     "awayTeam": "NC",
     "homeTeam": "LG",
-    "score": "",
-    "status": "scheduled",
+    "score": "0:0",
+    "status": "finished",
     "broadcast": "",
     "stadium": "잠실",
     "note": ""
@@ -1017,8 +1017,8 @@
     "gameType": "REGULAR",
     "awayTeam": "HANWHA",
     "homeTeam": "KIA",
-    "score": "",
-    "status": "scheduled",
+    "score": "0:0",
+    "status": "finished",
     "broadcast": "",
     "stadium": "광주",
     "note": ""
