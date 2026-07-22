@@ -455,32 +455,63 @@
 
 .ratingList {
   display: grid;
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
 }
 
 .ratingRow {
-  display: grid;
-  grid-template-columns: 108px minmax(0, 1fr) 24px;
-  gap: 14px;
-  align-items: center;
+  display: flex;
+  min-width: 0;
+  min-height: 82px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 8px;
+  background-color: rgb(255 255 255 / 4%);
 }
 
-.ratingRow span,
-.ratingRow strong {
+.ratingMeta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ratingMeta span {
+  min-width: 0;
   color: rgb(255 255 255 / 68%);
   font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
-.ratingRow strong {
+.ratingMeta strong {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  min-width: 40px;
   color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1;
   text-align: right;
+}
+
+.ratingMeta small {
+  margin-left: 2px;
+  color: rgb(255 255 255 / 42%);
+  font-family: var(--font-korean);
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .ratingTrack {
   overflow: hidden;
   height: 8px;
   border-radius: 999px;
-  background-color: rgb(255 255 255 / 12%);
+  background-color: rgb(255 255 255 / 11%);
 }
 
 .ratingTrack span {
@@ -583,8 +614,7 @@
     width: 100%;
   }
 
-  .ratingRow {
-    grid-template-columns: 92px minmax(0, 1fr) 22px;
-    gap: 10px;
+  .ratingList {
+    grid-template-columns: 1fr;
   }
 }

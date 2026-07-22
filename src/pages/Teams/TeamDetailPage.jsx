@@ -413,6 +413,31 @@ const TeamDetailPage = () => {
           </article>
         </section>
 
+        <section className={styles.ratingsSection}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionLabel}>평점</span>
+            <h2>입덕 체크리스트</h2>
+          </div>
+
+          <div className={styles.ratingList}>
+            {sortedRatings.map((rating) => (
+              <div key={rating.label} className={styles.ratingRow}>
+                <div className={styles.ratingMeta}>
+                  <span>{rating.label}</span>
+                  <strong>
+                    {rating.score}
+                    <small>/5</small>
+                  </strong>
+                </div>
+
+                <div className={styles.ratingTrack} aria-hidden="true">
+                  <span style={{ width: `${rating.score * 20}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section className={styles.membersSection}>
           <div className={styles.sectionHeader}>
             <span className={styles.sectionLabel}>멤버</span>
@@ -483,24 +508,6 @@ const TeamDetailPage = () => {
           )}
         </section>
 
-        <section className={styles.ratingsSection}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel}>평점</span>
-            <h2>입덕 체크리스트</h2>
-          </div>
-
-          <div className={styles.ratingList}>
-            {sortedRatings.map((rating) => (
-              <div key={rating.label} className={styles.ratingRow}>
-                <span>{rating.label}</span>
-                <div className={styles.ratingTrack} aria-hidden="true">
-                  <span style={{ width: `${rating.score * 20}%` }} />
-                </div>
-                <strong>{rating.score}</strong>
-              </div>
-            ))}
-          </div>
-        </section>
       </div>
 
       <FanPickDialog
