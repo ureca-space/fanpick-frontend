@@ -1,0 +1,146 @@
+.matchCard {
+  padding: 30px 46px 28px;
+  border: 1px solid #6c6e75;
+  border-radius: 20px;
+}
+
+.matchMeta {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 18px;
+  font-size: 16px;
+}
+
+.matchHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.matchHeading p {
+  font-size: 22px;
+}
+
+.matchHeading span {
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--color-text-white);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.scoreBoard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border: 1px solid #d9d9d9;
+  border-radius: 12px;
+  background: #f5f5f5;
+}
+
+.scoreTeam {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  height: 92px;
+  padding: 0 26px;
+  color: #a3a3a3;
+}
+
+.scoreTeam + .scoreTeam {
+  border-left: 1px solid #b8bbc4;
+}
+
+.scoreTeam span {
+  display: flex;
+  flex-direction: column;
+}
+
+.scoreTeam small {
+  margin-top: 3px;
+  font-size: 12px;
+}
+
+.scoreTeam > b {
+  font-size: 34px;
+}
+
+.awayScore {
+  grid-template-columns: auto 1fr auto;
+  text-align: right;
+}
+
+.awayScore span {
+  align-items: flex-end;
+}
+
+.matchCard > small {
+  display: block;
+  margin-top: 16px;
+  font-size: 11px;
+}
+
+/* - 예측 진행 중 */
+.scoreBoard.waiting {
+  border-color: var(--color-accent);
+}
+
+.scoreBoard.waiting .myPick {
+  color: var(--color-accent);
+}
+
+.matchHeading span.waiting {
+  background: var(--color-accent);
+}
+
+/* - 예측 성공 */
+.scoreBoard.correct {
+  border-color: #3483f7;
+}
+
+.scoreBoard.correct .myPick {
+  color: var(--color-text-white);
+  background: #3483f7;
+}
+
+.matchHeading span.correct {
+  background: #ed40bc;
+}
+
+/* - 예측 실패 */
+.scoreBoard.incorrect,
+.scoreBoard.finished {
+  border-color: #aeb0b6;
+  background: #f5f5f5;
+}
+
+.scoreBoard.incorrect .myPick,
+.scoreBoard.finished .myPick {
+  color: var(--color-text-white);
+  background: #c6c6c6;
+}
+
+.matchHeading span.incorrect,
+.matchHeading span.finished {
+  background: #777b88;
+}
+
+@media (max-width: 700px) {
+  .matchCard {
+    padding: 24px 18px 20px;
+    border-radius: 14px;
+  }
+
+  .scoreTeam {
+    height: 76px;
+    padding: 0 12px;
+  }
+
+  .scoreTeam > b {
+    font-size: 26px;
+  }
+}

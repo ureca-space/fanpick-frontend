@@ -1,0 +1,400 @@
+.page {
+  min-height: 100vh;
+  padding: 112px 0 140px;
+  color: var(--color-text-white);
+  background-color: var(--color-surface-dark);
+}
+
+.inner {
+  max-width: 1100px;
+}
+
+/* - 페이지 제목 */
+.hero {
+  margin-bottom: 92px;
+  text-align: center;
+}
+
+.hero h1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(36px, 4.2vw, 60px);
+  font-weight: 800;
+}
+
+.hero h1 span {
+  display: inline-block;
+  margin: 0 -4px;
+  font-size: 0.78em;
+  transform: rotate(-10deg);
+}
+
+.hero p {
+  margin-top: 16px;
+  color: #adb1bd;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* - 오늘의 경기 / 나의 예측 탭 */
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  height: 100px;
+  margin-bottom: 0;
+  border-radius: 999px;
+  background: #d9d9d9;
+}
+
+.tabs button {
+  color: #a3a3a3;
+  background: transparent;
+  font-size: clamp(20px, 2.5vw, 36px);
+  font-weight: 800;
+}
+
+.tabs .activeTab {
+  border-radius: 999px;
+  color: var(--color-text-white);
+  background: var(--color-accent);
+}
+
+/* - 주간 날짜 선택 */
+.schedulePanel {
+  overflow: hidden;
+  margin-top: 54px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 12px;
+  background-color: #202332;
+}
+
+.scheduleToolbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 78px;
+  padding: 14px 24px;
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+}
+
+.weekController {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrowButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 50%;
+  color: var(--color-text-white);
+  background-color: transparent;
+  font-size: 22px;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.arrowButton:hover {
+  border-color: rgb(255 255 255 / 40%);
+  background-color: rgb(255 255 255 / 7%);
+}
+
+.arrowButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+.weekRange {
+  min-width: 290px;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.currentWeekButton {
+  position: absolute;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 6px;
+  color: rgb(255 255 255 / 80%);
+  background-color: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.currentWeekButton:hover {
+  border-color: var(--color-text-white);
+  color: var(--color-surface-dark);
+  background-color: var(--color-text-white);
+}
+
+.currentWeekButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+.dateScroller {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dateScroller::-webkit-scrollbar {
+  display: none;
+}
+
+.dateList {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(100px, 1fr));
+  min-width: 700px;
+}
+
+.dateButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 116px;
+  border-right: 1px solid rgb(255 255 255 / 7%);
+  color: rgb(255 255 255 / 48%);
+  background-color: transparent;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.dateButton:last-child {
+  border-right: 0;
+}
+
+.dateButton:hover {
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 4%);
+}
+
+.dateButton.active {
+  color: var(--color-text-white);
+  background-color: var(--color-primary-dark);
+}
+
+.dateButton.active::before {
+  position: absolute;
+  top: 0;
+  right: 18px;
+  left: 18px;
+  height: 3px;
+  background-color: var(--color-accent);
+  content: "";
+}
+
+.dateButton:focus-visible {
+  z-index: 1;
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.dayLabel {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dateNumber {
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.matchDot {
+  position: absolute;
+  bottom: 17px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+}
+
+/* - 종목 필터 */
+.filterWrap {
+  margin: 30px 0 48px;
+}
+
+.filterWrap > div {
+  gap: 18px;
+  font-family: inherit;
+}
+
+.filterWrap button {
+  min-width: 108px;
+  height: 48px;
+  border: 0;
+  border-radius: 999px;
+  background: #272b3a;
+  font-size: 16px;
+}
+
+.filterWrap button[aria-pressed="true"] {
+  border: 1px solid var(--color-accent);
+  background: #e27c8b;
+}
+
+/* - 경기 카드 목록 */
+.matchList {
+  display: grid;
+  gap: 34px;
+}
+
+.empty {
+  padding: 80px 0;
+  color: #adb1bd;
+  text-align: center;
+}
+
+/* - 나의 예측 요약 */
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 34px;
+  padding: 28px 46px;
+  border: 1px solid #4b4f60;
+  border-radius: 14px;
+  background: var(--color-surface-card);
+}
+
+.badgeItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badgeItem > span {
+  font-size: 25px;
+}
+
+.badgeItem > strong {
+  font-size: 24px;
+}
+
+.badgeItem p {
+  margin-left: 22px;
+  color: #adb1bd;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.badgeItem p b {
+  color: var(--color-text-white);
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 72px 0 90px;
+  }
+
+  .hero {
+    margin-bottom: 54px;
+  }
+
+  .tabs {
+    height: 64px;
+  }
+
+  .scheduleToolbar {
+    min-height: 68px;
+    padding: 12px 16px;
+  }
+
+  .arrowButton {
+    width: 38px;
+    height: 38px;
+  }
+
+  .weekRange {
+    min-width: 210px;
+    font-size: 13px;
+  }
+
+  .dateList {
+    min-width: 630px;
+  }
+
+  .dateButton {
+    min-height: 104px;
+  }
+
+  .filterWrap {
+    margin-bottom: 30px;
+  }
+
+  .filterWrap button {
+    min-width: 72px;
+    height: 42px;
+    padding: 0 18px;
+  }
+
+  .summary {
+    padding: 22px 18px;
+  }
+
+  .badgeItem > strong {
+    font-size: 20px;
+  }
+
+  .badgeItem p {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .schedulePanel {
+    margin-top: 36px;
+  }
+
+  .currentWeekButton {
+    display: none;
+  }
+
+  .weekRange {
+    min-width: 250px;
+  }
+}
+
+@media (max-width: 700px) {
+  .weekRange {
+    min-width: 210px;
+  }
+}
+
+@media (max-width: 480px) {
+  .weekRange {
+    min-width: 180px;
+    font-size: 12px;
+  }
+
+  .arrowButton {
+    width: 34px;
+    height: 34px;
+    font-size: 19px;
+  }
+}

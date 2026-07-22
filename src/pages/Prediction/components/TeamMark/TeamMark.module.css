@@ -1,0 +1,25 @@
+.teamMark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-text-white);
+  background: var(--color-accent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.teamLogo {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+@media (max-width: 700px) {
+  .teamMark {
+    display: none;
+  }
+}
