@@ -14,6 +14,7 @@ const MatchSchedulePage = lazy(
 );
 const CalendarPage = lazy(() => import("../pages/Calendar/CalendarPage"));
 const PredictionPage = lazy(() => import("../pages/Prediction/PredictionPage"));
+const CommunityPage = lazy(() => import("../pages/Community/CommunityPage"));
 const WorldCupPage = lazy(() => import("../pages/WorldCup/WorldCupPage"));
 const WorldCupPlayPage = lazy(
   () => import("../pages/WorldCupPlay/WorldCupPlayPage"),
@@ -46,6 +47,8 @@ const AppRouter = () => {
             <Route path="/players" element={<Navigate to="/teams" replace />} />
             <Route path="/team-record" element={<TeamRecordPage />} />
             <Route path="/matches" element={<MatchSchedulePage />} />
+            <Route path="/prediction" element={<PredictionPage />} />
+            <Route path="/community" element={<CommunityPage />} />
 
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
@@ -54,7 +57,6 @@ const AppRouter = () => {
 
             {/* 로그인 사용자만 접근 가능 */}
             <Route element={<ProtectedRoute />}>
-              <Route path="/prediction" element={<PredictionPage />} />
               <Route path="/worldcup" element={<WorldCupPage />} />
               <Route path="/worldcup/:id" element={<WorldCupPlayPage />} />
               <Route path="/mypage" element={<MyPage />} />

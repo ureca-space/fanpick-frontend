@@ -9,8 +9,12 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "sync:kbo": "node --env-file=.env.sync scripts/sync-kbo-schedule.mjs",
+    "sync:kbo:standings": "node --env-file=.env.sync scripts/sync-kbo-standings.mjs",
     "sync:kleague": "node --env-file=.env.sync scripts/sync-kleague-schedule.mjs",
-    "sync:lck": "node --env-file=.env.sync scripts/sync-lck-schedule.mjs"
+    "sync:kleague:standings": "node --env-file=.env.sync scripts/sync-kleague-standings.mjs",
+    "sync:lck": "node --env-file=.env.sync scripts/sync-lck-schedule.mjs",
+    "sync:lck:standings": "node --env-file=.env.sync scripts/sync-lck-standings.mjs",
+    "sync:standings": "npm run sync:kbo:standings && npm run sync:kleague:standings && npm run sync:lck:standings"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.2",

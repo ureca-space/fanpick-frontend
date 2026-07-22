@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Button from "../../components/Button/Button";
+import EmptyState from "../../components/EmptyState/EmptyState";
 import FanPickDialog from "../../components/FanPickDialog/FanPickDialog";
 import MatchFilter from "../../components/MatchFilter/MatchFilter";
+import PaginationControls from "../../components/PaginationControls/PaginationControls";
 import SearchInput from "../../components/SearchInput/SearchInput";
 import ViewAllLink from "../../components/ViewAllLink/ViewAllLink";
 import useAuth from "../../contexts/useAuth";
@@ -20,6 +22,7 @@ import {
 import styles from "./TeamsPage.module.css";
 
 const VALID_FILTER_IDS = TEAM_FILTERS.map((filter) => filter.id);
+const TEAMS_PER_PAGE = 8;
 
 const getValidFilter = (filterId) =>
   VALID_FILTER_IDS.includes(filterId) ? filterId : "all";
@@ -161,6 +164,7 @@ const TeamsPage = () => {
   const [savingFavoriteTeamId, setSavingFavoriteTeamId] = useState("");
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const [pendingTeamId, setPendingTeamId] = useState("");
+  const [teamGridPages, setTeamGridPages] = useState({});
 
   const userId = user?.id || "";
   const activeFilter = getValidFilter(searchParams.get("league"));
@@ -241,6 +245,26 @@ const TeamsPage = () => {
   );
 
   const isFavorite = (teamId) => favoriteTeamIds.includes(teamId);
+
+  const getTeamGridPage = (sectionId, totalPages) =>
+    Math.min(teamGridPages[sectionId] || 0, Math.max(totalPages - 1, 0));
+
+  const handleMoveTeamGrid = (sectionId, direction, totalPages) => {
+    const currentPage = getTeamGridPage(sectionId, totalPages);
+    const nextPage = Math.min(
+      Math.max(currentPage + direction, 0),
+      Math.max(totalPages - 1, 0),
+    );
+
+    if (nextPage === currentPage) {
+      return;
+    }
+
+    setTeamGridPages((previousPages) => ({
+      ...previousPages,
+      [sectionId]: nextPage,
+    }));
+  };
 
   const handleFilterChange = (filterId) => {
     const nextFilter = getValidFilter(filterId);
@@ -397,33 +421,63 @@ const TeamsPage = () => {
 
         {activeFilter === "all" && !hasSearchKeyword ? (
           <div className={styles.leagueSections}>
-            {groupedTeams.map((section) => (
-              <section
-                key={section.id}
-                className={styles.leagueSection}
-                aria-labelledby={`${section.id}-teams-title`}
-              >
-                <div className={styles.leagueHeader}>
-                  <h2
-                    id={`${section.id}-teams-title`}
-                    className={styles.leagueTitle}
-                  >
-                    {section.label}
-                  </h2>
+            {groupedTeams.map((section) => {
+              const totalPages = Math.ceil(
+                section.teams.length / TEAMS_PER_PAGE,
+              );
+              const currentPage = getTeamGridPage(section.id, totalPages);
+              const visibleTeams = section.teams.slice(
+                currentPage * TEAMS_PER_PAGE,
+                (currentPage + 1) * TEAMS_PER_PAGE,
+              );
 
-                  <ViewAllLink onClick={() => handleFilterChange(section.id)} />
-                </div>
+              return (
+                <section
+                  key={section.id}
+                  className={styles.leagueSection}
+                  aria-labelledby={`${section.id}-teams-title`}
+                >
+                  <div className={styles.leagueHeader}>
+                    <h2
+                      id={`${section.id}-teams-title`}
+                      className={styles.leagueTitle}
+                    >
+                      {section.label}
+                    </h2>
 
-                {renderTeamGrid(section.teams)}
-              </section>
-            ))}
+                    <ViewAllLink
+                      onClick={() => handleFilterChange(section.id)}
+                    />
+                  </div>
+
+                  <PaginationControls
+                    ariaLabel={`${section.label} 팀 카드 페이지 이동`}
+                    className={styles.leagueNavigation}
+                    currentPage={currentPage}
+                    nextLabel={`${section.label} 다음 팀 페이지 보기`}
+                    onNext={() =>
+                      handleMoveTeamGrid(section.id, 1, totalPages)
+                    }
+                    onPrevious={() =>
+                      handleMoveTeamGrid(section.id, -1, totalPages)
+                    }
+                    previousLabel={`${section.label} 이전 팀 페이지 보기`}
+                    totalPages={totalPages}
+                  />
+
+                  {renderTeamGrid(visibleTeams)}
+                </section>
+              );
+            })}
           </div>
         ) : teamsToRender.length > 0 ? (
           renderTeamGrid(teamsToRender)
         ) : (
-          <p className={styles.emptyMessage}>
-            검색 조건에 맞는 팀이 없습니다.
-          </p>
+          <EmptyState
+            className={styles.emptyMessage}
+            title="검색 조건에 맞는 팀이 없습니다."
+            description="검색어를 바꾸거나 필터를 전체로 변경해 보세요."
+          />
         )}
       </div>
 

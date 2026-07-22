@@ -1,6 +1,6 @@
 .detailPage {
   min-height: 100vh;
-  padding: var(--section-padding) 0 96px;
+  padding: 0 0 96px;
   color: var(--color-text-white);
   background-color: var(--color-surface-dark);
 }
@@ -9,6 +9,8 @@
   display: flex;
   flex-direction: column;
   gap: 46px;
+  padding-top: var(--section-padding);
+  scroll-margin-top: calc(var(--header-height) + 92px);
 }
 
 .backLink {
@@ -67,7 +69,7 @@
   height: 120px;
   border-radius: 50%;
   color: var(--color-text-white);
-  background-color: #393e55;
+  background-color: var(--color-surface-fallback);
   font-family: var(--font-korean);
   font-size: 20px;
   font-weight: 900;
@@ -181,7 +183,10 @@
 .entryPanel,
 .guidePanel,
 .membersSection,
+.predictionResultsSection,
+.resultsSection,
 .scheduleSection,
+.standingsSection,
 .ratingsSection {
   padding: 26px;
   border: 1px solid rgb(255 255 255 / 8%);
@@ -237,10 +242,27 @@
   line-height: 1.2;
 }
 
+.memberHeader {
+  align-items: flex-end;
+  margin-bottom: 18px;
+}
+
+.memberHeaderActions {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .memberGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
   gap: 14px;
+}
+
+.memberNavigation {
+  justify-content: flex-end;
+  margin: 0;
 }
 
 .memberCard {
@@ -257,7 +279,7 @@
   aspect-ratio: 3 / 3.7;
   object-fit: cover;
   object-position: center 18%;
-  background-color: #292d3d;
+  background-color: var(--color-surface-media);
 }
 
 .memberInfo {
@@ -317,6 +339,10 @@
   background-color: rgb(255 255 255 / 4%);
 }
 
+.matchSkeletonCard {
+  pointer-events: none;
+}
+
 .matchDate {
   display: flex;
   align-items: baseline;
@@ -339,7 +365,7 @@
 
 .matchTeams {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 32px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(58px, max-content) minmax(0, 1fr);
   gap: 12px;
   align-items: center;
 }
@@ -353,10 +379,14 @@
 }
 
 .matchTeams > strong {
+  justify-self: center;
   color: rgb(255 255 255 / 45%);
   font-family: var(--font-display);
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
   text-align: center;
+  white-space: nowrap;
 }
 
 .matchTeams > .matchScore {
@@ -382,7 +412,7 @@
   justify-content: center;
   border-radius: 50%;
   color: var(--color-text-white);
-  background-color: #393e55;
+  background-color: var(--color-surface-fallback);
   font-size: 10px;
   font-weight: 900;
 }
@@ -397,6 +427,66 @@
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.matchPrediction {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.predictionLabels {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgb(255 255 255 / 64%);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.predictionLabels span {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 5px;
+}
+
+.predictionLabels span:first-child {
+  justify-content: flex-start;
+}
+
+.predictionLabels span:last-child {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.predictionLabels strong {
+  flex-shrink: 0;
+  color: var(--color-text-white);
+  font-weight: 900;
+}
+
+.predictionBar {
+  display: flex;
+  width: 100%;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background-color: var(--color-prediction-track);
+}
+
+.homePredictionBar,
+.awayPredictionBar {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.homePredictionBar {
+  background-color: var(--color-prediction-home);
+}
+
+.awayPredictionBar {
+  background-color: var(--color-prediction-away);
 }
 
 .matchLeague {
@@ -436,11 +526,219 @@
   background-color: var(--color-accent);
 }
 
-.stateMessage {
-  padding: 56px 16px;
-  color: rgb(255 255 255 / 54%);
-  font-size: 15px;
+.teamResultBadge {
+  padding: 4px 8px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 999px;
+  color: rgb(255 255 255 / 72%);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.teamResultBadge[data-result="win"] {
+  border-color: transparent;
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+}
+
+.teamResultBadge[data-result="loss"] {
+  color: rgb(255 255 255 / 58%);
+  background-color: rgb(255 255 255 / 6%);
+}
+
+.teamResultBadge[data-result="draw"] {
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 12%);
+}
+
+.predictionResultSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background-color: rgb(255 255 255 / 5%);
+}
+
+.predictionResultSummary span {
+  color: rgb(255 255 255 / 64%);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.predictionResultSummary strong {
+  flex-shrink: 0;
+  color: var(--color-text-white);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.standingSummary {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: -6px 0 18px;
+  padding: 18px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background-color: rgb(255 255 255 / 4%);
+}
+
+.standingSummary span {
+  color: var(--color-accent);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.standingSummary strong {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.standingSummary small {
+  color: rgb(255 255 255 / 58%);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.standingSummary em {
+  margin-left: auto;
+  color: rgb(255 255 255 / 42%);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.standingTableWrapper {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.standingTableWrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.standingTable {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+  color: var(--color-text-white);
+}
+
+.standingTable th,
+.standingTable td {
+  padding: 14px 12px;
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+  font-size: 13px;
   text-align: center;
+}
+
+.standingTable th {
+  color: rgb(255 255 255 / 48%);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.standingTable td {
+  color: rgb(255 255 255 / 72%);
+  font-weight: 800;
+}
+
+.standingTable tr[data-active="true"] {
+  background-color: rgb(227 27 54 / 11%);
+}
+
+.standingTable tr[data-active="true"] td {
+  color: var(--color-text-white);
+}
+
+.standingTable th:nth-child(2),
+.standingTable td:nth-child(2) {
+  text-align: left;
+}
+
+.standingTeam {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.standingLogo {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.standingTeam span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.standingSkeleton {
+  display: grid;
+  gap: 10px;
+}
+
+.skeletonStandingRow {
+  height: 48px;
+  border-radius: 8px;
+}
+
+.skeletonMatchDate {
+  width: 72px;
+  height: 30px;
+}
+
+.skeletonMatchTime {
+  width: 74px;
+  height: 14px;
+}
+
+.skeletonMatchLogo {
+  width: 42px;
+  height: 42px;
+}
+
+.skeletonMatchTeamName {
+  width: 70%;
+  height: 13px;
+}
+
+.skeletonMatchVs {
+  width: 24px;
+  height: 12px;
+}
+
+.skeletonPredictionLabel {
+  width: 36%;
+  height: 11px;
+}
+
+.skeletonPredictionBar {
+  height: 7px;
+}
+
+.skeletonMatchLeague {
+  width: 54px;
+  height: 12px;
+}
+
+.skeletonMatchStatus {
+  width: 44px;
+  height: 18px;
+}
+
+.skeletonMatchButton {
+  height: 36px;
+  border-radius: 6px;
 }
 
 .ratingList {
@@ -570,25 +868,68 @@
   }
 
   .matchGrid {
-    grid-template-columns: 1fr;
+    display: flex;
+    gap: 14px;
+    margin: 0 -22px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding: 0 22px 10px;
+    scroll-padding-inline: 22px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .matchGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .matchCard {
+    flex: 0 0 clamp(260px, 84vw, 320px);
+    scroll-snap-align: start;
   }
 
   .memberGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    gap: 14px;
+    margin: 0 -22px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding: 0 22px 10px;
+    scroll-padding-inline: 22px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .memberGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .memberCard {
+    flex: 0 0 clamp(156px, 52vw, 188px);
+    scroll-snap-align: start;
+  }
+
+  .standingSummary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .standingSummary em {
+    margin-left: 0;
   }
 
   .entryPanel,
   .guidePanel,
   .membersSection,
+  .predictionResultsSection,
+  .resultsSection,
   .scheduleSection,
+  .standingsSection,
   .ratingsSection {
     padding: 22px;
-  }
-}
-
-@media (max-width: 380px) {
-  .memberGrid {
-    grid-template-columns: 1fr;
   }
 }
 

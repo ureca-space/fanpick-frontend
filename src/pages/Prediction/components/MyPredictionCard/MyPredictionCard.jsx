@@ -1,3 +1,4 @@
+import Skeleton from "../../../../components/Skeleton/Skeleton";
 import { RESULT_LABELS, RESULT_STYLES, SPORT_ICONS } from "../../predictionUtils";
 import TeamMark from "../TeamMark/TeamMark";
 import styles from "./MyPredictionCard.module.css";
@@ -10,12 +11,17 @@ const MyPredictionCard = ({ match, selection, result = "pending" }) => {
   const awayRate = match.awayRate ?? 50;
   const isAwaySelected = selection === "away";
   const resultStyle = RESULT_STYLES[result] ?? "waiting";
+  const SportIcon = SPORT_ICONS[match.sport];
 
   return (
     <article className={styles.matchCard}>
       <div className={styles.matchMeta}>
         <span>{match.sportLabel}</span>
-        <span>{SPORT_ICONS[match.sport]}</span>
+        {SportIcon && (
+          <span className={styles.sportIcon} aria-hidden="true">
+            <SportIcon />
+          </span>
+        )}
         <strong>{match.league}</strong>
       </div>
 
@@ -55,5 +61,49 @@ const MyPredictionCard = ({ match, selection, result = "pending" }) => {
     </article>
   );
 };
+
+export const MyPredictionCardSkeleton = () => (
+  <article
+    className={`${styles.matchCard} ${styles.skeletonCard}`}
+    aria-label="나의 예측 로딩 중"
+  >
+    <div className={styles.matchMeta}>
+      <Skeleton.Line className={styles.skeletonMetaShort} />
+      <Skeleton.Circle className={styles.skeletonSportIcon} />
+      <Skeleton.Line className={styles.skeletonMetaLong} />
+    </div>
+
+    <div className={styles.matchHeading}>
+      <Skeleton.Line className={styles.skeletonHeading} />
+      <Skeleton.Line className={styles.skeletonStatus} />
+    </div>
+
+    <div className={styles.scoreBoard}>
+      <div className={styles.scoreTeam}>
+        <Skeleton.Circle className={styles.skeletonTeamMark} />
+
+        <span>
+          <Skeleton.Line className={styles.skeletonTeamName} />
+          <Skeleton.Line className={styles.skeletonTeamSubtext} />
+        </span>
+
+        <Skeleton.Line className={styles.skeletonScore} />
+      </div>
+
+      <div className={`${styles.scoreTeam} ${styles.awayScore}`}>
+        <Skeleton.Line className={styles.skeletonScore} />
+
+        <span>
+          <Skeleton.Line className={styles.skeletonTeamName} />
+          <Skeleton.Line className={styles.skeletonTeamSubtext} />
+        </span>
+
+        <Skeleton.Circle className={styles.skeletonTeamMark} />
+      </div>
+    </div>
+
+    <Skeleton.Line className={styles.skeletonParticipants} />
+  </article>
+);
 
 export default MyPredictionCard;
