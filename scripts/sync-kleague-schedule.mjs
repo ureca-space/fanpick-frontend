@@ -225,6 +225,14 @@ const getStatus = ({ match, date, awayScore, homeScore }) => {
     return "scheduled";
   }
 
+  if (
+    /경기중|진행|전반|후반|하프|half|live|playing|in progress/i.test(
+      statusText,
+    )
+  ) {
+    return "live";
+  }
+
   if (String(match.endYn).toUpperCase() === "Y") {
     return "finished";
   }
@@ -312,8 +320,10 @@ const parseKLeagueSchedule = ({ matches, league }) => {
           matchupSequence,
         ].join("-");
 
-    const score =
-      status === "finished" && awayScore !== null && homeScore !== null
+  const score =
+      ["finished", "live"].includes(status) &&
+      awayScore !== null &&
+      homeScore !== null
         ? `${awayScore}:${homeScore}`
         : "";
 

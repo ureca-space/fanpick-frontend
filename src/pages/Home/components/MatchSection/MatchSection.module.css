@@ -20,7 +20,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px 32px;
-  margin: 48px 0 58px;
+  margin: 48px 0 24px;
 }
 
 .headerText {
@@ -46,12 +46,18 @@
   line-height: 42px;
 }
 
-.navigation {
+.navigationControls {
   display: flex;
   grid-area: navigation;
-  flex-shrink: 0;
   align-items: center;
+  justify-self: end;
   gap: 14px;
+}
+
+.viewAllRow {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 22px;
 }
 
 .navigationButton {
@@ -127,7 +133,7 @@
 
   .sectionHeader {
     gap: 6px 12px;
-    margin: 38px 0;
+    margin: 38px 0 18px;
   }
 
   .dateRange {
@@ -135,8 +141,12 @@
     line-height: 36px;
   }
 
-  .navigation {
+  .navigationControls {
     gap: 2px;
+  }
+
+  .viewAllRow {
+    margin-bottom: 16px;
   }
 
   .navigationButton {

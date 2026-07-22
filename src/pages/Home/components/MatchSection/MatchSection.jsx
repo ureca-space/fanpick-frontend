@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import MatchCard from "../../../../components/MatchCard/MatchCard";
 import MatchFilter from "../../../../components/MatchFilter/MatchFilter";
+import ViewAllLink from "../../../../components/ViewAllLink/ViewAllLink";
 import { getTeamInfo } from "../../../../constants/teamInfo";
 import { supabase } from "../../../../lib/supabase";
+import { subscribeToMatchChanges } from "../../../../services/matchRealtime";
 import styles from "./MatchSection.module.css";
 
 const FILTERS = [
@@ -34,6 +36,11 @@ const STADIUM_NAMES = {
 };
 
 const CARDS_PER_PAGE = 4;
+const HOME_MATCH_STATUS_PRIORITY = {
+  live: 0,
+  scheduled: 1,
+  finished: 3,
+};
 
 const padNumber = (number) => String(number).padStart(2, "0");
 
@@ -43,25 +50,6 @@ const createToday = () => {
   today.setHours(12, 0, 0, 0);
 
   return today;
-};
-
-const addDays = (date, amount) => {
-  const nextDate = new Date(date);
-
-  nextDate.setDate(nextDate.getDate() + amount);
-
-  return nextDate;
-};
-
-const getMonday = (date) => {
-  const monday = new Date(date);
-  const currentDay = monday.getDay();
-  const difference = currentDay === 0 ? -6 : 1 - currentDay;
-
-  monday.setDate(monday.getDate() + difference);
-  monday.setHours(12, 0, 0, 0);
-
-  return monday;
 };
 
 const formatDateKey = (date) => {
@@ -78,20 +66,12 @@ const parseDateKey = (dateKey) => {
   return new Date(year, month - 1, day, 12);
 };
 
-const formatDateRange = (startDate, endDate) => {
-  const startText = [
-    startDate.getFullYear(),
-    padNumber(startDate.getMonth() + 1),
-    padNumber(startDate.getDate()),
+const formatDateLabel = (date) => {
+  return [
+    date.getFullYear(),
+    padNumber(date.getMonth() + 1),
+    padNumber(date.getDate()),
   ].join(".");
-
-  const endText = [
-    endDate.getFullYear(),
-    padNumber(endDate.getMonth() + 1),
-    padNumber(endDate.getDate()),
-  ].join(".");
-
-  return `${startText} ~ ${endText}`;
 };
 
 const getStadiumName = (stadium) => {
@@ -134,6 +114,48 @@ const normalizeSupabaseMatch = (match) => {
   };
 };
 
+const getMatchTimeValue = (match) => {
+  const [year, month, day] = match.dateKey.split("-").map(Number);
+  const [hourText, minuteText] = match.time.split(":");
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const matchDateTime = new Date(
+    year,
+    month - 1,
+    day,
+    Number.isFinite(hour) ? hour : 23,
+    Number.isFinite(minute) ? minute : 59,
+  );
+
+  return matchDateTime.getTime();
+};
+
+const getHomeMatchPriority = (match) => {
+  if (match.status !== "scheduled") {
+    return HOME_MATCH_STATUS_PRIORITY[match.status] ?? 2;
+  }
+
+  return getMatchTimeValue(match) >= Date.now() ? 1 : 2;
+};
+
+const sortHomeMatches = (firstMatch, secondMatch) => {
+  const firstPriority = getHomeMatchPriority(firstMatch);
+  const secondPriority = getHomeMatchPriority(secondMatch);
+
+  if (firstPriority !== secondPriority) {
+    return firstPriority - secondPriority;
+  }
+
+  const firstTime = getMatchTimeValue(firstMatch);
+  const secondTime = getMatchTimeValue(secondMatch);
+
+  if (firstPriority === HOME_MATCH_STATUS_PRIORITY.finished) {
+    return secondTime - firstTime;
+  }
+
+  return firstTime - secondTime;
+};
+
 const MatchSection = () => {
   const [matches, setMatches] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
@@ -141,25 +163,25 @@ const MatchSection = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
-  const weekRange = useMemo(() => {
-    const weekStart = getMonday(createToday());
-    const weekEnd = addDays(weekStart, 6);
+  const todayInfo = useMemo(() => {
+    const today = createToday();
 
     return {
-      startDate: weekStart,
-      endDate: weekEnd,
-      startDateKey: formatDateKey(weekStart),
-      endDateKey: formatDateKey(weekEnd),
+      date: today,
+      dateKey: formatDateKey(today),
+      label: formatDateLabel(today),
     };
   }, []);
 
   useEffect(() => {
     let isMounted = true;
 
-    const loadMatches = async () => {
+    const loadMatches = async ({ showLoading = true } = {}) => {
       try {
-        setIsLoading(true);
-        setLoadError("");
+        if (showLoading) {
+          setIsLoading(true);
+          setLoadError("");
+        }
 
         const { data, error } = await supabase
           .from("matches")
@@ -180,8 +202,7 @@ const MatchSection = () => {
               note
             `,
           )
-          .gte("match_date", weekRange.startDateKey)
-          .lte("match_date", weekRange.endDateKey)
+          .eq("match_date", todayInfo.dateKey)
           .in("sport", ["baseball", "soccer", "esports"])
           .order("match_date", {
             ascending: true,
@@ -212,11 +233,11 @@ const MatchSection = () => {
       } catch (error) {
         console.error("홈 경기 일정 불러오기 실패", error);
 
-        if (isMounted) {
+        if (isMounted && showLoading) {
           setLoadError("경기 일정을 불러오지 못했습니다.");
         }
       } finally {
-        if (isMounted) {
+        if (isMounted && showLoading) {
           setIsLoading(false);
         }
       }
@@ -224,15 +245,31 @@ const MatchSection = () => {
 
     loadMatches();
 
+    const unsubscribe = subscribeToMatchChanges({
+      channelName: "home-today-matches",
+      onChange: () => loadMatches({ showLoading: false }),
+      shouldHandlePayload: ({ new: nextMatch }) => {
+        if (!nextMatch?.match_date) {
+          return true;
+        }
+
+        return nextMatch.match_date === todayInfo.dateKey;
+      },
+    });
+
     return () => {
       isMounted = false;
+      unsubscribe();
     };
-  }, [weekRange]);
+  }, [todayInfo]);
 
   const filteredMatches = useMemo(() => {
-    return activeFilter === "all"
-      ? matches
-      : matches.filter((match) => match.sport === activeFilter);
+    const nextMatches =
+      activeFilter === "all"
+        ? matches
+        : matches.filter((match) => match.sport === activeFilter);
+
+    return [...nextMatches].sort(sortHomeMatches);
   }, [matches, activeFilter]);
 
   const totalPages = Math.ceil(filteredMatches.length / CARDS_PER_PAGE);
@@ -276,12 +313,10 @@ const MatchSection = () => {
           <div className={styles.headerText}>
             <h2 className={styles.title}>MATCHES</h2>
 
-            <p className={styles.dateRange}>
-              {formatDateRange(weekRange.startDate, weekRange.endDate)}
-            </p>
+            <p className={styles.dateRange}>{todayInfo.label}</p>
           </div>
 
-          <div className={styles.navigation}>
+          <div className={styles.navigationControls}>
             <button
               type="button"
               className={styles.navigationButton}
@@ -308,6 +343,10 @@ const MatchSection = () => {
           </div>
         </header>
 
+        <div className={styles.viewAllRow}>
+          <ViewAllLink to="/matches" />
+        </div>
+
         {isLoading ? (
           <p className={styles.emptyMessage}>경기 일정을 불러오는 중입니다.</p>
         ) : loadError ? (
@@ -319,7 +358,7 @@ const MatchSection = () => {
             ))}
           </div>
         ) : (
-          <p className={styles.emptyMessage}>예정된 경기가 없습니다.</p>
+          <p className={styles.emptyMessage}>오늘 예정된 경기가 없습니다.</p>
         )}
       </div>
     </section>

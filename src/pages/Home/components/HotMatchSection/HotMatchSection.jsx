@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Button from "../../../../components/Button/Button";
 import FanPickDialog from "../../../../components/FanPickDialog/FanPickDialog";
 import MatchFilter from "../../../../components/MatchFilter/MatchFilter";
 import { getTeamInfo } from "../../../../constants/teamInfo";
 import useAuth from "../../../../contexts/useAuth";
 import { supabase } from "../../../../lib/supabase";
+import { subscribeToMatchChanges } from "../../../../services/matchRealtime";
+import {
+  createPredictionLocation,
+  createPredictionPath,
+} from "../../../../utils/predictionPath";
 import styles from "./HotMatchSection.module.css";
 
 const FILTERS = [
@@ -139,10 +145,12 @@ const HotMatchSection = () => {
   useEffect(() => {
     let isMounted = true;
 
-    const loadHotMatches = async () => {
+    const loadHotMatches = async ({ showLoading = true } = {}) => {
       try {
-        setIsLoading(true);
-        setLoadError("");
+        if (showLoading) {
+          setIsLoading(true);
+          setLoadError("");
+        }
 
         const now = new Date();
 
@@ -174,11 +182,11 @@ const HotMatchSection = () => {
       } catch (error) {
         console.error("핫매치 불러오기 실패", error);
 
-        if (isMounted) {
+        if (isMounted && showLoading) {
           setLoadError("핫매치를 불러오지 못했습니다.");
         }
       } finally {
-        if (isMounted) {
+        if (isMounted && showLoading) {
           setIsLoading(false);
         }
       }
@@ -186,19 +194,26 @@ const HotMatchSection = () => {
 
     loadHotMatches();
 
+    const unsubscribe = subscribeToMatchChanges({
+      channelName: "home-hot-matches",
+      onChange: () => loadHotMatches({ showLoading: false }),
+      shouldHandlePayload: ({ new: nextMatch }) =>
+        !nextMatch?.sport || FILTERS.some(({ id }) => id === nextMatch.sport),
+    });
+
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, []);
 
   const handleVoteClick = (selectedTeamCode) => {
     if (isAuthLoading || !hotMatch) return;
 
-    const matchId = encodeURIComponent(hotMatch.id);
-    const teamCode = encodeURIComponent(selectedTeamCode);
-
-    const predictionPath =
-      `/prediction?matchId=${matchId}` + `&team=${teamCode}`;
+    const predictionPath = createPredictionPath({
+      matchId: hotMatch.id,
+      teamCode: selectedTeamCode,
+    });
 
     if (!isLoggedIn) {
       setPendingVote({
@@ -221,21 +236,15 @@ const HotMatchSection = () => {
   const handleMoveToLogin = () => {
     if (!pendingVote) return;
 
-    const matchId = encodeURIComponent(pendingVote.matchId);
-    const teamCode = encodeURIComponent(pendingVote.selectedTeamCode);
-
-    const search = `?matchId=${matchId}&team=${teamCode}`;
-
     setIsDialogOpen(false);
     setPendingVote(null);
 
     navigate("/login", {
       state: {
-        from: {
-          pathname: "/prediction",
-          search,
-          hash: "",
-        },
+        from: createPredictionLocation({
+          matchId: pendingVote.matchId,
+          teamCode: pendingVote.selectedTeamCode,
+        }),
       },
     });
   };
@@ -285,14 +294,15 @@ const HotMatchSection = () => {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
+                  <Button
                     className={styles.selectButton}
-                    onClick={() => handleVoteClick(hotMatch.homeTeamCode)}
                     disabled={isAuthLoading}
+                    onClick={() => handleVoteClick(hotMatch.homeTeamCode)}
+                    size="sm"
+                    variant="outline"
                   >
                     투표하기
-                  </button>
+                  </Button>
                 </div>
 
                 <div className={styles.matchInfo}>
@@ -327,14 +337,15 @@ const HotMatchSection = () => {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
+                  <Button
                     className={styles.selectButton}
-                    onClick={() => handleVoteClick(hotMatch.awayTeamCode)}
                     disabled={isAuthLoading}
+                    onClick={() => handleVoteClick(hotMatch.awayTeamCode)}
+                    size="sm"
+                    variant="outline"
                   >
                     투표하기
-                  </button>
+                  </Button>
                 </div>
               </article>
             ) : (

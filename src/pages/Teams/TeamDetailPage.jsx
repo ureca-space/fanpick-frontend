@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import Button from "../../components/Button/Button";
 import FanPickDialog from "../../components/FanPickDialog/FanPickDialog";
 import useAuth from "../../contexts/useAuth";
 import { getTeamInfo } from "../../constants/teamInfo.js";
 import { supabase } from "../../lib/supabase.js";
+import { subscribeToMatchChanges } from "../../services/matchRealtime.js";
+import {
+  createPredictionLocation,
+  createPredictionPath,
+} from "../../utils/predictionPath.js";
 import {
   FAVORITE_TEAMS_CHANGED_EVENT,
   fetchFavoriteTeamIds,
@@ -15,6 +21,13 @@ import styles from "./TeamDetailPage.module.css";
 
 const DAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 const UPCOMING_MATCH_LIMIT = 6;
+const MATCH_STATUS_LABELS = {
+  live: "LIVE",
+  finished: "종료",
+  cancelled: "취소",
+  postponed: "연기",
+};
+const SCORE_VISIBLE_STATUSES = new Set(["live", "finished"]);
 
 const padNumber = (number) => String(number).padStart(2, "0");
 
@@ -66,6 +79,8 @@ const normalizeMatch = (match) => {
     league: match.league,
     status: match.status,
     score: match.score,
+    hasScore:
+      SCORE_VISIBLE_STATUSES.has(match.status) && Boolean(match.score),
     homeTeam: getTeamInfo(match.home_team_code, match.sport),
     awayTeam: getTeamInfo(match.away_team_code, match.sport),
   };
@@ -148,7 +163,11 @@ const TeamDetailPage = () => {
     teamIds: [],
   });
   const [isSavingFavorite, setIsSavingFavorite] = useState(false);
-  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
+  const [loginDialogState, setLoginDialogState] = useState({
+    isOpen: false,
+    type: "favorite",
+    matchId: "",
+  });
   const [matches, setMatches] = useState([]);
   const [isMatchesLoading, setIsMatchesLoading] = useState(true);
   const [matchesError, setMatchesError] = useState("");
@@ -213,10 +232,12 @@ const TeamDetailPage = () => {
 
     let isMounted = true;
 
-    const loadTeamMatches = async () => {
+    const loadTeamMatches = async ({ showLoading = true } = {}) => {
       try {
-        setIsMatchesLoading(true);
-        setMatchesError("");
+        if (showLoading) {
+          setIsMatchesLoading(true);
+          setMatchesError("");
+        }
 
         const { data, error } = await supabase
           .from("matches")
@@ -263,11 +284,11 @@ const TeamDetailPage = () => {
       } catch (error) {
         console.error("팀 경기 일정 불러오기 실패", error);
 
-        if (isMounted) {
+        if (isMounted && showLoading) {
           setMatchesError("경기 일정을 불러오지 못했습니다.");
         }
       } finally {
-        if (isMounted) {
+        if (isMounted && showLoading) {
           setIsMatchesLoading(false);
         }
       }
@@ -275,8 +296,23 @@ const TeamDetailPage = () => {
 
     loadTeamMatches();
 
+    const unsubscribe = subscribeToMatchChanges({
+      channelName: `team-detail-matches-${team.id}`,
+      onChange: () => loadTeamMatches({ showLoading: false }),
+      shouldHandlePayload: ({ new: nextMatch }) => {
+        if (!nextMatch?.sport) {
+          return true;
+        }
+
+        return (
+          nextMatch.sport === team.matchSport && isTeamMatch(nextMatch, team)
+        );
+      },
+    });
+
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, [team]);
 
@@ -294,7 +330,11 @@ const TeamDetailPage = () => {
     }
 
     if (!isLoggedIn || !userId) {
-      setIsLoginDialogOpen(true);
+      setLoginDialogState({
+        isOpen: true,
+        type: "favorite",
+        matchId: "",
+      });
       return;
     }
 
@@ -324,17 +364,40 @@ const TeamDetailPage = () => {
     }
   };
 
+  const handleMatchVoteClick = (matchId) => {
+    if (isAuthLoading) {
+      return;
+    }
+
+    if (!isLoggedIn) {
+      setLoginDialogState({
+        isOpen: true,
+        type: "prediction",
+        matchId,
+      });
+      return;
+    }
+
+    navigate(createPredictionPath({ matchId }));
+  };
+
   const handleMoveToLogin = () => {
-    setIsLoginDialogOpen(false);
+    const from =
+      loginDialogState.type === "prediction"
+        ? createPredictionLocation({ matchId: loginDialogState.matchId })
+        : {
+            pathname: `/teams/${team.id}`,
+            search: "",
+            hash: "",
+          };
+
+    setLoginDialogState((currentState) => ({
+      ...currentState,
+      isOpen: false,
+    }));
 
     navigate("/login", {
-      state: {
-        from: {
-          pathname: `/teams/${team.id}`,
-          search: "",
-          hash: "",
-        },
-      },
+      state: { from },
     });
   };
 
@@ -368,24 +431,26 @@ const TeamDetailPage = () => {
             </div>
 
             <div className={styles.heroActions}>
-              <button
-                type="button"
-                className={`${styles.favoriteButton} ${
-                  isFavorite ? styles.favoriteButtonActive : ""
-                }`}
+              <Button
+                className={styles.heroActionButton}
                 disabled={isSavingFavorite}
                 onClick={handleFavoriteClick}
+                variant={isFavorite ? "secondary" : "primary"}
               >
                 {isSavingFavorite
                   ? "저장 중..."
                   : isFavorite
                     ? "관심 팀 해제"
                     : "관심 팀 등록"}
-              </button>
+              </Button>
 
-              <a className={styles.scheduleLink} href="#team-schedule">
+              <Button
+                className={styles.heroActionButton}
+                href="#team-schedule"
+                variant="outline"
+              >
                 경기 일정 보기
-              </a>
+              </Button>
             </div>
           </div>
 
@@ -489,7 +554,9 @@ const TeamDetailPage = () => {
                       <span>{match.homeTeam.name}</span>
                     </div>
 
-                    <strong>VS</strong>
+                    <strong className={match.hasScore ? styles.matchScore : ""}>
+                      {match.hasScore ? match.score.replace(":", " : ") : "VS"}
+                    </strong>
 
                     <div>
                       <TeamBadgeLogo team={match.awayTeam} />
@@ -497,7 +564,31 @@ const TeamDetailPage = () => {
                     </div>
                   </div>
 
-                  <span className={styles.matchLeague}>{match.league}</span>
+                  <div className={styles.matchMeta}>
+                    <span className={styles.matchLeague}>{match.league}</span>
+
+                    {MATCH_STATUS_LABELS[match.status] && (
+                      <span
+                        className={`${styles.matchStatus} ${
+                          match.status === "live" ? styles.matchStatusLive : ""
+                        }`}
+                      >
+                        {MATCH_STATUS_LABELS[match.status]}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className={styles.matchAction}>
+                    <Button
+                      disabled={isAuthLoading}
+                      fullWidth
+                      onClick={() => handleMatchVoteClick(match.id)}
+                      size="sm"
+                      variant="outline"
+                    >
+                      투표하기
+                    </Button>
+                  </div>
                 </article>
               ))}
             </div>
@@ -511,12 +602,21 @@ const TeamDetailPage = () => {
       </div>
 
       <FanPickDialog
-        isOpen={isLoginDialogOpen}
+        isOpen={loginDialogState.isOpen}
         title="로그인이 필요합니다"
-        description="관심 팀을 마이페이지에 저장하려면 먼저 로그인해 주세요."
+        description={
+          loginDialogState.type === "prediction"
+            ? "경기 승부 예측에 참여하려면 먼저 로그인해 주세요."
+            : "관심 팀을 마이페이지에 저장하려면 먼저 로그인해 주세요."
+        }
         confirmText="로그인하기"
         cancelText="취소"
-        onClose={() => setIsLoginDialogOpen(false)}
+        onClose={() =>
+          setLoginDialogState((currentState) => ({
+            ...currentState,
+            isOpen: false,
+          }))
+        }
         onConfirm={handleMoveToLogin}
       />
     </main>

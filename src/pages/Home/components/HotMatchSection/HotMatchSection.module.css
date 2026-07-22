@@ -108,33 +108,12 @@
 }
 
 .selectButton {
+  --button-min-height: 43px;
+  --button-padding-x: 22px;
+  --button-font-size: 14px;
+
   min-width: 112px;
-  height: 43px;
   margin-top: 30px;
-  padding: 0 22px;
-  border: 1px solid rgb(255 255 255 / 50%);
-  border-radius: 5px;
-  color: var(--color-text-white);
-  background-color: transparent;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    border-color 0.2s ease,
-    color 0.2s ease,
-    background-color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.selectButton:hover {
-  border-color: var(--color-text-white);
-  color: var(--color-surface-dark);
-  background-color: var(--color-text-white);
-}
-
-.selectButton:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
 }
 
 .matchInfo {
@@ -261,10 +240,11 @@
   }
 
   .selectButton {
+    --button-min-height: 40px;
+    --button-padding-x: 18px;
+    --button-font-size: 13px;
+
     min-width: 100px;
-    height: 40px;
-    padding: 0 18px;
-    font-size: 13px;
   }
 
   .vs {
@@ -315,10 +295,11 @@
   }
 
   .selectButton {
+    --button-min-height: 36px;
+    --button-padding-x: 14px;
+    --button-font-size: 12px;
+
     min-width: auto;
-    height: 36px;
-    padding: 0 14px;
-    font-size: 12px;
   }
 
   .vs {

@@ -226,10 +226,10 @@ const getMatchStatus = (status) => {
     return "postponed";
   }
 
-  /*
-   * matches 테이블의 status 제약조건과 맞추기 위해
-   * not_started와 running은 scheduled로 통일한다.
-   */
+  if (["running", "in_progress"].includes(normalizedStatus)) {
+    return "live";
+  }
+
   return "scheduled";
 };
 
