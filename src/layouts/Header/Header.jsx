@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import FanPickDialog from "../../components/FanPickDialog/FanPickDialog";
+import { LOGOUT_REDIRECT_STORAGE_KEY } from "../../constants/authFlow";
 import useAuth from "../../contexts/useAuth";
 import { supabase } from "../../lib/supabase";
 import styles from "./Header.module.css";
@@ -14,16 +16,14 @@ const menuList = [
     path: "/matches",
   },
   {
-    label: "CALENDAR",
-    path: "/calendar",
-  },
-  {
-    label: "PREDICTION",
-    path: "/prediction",
-  },
-  {
     label: "PICK BATTLE",
+    loginDescription: "픽 배틀에 참여하려면 먼저 로그인해 주세요.",
     path: "/worldcup",
+    requiresAuth: true,
+  },
+  {
+    label: "COMMUNITY",
+    path: "/community",
   },
 ];
 
@@ -34,6 +34,11 @@ const Header = () => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [loginDialogState, setLoginDialogState] = useState({
+    description: "",
+    from: null,
+    isOpen: false,
+  });
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -53,15 +58,23 @@ const Header = () => {
     setIsMenuOpen((prev) => !prev);
   };
 
+  const clearPendingLogoutRedirect = () => {
+    window.sessionStorage.removeItem(LOGOUT_REDIRECT_STORAGE_KEY);
+  };
+
   const handleLogout = async () => {
     if (isLoggingOut) return;
 
+    closeMenu();
+    closeLoginDialog();
     setIsLoggingOut(true);
+    window.sessionStorage.setItem(LOGOUT_REDIRECT_STORAGE_KEY, "1");
 
     try {
       const { error } = await supabase.auth.signOut();
 
       if (error) {
+        clearPendingLogoutRedirect();
         console.error("로그아웃 오류:", error);
 
         const currentPath = `${location.pathname}${location.search}${location.hash}`;
@@ -77,17 +90,59 @@ const Header = () => {
         return;
       }
 
-      closeMenu();
-
       navigate("/", {
         replace: true,
         state: {
           authDialog: "logout",
         },
       });
+
+      window.setTimeout(clearPendingLogoutRedirect, 1_000);
     } finally {
       setIsLoggingOut(false);
     }
+  };
+
+  const handleMenuLinkClick = (event, menu) => {
+    if (menu.requiresAuth && !isAuthLoading && !isLoggedIn) {
+      event.preventDefault();
+      closeMenu();
+      setLoginDialogState({
+        description:
+          menu.loginDescription ?? "이 메뉴를 이용하려면 먼저 로그인해 주세요.",
+        from: {
+          pathname: menu.path,
+        },
+        isOpen: true,
+      });
+      return;
+    }
+
+    if (menu.requiresAuth && isAuthLoading) {
+      event.preventDefault();
+      return;
+    }
+
+    closeMenu();
+  };
+
+  const closeLoginDialog = () => {
+    setLoginDialogState((previous) => ({
+      ...previous,
+      isOpen: false,
+    }));
+  };
+
+  const handleMoveToLogin = () => {
+    const from = loginDialogState.from;
+
+    closeLoginDialog();
+
+    navigate("/login", {
+      state: {
+        from,
+      },
+    });
   };
 
   const getNavLinkClass = ({ isActive }) =>
@@ -168,7 +223,7 @@ const Header = () => {
               key={menu.path}
               to={menu.path}
               className={getNavLinkClass}
-              onClick={closeMenu}
+              onClick={(event) => handleMenuLinkClick(event, menu)}
             >
               {menu.label}
             </NavLink>
@@ -209,7 +264,7 @@ const Header = () => {
               key={menu.path}
               to={menu.path}
               className={getNavLinkClass}
-              onClick={closeMenu}
+              onClick={(event) => handleMenuLinkClick(event, menu)}
               tabIndex={isMenuOpen ? 0 : -1}
             >
               {menu.label}
@@ -219,6 +274,16 @@ const Header = () => {
 
         <div className={styles.mobileAuthMenu}>{renderAuthMenu(true)}</div>
       </div>
+
+      <FanPickDialog
+        isOpen={loginDialogState.isOpen}
+        title="로그인이 필요합니다"
+        description={loginDialogState.description}
+        confirmText="로그인하기"
+        cancelText="취소"
+        onClose={closeLoginDialog}
+        onConfirm={handleMoveToLogin}
+      />
     </header>
   );
 };
