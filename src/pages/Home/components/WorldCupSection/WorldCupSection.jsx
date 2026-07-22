@@ -8,7 +8,6 @@ import styles from "./WorldCupSection.module.css";
 const FILTERS = [
   { id: "soccer", label: "SOCCER" },
   { id: "baseball", label: "BASEBALL" },
-  { id: "basketball", label: "BASKETBALL" },
   { id: "esports", label: "LOL" },
 ];
 
@@ -36,19 +35,6 @@ const WORLD_CUPS = {
       name: "오타니 쇼헤이",
       team: "LOS ANGELES",
       image: "/images/worldcup/baseball/ohtani.jpg",
-    },
-  },
-
-  basketball: {
-    leftPlayer: {
-      name: "Stephen Curry",
-      team: "GOLDEN STATE",
-      image: "/images/worldcup/basketball/curry.jpg",
-    },
-    rightPlayer: {
-      name: "LeBron James",
-      team: "LOS ANGELES",
-      image: "/images/worldcup/basketball/lebron.jpg",
     },
   },
 

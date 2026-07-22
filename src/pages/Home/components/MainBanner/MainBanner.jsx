@@ -6,7 +6,7 @@ const MainBanner = () => {
     <section className={styles.mainBanner}>
       <img
         src={mainBannerImage}
-        alt="야구, 축구, 농구, e스포츠를 표현한 FanPick 메인 배너"
+        alt="야구, 축구, e스포츠를 표현한 FanPick 메인 배너"
         className={styles.bannerImage}
       />
 
