@@ -16,7 +16,8 @@ import {
 } from "../../../services/communityApi";
 import { formatRelativeTime } from "../../../utils/formatRelativeTime";
 import { getPredictionBadgeMeta } from "../../../utils/predictionBadge";
-import { CATEGORIES } from "../CommunityPage";
+import CommunitySidebars from "../components/CommunitySidebars/CommunitySidebars";
+import { CATEGORIES } from "../communityConstants";
 import styles from "./CommunityDetailPage.module.css";
 
 const CATEGORY_LABELS = Object.fromEntries(
@@ -381,19 +382,7 @@ const CommunityDetailPage = () => {
   return (
     <section className={styles.page}>
       <div className={`container ${styles.layout}`}>
-        <aside className={styles.categoryPanel}>
-          <Link to="/community/write" className={styles.writeButton}>
-            글쓰기
-          </Link>
-
-          <nav className={styles.categoryNav} aria-label="게시판 카테고리">
-            {CATEGORIES.map((category) => (
-              <Link key={category.id} to="/community">
-                {category.label}
-              </Link>
-            ))}
-          </nav>
-        </aside>
+        <CommunitySidebars popularPosts={popularPosts} />
 
         <main className={styles.mainArea}>
           <div className={styles.pageControls}>
@@ -689,19 +678,6 @@ const CommunityDetailPage = () => {
           </article>
         </main>
 
-        <aside className={styles.popularPanel}>
-          <h2>커뮤니티 인기글</h2>
-          <ul>
-            {popularPosts.map((popularPost) => (
-                <li key={popularPost.id}>
-                  <Link to={`/community/${popularPost.id}`}>
-                    <span>{popularPost.title}</span>
-                    <b>({popularPost.commentCount.toLocaleString()})</b>
-                  </Link>
-                </li>
-              ))}
-          </ul>
-        </aside>
       </div>
 
       <FanPickDialog

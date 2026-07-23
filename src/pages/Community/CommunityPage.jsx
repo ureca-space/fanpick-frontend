@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import EmptyState from "../../components/EmptyState/EmptyState";
 import useAuth from "../../contexts/useAuth";
 import {
@@ -7,21 +7,9 @@ import {
   fetchMyCommunityComments,
 } from "../../services/communityApi";
 import { formatRelativeTime } from "../../utils/formatRelativeTime";
+import CommunitySidebars from "./components/CommunitySidebars/CommunitySidebars";
+import { BOARD_FILTERS, CATEGORIES } from "./communityConstants";
 import styles from "./CommunityPage.module.css";
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const CATEGORIES = [
-  { id: "all", label: "전체 게시글" },
-  { id: "lck", label: "LCK" },
-  { id: "baseball", label: "KBO" },
-  { id: "soccer", label: "K-LEAGUE" },
-];
-const BOARD_FILTERS = [
-  { id: "all", label: "전체 게시글" },
-  ...CATEGORIES.slice(1),
-  { id: "my-posts", label: "작성한 글" },
-  { id: "my-comments", label: "작성한 댓글" },
-];
 
 const PAGE_SIZE = 10;
 const INITIAL_TIME = Date.now();
@@ -33,9 +21,15 @@ const formatAuthorName = (name = "") =>
 
 const CommunityPage = () => {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedFilter = searchParams.get("filter");
+  const category = BOARD_FILTERS.some(
+    (item) => item.id === requestedFilter,
+  )
+    ? requestedFilter
+    : "all";
   const [posts, setPosts] = useState([]);
   const [myComments, setMyComments] = useState([]);
-  const [category, setCategory] = useState("all");
   const [sortBy, setSortBy] = useState("latest");
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -119,8 +113,8 @@ const CommunityPage = () => {
   );
 
   const changeCategory = (nextCategory) => {
-    setCategory(nextCategory);
     setCurrentPage(1);
+    setSearchParams(nextCategory === "all" ? {} : { filter: nextCategory });
   };
 
   const changeSort = (nextSort) => {
@@ -142,28 +136,11 @@ const CommunityPage = () => {
         </header>
 
         <div className={styles.layout}>
-          <aside className={styles.categoryPanel}>
-            <Link to="/community/write" className={styles.writeButton}>
-              글쓰기
-            </Link>
-            <nav className={styles.categoryNav} aria-label="게시판 카테고리">
-              {BOARD_FILTERS.map((item, index) => (
-                <button
-                  type="button"
-                  key={item.id}
-                  className={[
-                    category === item.id ? styles.activeCategory : "",
-                    index === 4 ? styles.categoryStart : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  onClick={() => changeCategory(item.id)}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </nav>
-          </aside>
+          <CommunitySidebars
+            activeFilter={category}
+            onFilterChange={changeCategory}
+            popularPosts={popularPosts}
+          />
 
           <main className={styles.board}>
             <div className={styles.boardHeader}>
@@ -298,19 +275,6 @@ const CommunityPage = () => {
             )}
           </main>
 
-          <aside className={styles.popularPanel}>
-            <h2>커뮤니티 인기글</h2>
-            <ul>
-              {popularPosts.map((post) => (
-                <li key={post.id}>
-                  <Link to={`/community/${post.id}`}>
-                    <span>{post.title}</span>
-                    <b>({post.commentCount.toLocaleString()})</b>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </aside>
         </div>
       </div>
     </section>

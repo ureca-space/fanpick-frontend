@@ -28,7 +28,7 @@ export const fetchMyCommunityComments = async (userId) => {
 
   const { data, error } = await supabase
     .from("community_comments")
-    .select("id, post_id, parent_id, content, created_at")
+    .select("id, post_id, content, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 

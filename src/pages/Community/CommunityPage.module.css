@@ -63,62 +63,6 @@
   min-height: 520px;
 }
 
-.categoryPanel,
-.popularPanel {
-  border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: 8px;
-  background: var(--color-surface-card);
-}
-
-.categoryPanel {
-  grid-area: category;
-  padding: 38px 34px;
-}
-
-.writeButton {
-  display: grid;
-  width: 100%;
-  height: 48px;
-  place-items: center;
-  border-radius: 8px;
-  color: var(--color-text-white);
-  background: var(--color-accent);
-  font-weight: 700;
-}
-
-.writeButton:hover {
-  background: var(--color-accent-hover);
-}
-
-.categoryNav {
-  display: grid;
-  gap: 6px;
-  margin-top: 28px;
-}
-
-.categoryNav button {
-  padding: 14px 8px;
-  color: rgb(255 255 255 / 72%);
-  background: transparent;
-  text-align: left;
-}
-
-.categoryNav button:first-child {
-  margin-bottom: 0;
-}
-
-.categoryNav .categoryStart {
-  margin-top: 10px;
-  padding-top: 24px;
-  border-top: 1px solid rgb(255 255 255 / 12%);
-}
-
-.categoryNav button:hover,
-.categoryNav .activeCategory {
-  color: var(--color-text-white);
-  font-weight: 700;
-}
-
 .boardHeader {
   display: flex;
   align-items: flex-end;
@@ -214,8 +158,7 @@
   line-height: 1;
 }
 
-.postTitle b,
-.popularPanel b {
+.postTitle b {
   margin-left: 4px;
   color: var(--color-accent);
 }
@@ -267,38 +210,6 @@
   background: var(--color-accent);
 }
 
-.popularPanel {
-  grid-area: popular;
-  min-height: 270px;
-  padding: 30px;
-}
-
-.popularPanel h2 {
-  margin-bottom: 24px;
-  font-family: var(--font-display);
-  font-size: 20px;
-  line-height: 1.2;
-}
-
-.popularPanel ul {
-  display: grid;
-  gap: 16px;
-}
-
-.popularPanel a {
-  display: flex;
-  width: 100%;
-  color: rgb(255 255 255 / 82%);
-  font-size: 13px;
-  text-align: left;
-}
-
-.popularPanel a span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 @media (max-width: 1300px) {
   .layout {
     grid-template-columns: 200px minmax(0, 1fr);
@@ -306,14 +217,6 @@
       "category board"
       "category popular";
     gap: 32px;
-  }
-
-  .popularPanel {
-    min-height: auto;
-  }
-
-  .popularPanel ul {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -327,42 +230,6 @@
     gap: 40px;
   }
 
-  .categoryPanel {
-    padding: 20px;
-  }
-
-  .writeButton {
-    width: 180px;
-  }
-
-  .categoryNav {
-    display: flex;
-    overflow-x: auto;
-    margin-top: 18px;
-    scrollbar-width: none;
-  }
-
-  .categoryNav::-webkit-scrollbar {
-    display: none;
-  }
-
-  .categoryNav button,
-  .categoryNav button:first-child {
-    flex: 0 0 auto;
-    margin: 0;
-    padding: 10px 14px;
-    border: 0;
-  }
-
-  .categoryNav .categoryStart {
-    margin-top: 0;
-    padding-top: 10px;
-    border-top: 0;
-  }
-
-  .popularPanel ul {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 700px) {
@@ -388,21 +255,9 @@
   .postRow > :nth-child(4) {
     display: none;
   }
-
-  .popularPanel ul {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 480px) {
-  .categoryPanel {
-    padding: 16px;
-  }
-
-  .writeButton {
-    width: 100%;
-  }
-
   .postRow {
     grid-template-columns: minmax(0, 1fr) 52px;
     min-height: 54px;
@@ -425,7 +280,4 @@
     font-size: 11px;
   }
 
-  .popularPanel {
-    padding: 22px;
-  }
 }
