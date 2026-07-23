@@ -195,7 +195,7 @@ const parsePlayCell = (html = "") => {
 };
 
 const getGameStatus = ({ awayScore, homeScore, rowText }) => {
-  if (/연기|postponed/i.test(rowText)) {
+  if (/연기|그라운드사정|postponed/i.test(rowText)) {
     return "postponed";
   }
 
