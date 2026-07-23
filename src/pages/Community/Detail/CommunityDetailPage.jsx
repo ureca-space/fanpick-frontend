@@ -712,8 +712,6 @@ const CommunityDetailPage = () => {
         confirmText="삭제"
         onClose={() => setDeleteTarget(null)}
         onConfirm={confirmDelete}
-        showCloseButton={false}
-        showAccentLine={false}
         lockBodyScroll={false}
       />
     </section>
