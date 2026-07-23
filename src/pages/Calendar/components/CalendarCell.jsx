@@ -1,5 +1,5 @@
-﻿import CalendarItemCard from "./CalendarItemCard";
-import css from "../Calendar.module.css";
+import CalendarItemCard from "./CalendarItemCard";
+import css from "./CalendarCell/CalendarCell.module.css";
 
 const CalendarCell = ({ day, matches = [] }) => {
   const cellClassName = [

@@ -1,5 +1,5 @@
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import css from "./CalendarHeader.module.css";
+import css from "./CalendarHeader/CalendarHeader.module.css";
 
 const CalendarHeader = ({ year, month, onPrevMonth, onNextMonth }) => {
   return (

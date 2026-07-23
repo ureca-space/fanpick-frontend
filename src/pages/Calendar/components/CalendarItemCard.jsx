@@ -1,5 +1,5 @@
-﻿import { useState } from "react";
-import css from "../Calendar.module.css";
+import { useState } from "react";
+import css from "./CalendarItemCard/CalendarItemCard.module.css";
 
 const TeamBadge = ({ team }) => {
   const [hasError, setHasError] = useState(false);

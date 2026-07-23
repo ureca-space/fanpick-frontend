@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import SubNav from "../../components/SubNav/SubNav";
 import { MATCH_CENTER_SUB_NAV_ITEMS } from "../../constants/matchCenterNav";
 import CalendarFilter from "./components/CalendarFilter/CalendarFilter";
-import CalendarGrid from "./components/CalendarGrid/CalendarGrid";
-import CalendarHeader from "./components/CalendarHeader/CalendarHeader";
+import CalendarGrid from "./components/CalendarGrid.jsx";
+import CalendarHeader from "./components/CalendarHeader.jsx";
 import { fetchKBOSchedule } from "./api/getSportSchedule";
 import styles from "./CalendarPage.module.css";
 

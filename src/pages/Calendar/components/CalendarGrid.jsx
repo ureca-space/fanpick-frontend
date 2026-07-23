@@ -1,5 +1,5 @@
-﻿import CalendarCell from "./CalendarCell";
-import css from "../Calendar.module.css";
+import CalendarCell from "./CalendarCell";
+import css from "./CalendarGrid/CalendarGrid.module.css";
 
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
