@@ -116,16 +116,22 @@
 
 .avatar,
 .smallAvatar {
-  display: block;
+  display: flex;
   flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   border-radius: 50%;
-  background: #d9d9d9;
+  color: var(--color-text-white);
+  background: var(--color-accent);
+  font-weight: 700;
   object-fit: cover;
 }
 
 .avatar {
   width: 42px;
   height: 42px;
+  font-size: 15px;
 }
 
 .authorInfo div {
@@ -225,6 +231,7 @@
 .smallAvatar {
   width: 26px;
   height: 26px;
+  font-size: 10px;
 }
 
 .commentForm textarea {

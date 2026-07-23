@@ -1,12 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import EmptyState from "../../../components/EmptyState/EmptyState";
 import FanPickDialog from "../../../components/FanPickDialog/FanPickDialog";
 import useAuth from "../../../contexts/useAuth";
-import {
-  createSettledPredictionSportStats,
-  fetchMyPredictions,
-} from "../../../services/predictionApi";
 import {
   createCommunityComment,
   deleteCommunityComment,
@@ -14,9 +10,11 @@ import {
   fetchCommunityComments,
   fetchCommunityPost,
   fetchCommunityPosts,
+  fetchCommunityPredictionStats,
   increaseCommunityPostView,
   updateCommunityComment,
 } from "../../../services/communityApi";
+import { formatRelativeTime } from "../../../utils/formatRelativeTime";
 import { getPredictionBadgeMeta } from "../../../utils/predictionBadge";
 import { CATEGORIES } from "../CommunityPage";
 import styles from "./CommunityDetailPage.module.css";
@@ -30,16 +28,19 @@ const CATEGORY_SPORT = {
   baseball: "baseball",
   soccer: "soccer",
 };
+const INITIAL_TIME = Date.now();
 
 const PredictionBadge = ({
   userId,
-  currentUserId,
   fallbackSport,
   sportStats,
 }) => {
-  if (!userId || userId !== currentUserId) return null;
+  if (!userId) return null;
 
-  const stats = sportStats.find((item) => item.sport === fallbackSport);
+  const stats = sportStats.find(
+    (item) =>
+      item.user_id === userId && item.sport === fallbackSport,
+  );
   const totalCount = Number(stats?.total_count ?? 0);
   const accuracyRate = Number(stats?.accuracy_rate ?? 0);
   const badge = getPredictionBadgeMeta(
@@ -51,20 +52,8 @@ const PredictionBadge = ({
   return <span className={styles.predictionBadge}>{badge.name}</span>;
 };
 
-const formatDate = (date) => {
-  const value = new Date(date);
-  const month = String(value.getMonth() + 1).padStart(2, "0");
-  const day = String(value.getDate()).padStart(2, "0");
-  return `${month}.${day}`;
-};
-
-const formatCommentTime = (date, updatedAt) => {
-  const formatted = new Intl.DateTimeFormat("ko-KR", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(updatedAt || date));
+const formatCommentTime = (date, updatedAt, currentTime) => {
+  const formatted = formatRelativeTime(updatedAt || date, currentTime);
 
   return updatedAt !== date ? `${formatted} · 수정됨` : formatted;
 };
@@ -73,7 +62,7 @@ const normalizePost = (post) => ({
   ...post,
   author: post.author_name,
   avatarUrl: post.author_avatar_url,
-  date: formatDate(post.created_at),
+  createdAt: post.created_at,
   views: Number(post.view_count ?? 0),
 });
 
@@ -84,7 +73,8 @@ const normalizeComments = (rows) => {
     author: row.author_name,
     avatarUrl: row.author_avatar_url,
     content: row.content,
-    time: formatCommentTime(row.created_at, row.updated_at),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
     replies: [],
   });
   const roots = rows.filter((row) => !row.parent_id).map(normalize);
@@ -96,12 +86,21 @@ const normalizeComments = (rows) => {
   return roots;
 };
 
-const ProfileAvatar = ({ avatarUrl, className }) =>
-  avatarUrl ? (
-    <img className={className} src={avatarUrl} alt="프로필" />
+const ProfileAvatar = ({ avatarUrl, className, name }) => {
+  const profileName = String(name || "FanPick");
+
+  return avatarUrl ? (
+    <img
+      className={className}
+      src={avatarUrl}
+      alt={`${profileName} 프로필`}
+    />
   ) : (
-    <span className={className} aria-hidden="true" />
+    <span className={className} aria-hidden="true">
+      {profileName.trim().charAt(0).toUpperCase() || "F"}
+    </span>
   );
+};
 
 const CommunityDetailPage = () => {
   const { postId } = useParams();
@@ -121,32 +120,25 @@ const CommunityDetailPage = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [editedContent, setEditedContent] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [currentTime, setCurrentTime] = useState(INITIAL_TIME);
+  const increasedPostIdRef = useRef(null);
 
   const currentAvatarUrl = user?.user_metadata?.avatar_url || "";
 
   useEffect(() => {
-    if (!user) return;
+    const timer = window.setInterval(() => setCurrentTime(Date.now()), 60000);
 
-    const loadMyBadgeStats = async () => {
-      try {
-        const predictions = await fetchMyPredictions(user.id);
-        setSportStats(
-          createSettledPredictionSportStats(predictions, [
-            "soccer",
-            "baseball",
-            "esports",
-          ]),
-        );
-      } catch (error) {
-        console.error("커뮤니티 배지 조회 오류:", error);
-        setSportStats([]);
-      }
-    };
-
-    loadMyBadgeStats();
-  }, [user]);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
+    const shouldIncreaseView =
+      increasedPostIdRef.current !== String(postId);
+
+    if (shouldIncreaseView) {
+      increasedPostIdRef.current = String(postId);
+    }
+
     const loadDetail = async () => {
       try {
         setIsLoading(true);
@@ -161,16 +153,41 @@ const CommunityDetailPage = () => {
           (item) => String(item.id) === String(postId),
         );
 
-        setPost(normalizePost(postData));
+        const normalizedPost = normalizePost(postData);
+
+        setPost(normalizedPost);
         setPreviousPost(normalizedPosts[currentIndex - 1] ?? null);
         setNextPost(normalizedPosts[currentIndex + 1] ?? null);
         setPopularPosts(
           [...normalizedPosts].sort((a, b) => b.views - a.views).slice(0, 10),
         );
         setComments(normalizeComments(commentRows));
-        increaseCommunityPostView(postId).catch((error) =>
-          console.warn("조회수 증가 함수 오류:", error.message),
-        );
+
+        try {
+          const authorIds = [
+            postData.user_id,
+            user?.id,
+            ...commentRows.map((item) => item.user_id),
+          ];
+          setSportStats(
+            await fetchCommunityPredictionStats(authorIds),
+          );
+        } catch (badgeError) {
+          console.error("커뮤니티 배지 조회 오류:", badgeError);
+          setSportStats([]);
+        }
+
+        try {
+          if (!shouldIncreaseView) return;
+
+          const increasedViewCount = await increaseCommunityPostView(postId);
+          setPost((currentPost) => ({
+            ...currentPost,
+            views: increasedViewCount ?? normalizedPost.views + 1,
+          }));
+        } catch (viewError) {
+          console.error("게시글 조회수 증가 오류:", viewError);
+        }
       } catch (error) {
         console.error("커뮤니티 상세 조회 오류:", error);
         setErrorMessage("게시글을 불러오지 못했습니다.");
@@ -180,7 +197,7 @@ const CommunityDetailPage = () => {
     };
 
     loadDetail();
-  }, [postId]);
+  }, [postId, user?.id]);
 
   const submitComment = async (event) => {
     event.preventDefault();
@@ -250,7 +267,11 @@ const CommunityDetailPage = () => {
       setComments((currentComments) =>
         currentComments.map((item) =>
           item.id === commentId
-            ? { ...item, content: editedContent.trim(), time: "방금 전 · 수정됨" }
+            ? {
+                ...item,
+                content: editedContent.trim(),
+                updatedAt: new Date().toISOString(),
+              }
             : item,
         ),
       );
@@ -277,7 +298,11 @@ const CommunityDetailPage = () => {
                 ...item,
                 replies: item.replies.map((replyItem) =>
                   replyItem.id === replyId
-                    ? { ...replyItem, content: editedContent.trim(), time: "방금 전 · 수정됨" }
+                    ? {
+                        ...replyItem,
+                        content: editedContent.trim(),
+                        updatedAt: new Date().toISOString(),
+                      }
                     : replyItem,
                 ),
               }
@@ -405,19 +430,21 @@ const CommunityDetailPage = () => {
                 <ProfileAvatar
                   avatarUrl={post.avatarUrl}
                   className={styles.avatar}
+                  name={post.author}
                 />
                 <div>
                   <span className={styles.nicknameWithBadge}>
                     <b>{post.author}</b>
                     <PredictionBadge
                       userId={post.user_id}
-                      currentUserId={user?.id}
                       fallbackSport={CATEGORY_SPORT[post.category]}
                       sportStats={sportStats}
                     />
                   </span>
                   <span className={styles.authorMeta}>
-                    <small>{post.date}</small>
+                    <small>
+                      {formatRelativeTime(post.createdAt, currentTime)}
+                    </small>
                     {post.user_id === user?.id && (
                       <span className={styles.postActions}>
                         <Link to={`/community/${post.id}/edit`}>수정</Link>
@@ -442,6 +469,7 @@ const CommunityDetailPage = () => {
                 <ProfileAvatar
                   avatarUrl={currentAvatarUrl}
                   className={styles.smallAvatar}
+                  name={user?.user_metadata?.nickname}
                 />
                 <textarea
                   value={comment}
@@ -465,13 +493,13 @@ const CommunityDetailPage = () => {
                     <ProfileAvatar
                       avatarUrl={item.avatarUrl}
                       className={styles.smallAvatar}
+                      name={item.author}
                     />
                     <div className={styles.commentBody}>
                       <span className={styles.nicknameWithBadge}>
                         <b>{item.author}</b>
                         <PredictionBadge
                           userId={item.userId}
-                          currentUserId={user?.id}
                           fallbackSport={CATEGORY_SPORT[post.category]}
                           sportStats={sportStats}
                         />
@@ -503,7 +531,13 @@ const CommunityDetailPage = () => {
                         <p>{item.content}</p>
                       )}
                       <div className={styles.commentMeta}>
-                        <small>{item.time}</small>
+                        <small>
+                          {formatCommentTime(
+                            item.createdAt,
+                            item.updatedAt,
+                            currentTime,
+                          )}
+                        </small>
                         {user && (
                           <button
                             type="button"
@@ -572,13 +606,13 @@ const CommunityDetailPage = () => {
                           <ProfileAvatar
                             avatarUrl={replyItem.avatarUrl}
                             className={styles.smallAvatar}
+                            name={replyItem.author}
                           />
                           <div>
                             <span className={styles.nicknameWithBadge}>
                               <b>{replyItem.author}</b>
                               <PredictionBadge
                                 userId={replyItem.userId}
-                                currentUserId={user?.id}
                                 fallbackSport={CATEGORY_SPORT[post.category]}
                                 sportStats={sportStats}
                               />
@@ -613,7 +647,13 @@ const CommunityDetailPage = () => {
                               <p>{replyItem.content}</p>
                             )}
                             <div className={styles.commentMeta}>
-                              <small>{replyItem.time}</small>
+                              <small>
+                                {formatCommentTime(
+                                  replyItem.createdAt,
+                                  replyItem.updatedAt,
+                                  currentTime,
+                                )}
+                              </small>
                               {replyItem.userId === user?.id && (
                                 <>
                                   <button
@@ -656,7 +696,7 @@ const CommunityDetailPage = () => {
                 <li key={popularPost.id}>
                   <Link to={`/community/${popularPost.id}`}>
                     <span>{popularPost.title}</span>
-                    <b>({popularPost.views.toLocaleString()})</b>
+                    <b>({popularPost.commentCount.toLocaleString()})</b>
                   </Link>
                 </li>
               ))}

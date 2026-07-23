@@ -129,9 +129,29 @@ export const deleteCommunityComment = async (commentId) => {
 };
 
 export const increaseCommunityPostView = async (postId) => {
-  const { error } = await supabase.rpc("increment_community_post_view", {
+  const { data, error } = await supabase.rpc("increment_community_post_view", {
     target_post_id: Number(postId),
   });
 
   if (error) throw error;
+
+  return data == null ? null : Number(data);
+};
+
+// 커뮤니티 작성자들의 종목별 예측 횟수와 적중률만 조회
+export const fetchCommunityPredictionStats = async (userIds) => {
+  const targetUserIds = [...new Set(userIds.filter(Boolean))];
+
+  if (targetUserIds.length === 0) return [];
+
+  const { data, error } = await supabase.rpc(
+    "get_community_prediction_stats",
+    {
+      target_user_ids: targetUserIds,
+    },
+  );
+
+  if (error) throw error;
+
+  return data ?? [];
 };
