@@ -50,9 +50,7 @@
 }
 
 .categoryNav a:first-child {
-  margin-bottom: 8px;
-  padding-bottom: 22px;
-  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  margin-bottom: 0;
 }
 
 .categoryNav a:hover {
@@ -133,6 +131,62 @@
 .authorInfo div {
   display: grid;
   gap: 4px;
+}
+
+.authorMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 16px;
+}
+
+.authorMeta small {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.postActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.postActions a,
+.postActions button {
+  padding: 0;
+  color: rgb(255 255 255 / 48%);
+  background: transparent;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.postActions a:hover,
+.postActions button:hover {
+  color: var(--color-text-white);
+  background: transparent;
+}
+
+.loadingSpace {
+  min-height: 720px;
+}
+
+.nicknameWithBadge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.predictionBadge {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .authorInfo small,
