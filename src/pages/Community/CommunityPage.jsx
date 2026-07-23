@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import EmptyState from "../../components/EmptyState/EmptyState";
 import { fetchCommunityPosts } from "../../services/communityApi";
+import { formatRelativeTime } from "../../utils/formatRelativeTime";
 import styles from "./CommunityPage.module.css";
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -13,13 +14,12 @@ export const CATEGORIES = [
 ];
 
 const PAGE_SIZE = 10;
-
-const formatDate = (date) => {
-  const value = new Date(date);
-  const month = String(value.getMonth() + 1).padStart(2, "0");
-  const day = String(value.getDate()).padStart(2, "0");
-  return `${month}.${day}`;
-};
+const INITIAL_TIME = Date.now();
+const CATEGORY_LABELS = Object.fromEntries(
+  CATEGORIES.map((item) => [item.id, item.label]),
+);
+const formatAuthorName = (name = "") =>
+  name.length > 4 ? `${name.slice(0, 3)}...` : name;
 
 const CommunityPage = () => {
   const [posts, setPosts] = useState([]);
@@ -28,6 +28,13 @@ const CommunityPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [currentTime, setCurrentTime] = useState(INITIAL_TIME);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setCurrentTime(Date.now()), 60000);
+
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -157,11 +164,20 @@ const CommunityPage = () => {
                       key={post.id}
                     >
                       <span className={styles.postTitle}>
+                        {category === "all" && (
+                          <small className={styles.postCategory}>
+                            {CATEGORY_LABELS[post.category]}
+                          </small>
+                        )}
                         {post.title}
                         <b>({post.commentCount})</b>
                       </span>
-                      <span>{post.author_name}</span>
-                      <span>{formatDate(post.created_at)}</span>
+                      <span title={post.author_name}>
+                        {formatAuthorName(post.author_name)}
+                      </span>
+                      <span>
+                        {formatRelativeTime(post.created_at, currentTime)}
+                      </span>
                       <span>{post.view_count.toLocaleString()}</span>
                     </Link>
                   ))}
@@ -198,7 +214,7 @@ const CommunityPage = () => {
                 <li key={post.id}>
                   <Link to={`/community/${post.id}`}>
                     <span>{post.title}</span>
-                    <b>({post.view_count.toLocaleString()})</b>
+                    <b>({post.commentCount.toLocaleString()})</b>
                   </Link>
                 </li>
               ))}
