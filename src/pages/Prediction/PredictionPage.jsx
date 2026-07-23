@@ -581,7 +581,9 @@ const PredictionPage = () => {
         return;
       }
 
-      const hasExistingPrediction = Boolean(predictions[match.id]);
+      const currentSelection = predictions[match.id];
+      const hasExistingPrediction = Boolean(currentSelection);
+      const isCancellingPrediction = currentSelection === selection;
       const matchBeginTime = new Date(match.beginAt).getTime();
 
       if (
@@ -600,7 +602,53 @@ const PredictionPage = () => {
         return;
       }
 
+      const refreshPredictionStats = async () => {
+        try {
+          const latestStats = await fetchMatchPredictionStats();
+          setMatches((previous) =>
+            applyPredictionStatsToMatches(previous, latestStats, {
+              awayRateKey: "awayRate",
+              homeRateKey: "homeRate",
+            }),
+          );
+        } catch (statsError) {
+          console.error("경기 투표 통계 조회 오류:", statsError);
+        }
+      };
+
       setSavingMatchId(match.id);
+
+      if (isCancellingPrediction) {
+        const { error } = await supabase
+          .from("predictions")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("match_id", match.databaseId);
+
+        setSavingMatchId(null);
+
+        if (error) {
+          console.error("예측 취소 오류:", error);
+          alert(`예측을 취소하지 못했습니다.\n${error.message}`);
+          return;
+        }
+
+        setPredictions((previous) => {
+          const nextPredictions = { ...previous };
+          delete nextPredictions[match.id];
+
+          return nextPredictions;
+        });
+        setPredictionResults((previous) => {
+          const nextResults = { ...previous };
+          delete nextResults[match.id];
+
+          return nextResults;
+        });
+
+        await refreshPredictionStats();
+        return;
+      }
 
       const { data, error } = await supabase
         .from("predictions")
@@ -635,17 +683,7 @@ const PredictionPage = () => {
       }));
 
       // - 저장 직후 서버에서 최신 참여자 수와 투표 비율 다시 받기
-      try {
-        const latestStats = await fetchMatchPredictionStats();
-        setMatches((previous) =>
-          applyPredictionStatsToMatches(previous, latestStats, {
-            awayRateKey: "awayRate",
-            homeRateKey: "homeRate",
-          }),
-        );
-      } catch (statsError) {
-        console.error("경기 투표 통계 조회 오류:", statsError);
-      }
+      await refreshPredictionStats();
     },
     [openLoginDialog, predictions, savingMatchId, user],
   );

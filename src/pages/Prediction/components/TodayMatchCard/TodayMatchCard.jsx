@@ -29,11 +29,11 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
   const isHomeDisabled =
     match.isFinished ||
     isSaving ||
-    (hasSelection && (!canChangeSelection || isHomeSelected));
+    (hasSelection && !canChangeSelection);
   const isAwayDisabled =
     match.isFinished ||
     isSaving ||
-    (hasSelection && (!canChangeSelection || isAwaySelected));
+    (hasSelection && !canChangeSelection);
   const statusLabel = match.isFinished
     ? selection
       ? "경기종료"
