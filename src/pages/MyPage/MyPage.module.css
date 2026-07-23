@@ -705,6 +705,24 @@
   flex-shrink: 0;
 }
 
+.skeletonSectionNavigation {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+}
+
+.skeletonPageCount {
+  width: 34px;
+  height: 11px;
+}
+
+.skeletonNavigationButton {
+  width: 38px;
+  height: 38px;
+}
+
 /* 예측 기록 */
 
 .historyList {
@@ -1079,6 +1097,10 @@
   }
 
   .sectionNavigation {
+    align-self: flex-end;
+  }
+
+  .skeletonSectionNavigation {
     align-self: flex-end;
   }
 

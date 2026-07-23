@@ -14,6 +14,9 @@ const MatchSchedulePage = lazy(
 const CalendarPage = lazy(() => import("../pages/Calendar/CalendarPage"));
 const PredictionPage = lazy(() => import("../pages/Prediction/PredictionPage"));
 const CommunityPage = lazy(() => import("../pages/Community/CommunityPage"));
+const CommunitySportsPage = lazy(
+  () => import("../pages/Community/Sports/CommunitySportsPage"),
+);
 const CommunityWritePage = lazy(
   () => import("../pages/Community/Write/CommunityWritePage"),
 );
@@ -53,6 +56,18 @@ const AppRouter = () => {
             <Route path="/matches" element={<MatchSchedulePage />} />
             <Route path="/prediction" element={<PredictionPage />} />
             <Route path="/community" element={<CommunityPage />} />
+            <Route
+              path="/community/standings"
+              element={<CommunitySportsPage view="standings" />}
+            />
+            <Route
+              path="/community/results"
+              element={<CommunitySportsPage view="results" />}
+            />
+            <Route
+              path="/community/prediction-results"
+              element={<CommunitySportsPage view="prediction-results" />}
+            />
             <Route path="/community/write" element={<CommunityWritePage />} />
             <Route
               path="/community/:postId/edit"

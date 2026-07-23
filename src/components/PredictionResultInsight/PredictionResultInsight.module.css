@@ -1,0 +1,76 @@
+.insight {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.item {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  padding: 11px 12px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background-color: rgb(255 255 255 / 5%);
+}
+
+.item span {
+  color: rgb(255 255 255 / 48%);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.item strong {
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item b {
+  width: fit-content;
+  padding: 4px 7px;
+  border-radius: 999px;
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 14%);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.myPick {
+  border-color: rgb(255 255 255 / 12%);
+}
+
+.myPick[data-result="correct"] {
+  border-color: rgb(97 118 255 / 48%);
+  background-color: rgb(97 118 255 / 13%);
+}
+
+.myPick[data-result="correct"] b {
+  background-color: var(--color-prediction-home);
+}
+
+.myPick[data-result="incorrect"] {
+  border-color: rgb(223 93 118 / 48%);
+  background-color: rgb(223 93 118 / 13%);
+}
+
+.myPick[data-result="incorrect"] b {
+  background-color: var(--color-prediction-away);
+}
+
+.myPick[data-result="void"] b,
+.myPick[data-result="pending"] b {
+  background-color: var(--color-surface-muted);
+}
+
+@media (max-width: 560px) {
+  .insight {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

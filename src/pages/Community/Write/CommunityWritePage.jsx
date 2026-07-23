@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import Button from "../../../components/Button/Button";
 import useAuth from "../../../contexts/useAuth";
 import {
   createCommunityPost,
@@ -158,22 +159,21 @@ const CommunityWritePage = () => {
           />
 
           <div className={styles.actions}>
-            <button
+            <Button
               type="button"
-              className={styles.cancelButton}
               onClick={() => navigate("/community")}
+              variant="secondary"
             >
               취소
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className={styles.submitButton}
               disabled={
                 !category || !title.trim() || !content.trim() || isSubmitting
               }
             >
               {isSubmitting ? "저장 중..." : isEditMode ? "수정" : "등록"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

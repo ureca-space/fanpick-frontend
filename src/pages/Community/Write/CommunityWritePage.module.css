@@ -154,33 +154,6 @@
   padding: 24px 44px;
 }
 
-.actions button {
-  min-width: 116px;
-  height: 48px;
-  border-radius: 8px;
-  font-family: var(--font-korean);
-  font-weight: 700;
-}
-
-.cancelButton {
-  color: var(--color-text-secondary);
-  background: var(--color-background-light);
-}
-
-.submitButton {
-  color: var(--color-text-white);
-  background: var(--color-accent);
-}
-
-.submitButton:hover:not(:disabled) {
-  background: var(--color-accent-hover);
-}
-
-.submitButton:disabled {
-  cursor: default;
-  opacity: 0.45;
-}
-
 @media (max-width: 700px) {
   .editorHeader {
     align-items: stretch;
@@ -211,7 +184,7 @@
     padding: 20px 24px;
   }
 
-  .actions button {
+  .actions > * {
     flex: 1;
     min-width: 0;
   }

@@ -4,6 +4,7 @@ import Button from "../../components/Button/Button";
 import EmptyState from "../../components/EmptyState/EmptyState";
 import FanPickDialog from "../../components/FanPickDialog/FanPickDialog";
 import PaginationControls from "../../components/PaginationControls/PaginationControls";
+import PredictionResultInsight from "../../components/PredictionResultInsight/PredictionResultInsight";
 import Skeleton from "../../components/Skeleton/Skeleton";
 import SubNav from "../../components/SubNav/SubNav";
 import useAuth from "../../contexts/useAuth";
@@ -712,10 +713,6 @@ const TeamDetailMatchCard = ({
   const hasScore = formatScoreText(match) !== "VS";
   const showPrediction = variant !== "result";
   const showAction = variant === "schedule";
-  const leaderText =
-    homeRate === awayRate
-      ? "예측 동률"
-      : `${homeRate > awayRate ? match.homeTeam.name : match.awayTeam.name} 우세`;
 
   return (
     <article className={styles.matchCard}>
@@ -769,10 +766,14 @@ const TeamDetailMatchCard = ({
       )}
 
       {variant === "prediction" && (
-        <div className={styles.predictionResultSummary}>
-          <span>{leaderText}</span>
-          <strong>{(match.participants ?? 0).toLocaleString()}명 참여</strong>
-        </div>
+        <>
+          <PredictionResultInsight match={match} />
+
+          <div className={styles.predictionResultSummary}>
+            <span>참여자</span>
+            <strong>{(match.participants ?? 0).toLocaleString()}명 참여</strong>
+          </div>
+        </>
       )}
 
       <div className={styles.matchMeta}>

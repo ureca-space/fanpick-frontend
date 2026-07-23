@@ -10,21 +10,6 @@
   padding: 38px 34px;
 }
 
-.writeButton {
-  display: grid;
-  width: 100%;
-  height: 48px;
-  place-items: center;
-  border-radius: 8px;
-  color: var(--color-text-white);
-  background: var(--color-accent);
-  font-weight: 700;
-}
-
-.writeButton:hover {
-  background: var(--color-accent-hover);
-}
-
 .categoryNav {
   display: grid;
   gap: 6px;
@@ -54,7 +39,7 @@
 
 .popularPanel {
   grid-area: popular;
-  min-height: 270px;
+  min-height: 390px;
   padding: 30px;
 }
 
@@ -89,13 +74,18 @@
   color: var(--color-accent);
 }
 
+.popularSkeletonItem {
+  min-width: 0;
+}
+
+.popularSkeletonLine {
+  width: 100%;
+  height: 14px;
+}
+
 @media (max-width: 1300px) {
   .popularPanel {
-    min-height: auto;
-  }
-
-  .popularPanel ul {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    min-height: 390px;
   }
 }
 
@@ -104,8 +94,13 @@
     padding: 20px;
   }
 
-  .writeButton {
-    width: 180px;
+  .popularPanel {
+    min-height: 230px;
+    padding: 24px;
+  }
+
+  .popularPanel ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .categoryNav {
@@ -130,6 +125,10 @@
 }
 
 @media (max-width: 700px) {
+  .popularPanel {
+    min-height: 390px;
+  }
+
   .popularPanel ul {
     grid-template-columns: 1fr;
   }
@@ -138,10 +137,6 @@
 @media (max-width: 480px) {
   .categoryPanel {
     padding: 16px;
-  }
-
-  .writeButton {
-    width: 100%;
   }
 
   .popularPanel {

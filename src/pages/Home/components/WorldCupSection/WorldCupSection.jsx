@@ -137,7 +137,7 @@ const WorldCupSection = () => {
       <section className={styles.worldCupSection}>
         <div className={`container ${styles.inner}`}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>PLAYER PICK</h2>
+            <h2 className={styles.sectionTitle}>PICK BATTLE</h2>
 
             <p className={styles.sectionDescription}>
               인기 선수 중 당신의 최애 선수를 선택해 보세요.

@@ -119,13 +119,21 @@ const MyPageSkeleton = () => (
       </section>
 
       <section className={styles.favoriteTeamsSection}>
-        <div className={styles.sectionHeader}>
-          <Skeleton.Line className={styles.skeletonSectionTitle} />
-          <Skeleton.Line className={styles.skeletonSectionDescription} />
+        <div className={styles.sectionHeaderWithNavigation}>
+          <div className={styles.sectionHeader}>
+            <Skeleton.Line className={styles.skeletonSectionTitle} />
+            <Skeleton.Line className={styles.skeletonSectionDescription} />
+          </div>
+
+          <div className={styles.skeletonSectionNavigation}>
+            <Skeleton.Line className={styles.skeletonPageCount} />
+            <Skeleton.Circle className={styles.skeletonNavigationButton} />
+            <Skeleton.Circle className={styles.skeletonNavigationButton} />
+          </div>
         </div>
 
         <div className={styles.favoriteTeamsGrid}>
-          {Array.from({ length: 3 }, (_, index) => (
+          {Array.from({ length: FAVORITE_TEAMS_PAGE_SIZE }, (_, index) => (
             <article
               key={index}
               className={`${styles.favoriteTeamCard} ${styles.skeletonStaticCard}`}
@@ -144,13 +152,21 @@ const MyPageSkeleton = () => (
       </section>
 
       <section className={styles.historySection}>
-        <div className={styles.sectionHeader}>
-          <Skeleton.Line className={styles.skeletonSectionTitle} />
-          <Skeleton.Line className={styles.skeletonSectionDescription} />
+        <div className={styles.sectionHeaderWithNavigation}>
+          <div className={styles.sectionHeader}>
+            <Skeleton.Line className={styles.skeletonSectionTitle} />
+            <Skeleton.Line className={styles.skeletonSectionDescription} />
+          </div>
+
+          <div className={styles.skeletonSectionNavigation}>
+            <Skeleton.Line className={styles.skeletonPageCount} />
+            <Skeleton.Circle className={styles.skeletonNavigationButton} />
+            <Skeleton.Circle className={styles.skeletonNavigationButton} />
+          </div>
         </div>
 
         <div className={styles.historyList}>
-          {Array.from({ length: 2 }, (_, index) => (
+          {Array.from({ length: PICK_HISTORY_PAGE_SIZE }, (_, index) => (
             <article
               key={index}
               className={`${styles.historyCard} ${styles.skeletonStaticCard}`}

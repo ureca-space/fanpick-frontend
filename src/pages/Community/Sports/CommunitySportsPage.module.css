@@ -1,0 +1,472 @@
+.page {
+  min-height: 100vh;
+  padding: var(--section-padding) 0;
+  color: var(--color-text-white);
+  background-color: var(--color-surface-dark);
+  font-family: var(--font-korean);
+}
+
+.inner {
+  display: grid;
+  gap: 48px;
+}
+
+.pageHeader {
+  max-width: 720px;
+}
+
+.eyebrow {
+  margin-bottom: 16px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 1.4px;
+}
+
+.title {
+  position: relative;
+  width: fit-content;
+  padding-bottom: 18px;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: var(--font-size-section-title);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.title::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: var(--color-accent);
+  content: "";
+}
+
+.controlArea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.filterArea {
+  flex: 1;
+  min-width: 0;
+}
+
+.sections {
+  display: grid;
+  gap: 36px;
+}
+
+.sectionCard {
+  display: grid;
+  gap: 28px;
+  padding: 28px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  background: var(--color-surface-card);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.sectionHeader h2 {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.sectionHeader > span {
+  color: rgb(255 255 255 / 55%);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sectionEyebrow {
+  margin-bottom: 12px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.tableWrap {
+  min-width: 0;
+}
+
+.standingsTable {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  color: var(--color-text-white);
+  font-size: 13px;
+}
+
+.standingsTable th,
+.standingsTable td {
+  height: 58px;
+  border-bottom: 1px solid rgb(255 255 255 / 9%);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.standingsTable th {
+  height: 42px;
+  color: rgb(255 255 255 / 55%);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.standingsTable th:first-child,
+.standingsTable td:first-child {
+  width: 56px;
+}
+
+.standingsTable th:nth-child(2),
+.standingsTable td:nth-child(2) {
+  width: 32%;
+  text-align: left;
+}
+
+.standingTeam {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 12px;
+}
+
+.standingTeam b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teamLogo {
+  display: grid;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  place-items: center;
+}
+
+.teamLogo img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.teamLogo span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-text-white);
+  background: var(--color-surface-muted);
+  font-family: var(--font-display);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.standingLogo {
+  width: 30px;
+  height: 30px;
+}
+
+.standingLogo span {
+  width: 30px;
+  height: 30px;
+  font-size: 11px;
+}
+
+.matchGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.matchCard {
+  display: grid;
+  min-width: 0;
+  gap: 22px;
+  padding: 24px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  background: rgb(24 26 42 / 62%);
+}
+
+.matchTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.matchTop span {
+  color: rgb(255 255 255 / 65%);
+  font-family: var(--font-display);
+  font-size: 12px;
+}
+
+.matchTop b {
+  color: rgb(255 255 255 / 72%);
+  font-size: 13px;
+}
+
+.matchScore {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+}
+
+.matchScore > strong {
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 20px;
+  text-align: center;
+}
+
+.matchTeam {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+}
+
+.rightTeam {
+  grid-template-columns: auto minmax(0, 1fr) 42px;
+}
+
+.rightTeam .teamLogo {
+  order: 3;
+}
+
+.rightTeam span {
+  order: 2;
+  text-align: right;
+}
+
+.rightTeam b {
+  order: 1;
+}
+
+.matchTeam span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 14px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.matchTeam b {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 24px;
+}
+
+.predictionRates {
+  display: grid;
+  gap: 8px;
+}
+
+.rateLabels {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgb(255 255 255 / 72%);
+  font-size: 12px;
+}
+
+.rateLabels span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rateLabels span:last-child {
+  text-align: right;
+}
+
+.rateLabels b {
+  color: var(--color-text-white);
+}
+
+.rateTrack {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-prediction-away);
+}
+
+.rateTrack span {
+  display: block;
+  height: 100%;
+  background: var(--color-prediction-home);
+}
+
+.participants {
+  color: rgb(255 255 255 / 55%);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.compactEmpty {
+  min-height: 180px;
+}
+
+.standingsSkeleton {
+  display: grid;
+  gap: 14px;
+}
+
+.skeletonEyebrow {
+  width: 108px;
+  height: 12px;
+  margin-bottom: 14px;
+}
+
+.skeletonTitle {
+  width: 180px;
+  height: 28px;
+}
+
+.skeletonRow {
+  width: 100%;
+  height: 42px;
+}
+
+.skeletonMatchCard {
+  height: 170px;
+}
+
+@media (max-width: 900px) {
+  .inner {
+    gap: 40px;
+  }
+
+  .controlArea {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .sectionCard {
+    padding: 22px;
+  }
+
+  .sectionHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sectionHeader h2 {
+    font-size: 24px;
+  }
+
+  .matchGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .optionalColumn {
+    display: none;
+  }
+
+  .standingsTable th,
+  .standingsTable td {
+    height: 54px;
+    font-size: 12px;
+  }
+
+  .standingsTable th:nth-child(2),
+  .standingsTable td:nth-child(2) {
+    width: 42%;
+  }
+}
+
+@media (max-width: 560px) {
+  .page {
+    padding: 42px 0 64px;
+  }
+
+  .sectionCard {
+    padding: 18px;
+  }
+
+  .standingsTable th:first-child,
+  .standingsTable td:first-child {
+    width: 38px;
+  }
+
+  .standingTeam {
+    gap: 8px;
+  }
+
+  .teamLogo {
+    width: 30px;
+    height: 30px;
+  }
+
+  .standingTeam b,
+  .matchTeam span {
+    font-size: 12px;
+  }
+
+  .matchCard {
+    padding: 18px;
+  }
+
+  .matchScore {
+    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .matchTeam {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .rightTeam {
+    grid-template-columns: minmax(0, 1fr) 30px;
+  }
+
+  .matchTeam b {
+    grid-column: 1 / -1;
+    font-size: 22px;
+  }
+
+  .rightTeam b {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+
+  .rightTeam .teamLogo {
+    order: 2;
+  }
+
+  .rightTeam span {
+    order: 1;
+  }
+
+  .standingsTable {
+    font-size: 11px;
+  }
+}

@@ -40,6 +40,9 @@ const MyPredictionCard = ({ match, selection, result = "pending" }) => {
           <TeamMark team={match.homeTeam} />
           <span>
             <strong>{match.homeTeam.name}</strong>
+            {!isAwaySelected && (
+              <small className={styles.myPickBadge}>내 선택</small>
+            )}
             <small>{homeRate}%</small>
           </span>
           <b>{match.homeScore ?? "-"}</b>
@@ -51,6 +54,9 @@ const MyPredictionCard = ({ match, selection, result = "pending" }) => {
           <b>{match.awayScore ?? "-"}</b>
           <span>
             <strong>{match.awayTeam.name}</strong>
+            {isAwaySelected && (
+              <small className={styles.myPickBadge}>내 선택</small>
+            )}
             <small>{awayRate}%</small>
           </span>
           <TeamMark team={match.awayTeam} />

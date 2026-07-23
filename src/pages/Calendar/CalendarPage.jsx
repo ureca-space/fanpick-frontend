@@ -15,7 +15,7 @@ const CalendarPage = () => {
         <div className={`container ${styles.inner}`}>
           <header className={styles.pageHeader}>
             <p className={styles.eyebrow}>FANPICK MATCH CENTER</p>
-            <h1 className={styles.title}>CALENDAR</h1>
+            <h1 className={styles.title}>캘린더</h1>
           </header>
         </div>
       </section>
