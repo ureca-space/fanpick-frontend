@@ -1,0 +1,165 @@
+.playerRecord {
+  display: grid;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: rgba(238, 241, 255, 0.5);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.title {
+  margin: 0;
+  color: #eef1ff;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.subtitle {
+  margin: 0;
+  color: rgba(238, 241, 255, 0.56);
+  font-size: 0.82rem;
+}
+
+.sections {
+  display: grid;
+  gap: 16px;
+}
+
+.sectionCard {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.sectionHeader h4 {
+  margin: 0;
+  color: #eef1ff;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.sectionHeader p {
+  margin: 4px 0 0;
+  color: rgba(238, 241, 255, 0.56);
+  font-size: 0.8rem;
+}
+
+.sectionHeader span {
+  color: rgba(238, 241, 255, 0.56);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.playerCard {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(10, 12, 23, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.playerTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.playerImage {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.playerInfo {
+  min-width: 0;
+}
+
+.playerName {
+  margin: 0;
+  color: #eef1ff;
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.playerMeta {
+  margin: 4px 0 0;
+  color: rgba(238, 241, 255, 0.58);
+  font-size: 0.78rem;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tagList li {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 51, 91, 0.12);
+  color: #ff6781;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.metricList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metricItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: rgba(238, 241, 255, 0.76);
+  font-size: 0.8rem;
+}
+
+.metricItem strong {
+  color: #eef1ff;
+}
+
+@media (max-width: 980px) {
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+}

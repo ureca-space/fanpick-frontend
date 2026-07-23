@@ -1,0 +1,153 @@
+.lineUp {
+  display: grid;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: rgba(238, 241, 255, 0.5);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.title {
+  margin: 0;
+  color: #eef1ff;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.subtitle {
+  margin: 0;
+  color: rgba(238, 241, 255, 0.56);
+  font-size: 0.82rem;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.teamPanel {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.teamHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  color: #eef1ff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.teamHeader strong {
+  color: rgba(238, 241, 255, 0.6);
+  font-size: 0.72rem;
+}
+
+.playerList {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.playerCard {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) minmax(180px, 0.8fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(10, 12, 23, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.playerOrder {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(255, 51, 91, 0.16);
+  color: #ff335b;
+  font-weight: 800;
+}
+
+.playerProfile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.playerImage {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.playerInfo {
+  min-width: 0;
+}
+
+.playerName {
+  margin: 0;
+  color: #eef1ff;
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.playerMeta {
+  margin: 4px 0 0;
+  color: rgba(238, 241, 255, 0.58);
+  font-size: 0.78rem;
+}
+
+.statList {
+  display: grid;
+  gap: 8px;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgba(238, 241, 255, 0.76);
+  font-size: 0.8rem;
+}
+
+.statRow strong {
+  color: #eef1ff;
+}
+
+@media (max-width: 980px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .playerCard {
+    grid-template-columns: 1fr;
+  }
+}

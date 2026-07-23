@@ -54,7 +54,7 @@ const TEAM_INFO = {
     logo: "/logos/kiwoom.png",
   },
   KT: {
-    name: "KT 위즈",
+    name: "KT 트위즈",
     shortName: "KT",
     logo: "/logos/kt.png",
   },

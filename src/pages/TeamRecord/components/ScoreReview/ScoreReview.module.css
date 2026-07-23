@@ -1,0 +1,103 @@
+.scoreReview {
+  display: grid;
+  gap: 22px;
+  color: #eef1ff;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: rgba(238, 241, 255, 0.5);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.title {
+  margin: 0;
+  color: #eef1ff;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.subtitle {
+  margin: 0;
+  color: rgba(238, 241, 255, 0.56);
+  font-size: 0.82rem;
+}
+
+.summaryCard {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.summaryMain {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.summaryMain span {
+  color: rgba(238, 241, 255, 0.56);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.summaryMain strong {
+  color: #eef1ff;
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.summaryMain small {
+  color: rgba(238, 241, 255, 0.56);
+  font-size: 0.8rem;
+}
+
+.ratingGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ratingItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(10, 12, 23, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.ratingItem span {
+  color: rgba(238, 241, 255, 0.68);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.ratingItem strong {
+  color: #eef1ff;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .ratingGrid {
+    grid-template-columns: 1fr;
+  }
+}

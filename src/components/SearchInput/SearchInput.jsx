@@ -39,7 +39,7 @@ const SearchInput = ({
 
   useEffect(() => {
     return () => {
-      window.clearTimeout(timerRef.current);
+  window.clearTimeout(timerRef.current);
     };
   }, []);
 

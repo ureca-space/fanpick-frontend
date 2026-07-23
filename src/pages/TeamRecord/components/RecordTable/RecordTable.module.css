@@ -7,8 +7,8 @@
 }
 
 .table {
-  width: 100%;
-  min-width: 1080px;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
   color: var(--color-text-white);
 }
@@ -32,6 +32,7 @@
   line-height: 1.35;
   border-bottom: 1px solid rgb(255 255 255 / 6%);
   white-space: nowrap;
+  vertical-align: middle;
 }
 
 .row:nth-child(odd) .bodyCell {
@@ -56,4 +57,16 @@
 
 .alignLeft {
   text-align: left;
+}
+
+@media (max-width: 720px) {
+  .table {
+    min-width: 960px;
+  }
+
+  .headerCell,
+  .bodyCell {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
 }
