@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SearchInput from "../../components/SearchInput/SearchInput";
 import PillTabs from "./components/PillTabs/PillTabs";
 import RecordTable from "./components/RecordTable/RecordTable";
@@ -63,7 +63,66 @@ const matchesQuery = (query, fields = []) => {
   return fields.some((field) => normalizeText(field).includes(normalizedQuery));
 };
 
-const getImageUrl = (...urls) => urls.find(Boolean) || "";
+const FALLBACK_IMAGE_URL = "/fanpick_logo.svg";
+
+const BROKEN_IMAGE_URLS = new Set([
+  "https://sports-phinf.pstatic.net/player/kfootball/default/20190178.png",
+  "https://sports-phinf.pstatic.net/player/kfootball/default/20230255.png",
+  "https://sports-phinf.pstatic.net/player/kfootball/default/20210155.png",
+  "https://sports-phinf.pstatic.net/player/kfootball/default/20250166.png",
+  "https://sports-phinf.pstatic.net/player/kfootball/default/20260332.png",
+  "https://sports-phinf.pstatic.net/player/kfootball/default/20260282.png",
+  "https://sports-phinf.pstatic.net/player/kfootball/default/20260284.png",
+  "hhttps://ssl.pstatic.net/sstatic/people/profileImg/t/7e68a7dd-43e8-4cca-9540-dda3e777f7d2.png",
+]);
+
+const isValidImageUrl = (url) =>
+  typeof url === "string" && /^https?:\/\//.test(url) && !BROKEN_IMAGE_URLS.has(url);
+
+const getImageUrl = (...urls) => urls.find(isValidImageUrl) || FALLBACK_IMAGE_URL;
+
+const uniqueBy = (rows = [], getKey) => {
+  const seen = new Set();
+
+  return rows.filter((row) => {
+    const key = getKey(row);
+
+    if (!key || seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+};
+
+const TeamRecordImage = ({ src, className, alt = "", fallbackSrc = FALLBACK_IMAGE_URL }) => {
+  const [currentSrc, setCurrentSrc] = useState(src || fallbackSrc);
+  const [isFallback, setIsFallback] = useState(!src);
+
+  useEffect(() => {
+    setCurrentSrc(src || fallbackSrc);
+    setIsFallback(!src || src === fallbackSrc);
+  }, [fallbackSrc, src]);
+
+  return (
+    <img
+      className={[className, isFallback ? styles.fallbackImage : ""].filter(Boolean).join(" ")}
+      src={currentSrc}
+      alt={alt}
+      aria-hidden="true"
+      onError={(event) => {
+        if (event.currentTarget.dataset.fallbackApplied === "true") {
+          return;
+        }
+
+        event.currentTarget.dataset.fallbackApplied = "true";
+        setCurrentSrc(fallbackSrc);
+        setIsFallback(true);
+      }}
+    />
+  );
+};
 
 const getRankValue = (row) => row.rank ?? row.ranking ?? "-";
 
@@ -89,6 +148,8 @@ const collectTeamTabs = (rows = []) => {
 
 const buildEsportsPlayerRows = (rows = []) => rows.map((row) => ({ ...row }));
 
+const getEsportsPlayerDisplayName = (row) => row.playerFullName || row.playerName;
+
 const buildBaseballPlayerRows = () =>
   [...BASEBALL_HITTER_RECORDS, ...BASEBALL_PITCHER_RECORDS].map((row, index) => ({
     ...row,
@@ -104,7 +165,9 @@ const buildSoccerTeamRows = (leagueKey) =>
   }));
 
 const buildSoccerPlayerRows = (leagueKey) =>
-  (leagueKey === "k2" ? SOCCER_PLAYER_RECORDS_K2 : SOCCER_PLAYER_RECORDS_K1).map((row, index) => ({
+  uniqueBy(leagueKey === "k2" ? SOCCER_PLAYER_RECORDS_K2 : SOCCER_PLAYER_RECORDS_K1, (row) =>
+    row.playerId ? `${row.teamId}:${row.playerId}` : `${row.teamId}:${row.playerName}`,
+  ).map((row, index) => ({
     ...row,
     rank: row.rank ?? row.ranking ?? index + 1,
     imageUrl: getImageUrl(row.imageUrl, row.playerImageUrl, row.image),
@@ -123,7 +186,7 @@ const getSearchFields = (row, sport, view) => {
     return [row.playerName, row.teamName, row.teamShortName, row.position, row.kind];
   }
 
-  return [row.playerName, row.teamName, row.teamShortName, row.position, row.backNumber];
+  return [row.playerName, row.teamShortName, row.position, row.teamId];
 };
 
 const esportsTeamColumns = [
@@ -137,12 +200,12 @@ const esportsTeamColumns = [
     key: "team",
     label: "Team",
     render: (row) => (
-      <div className={styles.nameCell}>
-        <img className={styles.logo} src={getImageUrl(row.imageUrl, row.logoUrl, row.teamImageUrl)} alt="" aria-hidden="true" />
+      <div className={`${styles.nameCell} ${styles.teamCell}`}>
         <div>
           <strong>{row.teamShortName}</strong>
           <span>{row.teamName}</span>
         </div>
+        <TeamRecordImage className={styles.logo} src={getImageUrl(row.imageUrl, row.logoUrl, row.teamImageUrl)} />
       </div>
     ),
   },
@@ -172,15 +235,10 @@ const esportsPlayerColumns = [
     label: "Player",
     render: (row) => (
       <div className={styles.nameCell}>
-        <img
-          className={styles.avatar}
-          src={getImageUrl(row.imageUrl, row.playerImageUrl, row.image)}
-          alt=""
-          aria-hidden="true"
-        />
+        <TeamRecordImage className={styles.avatar} src={getImageUrl(row.imageUrl, row.playerImageUrl, row.image)} />
         <div>
-          <strong>{row.playerName}</strong>
-          <span>{row.playerFullName}</span>
+          <strong>{getEsportsPlayerDisplayName(row)}</strong>
+          <span>{row.playerName}</span>
         </div>
       </div>
     ),
@@ -212,12 +270,12 @@ const baseballTeamColumns = [
     key: "team",
     label: "Team",
     render: (row) => (
-      <div className={styles.nameCell}>
-        <img className={styles.logo} src={getImageUrl(row.logoUrl, row.imageUrl, row.teamImageUrl)} alt="" aria-hidden="true" />
+      <div className={`${styles.nameCell} ${styles.teamCell}`}>
         <div>
           <strong>{row.teamShortName}</strong>
           <span>{row.teamName}</span>
         </div>
+        <TeamRecordImage className={styles.logo} src={getImageUrl(row.logoUrl, row.imageUrl, row.teamImageUrl)} />
       </div>
     ),
   },
@@ -245,12 +303,7 @@ const baseballPlayerColumns = [
     label: "Player",
     render: (row) => (
       <div className={styles.nameCell}>
-        <img
-          className={styles.avatar}
-          src={getImageUrl(row.imageUrl, row.playerImageUrl, row.image)}
-          alt=""
-          aria-hidden="true"
-        />
+        <TeamRecordImage className={styles.avatar} src={getImageUrl(row.imageUrl, row.playerImageUrl, row.image)} />
         <div>
           <strong>{row.playerName}</strong>
           <span>{row.position}</span>
@@ -304,12 +357,12 @@ const soccerTeamColumns = [
     key: "team",
     label: "Team",
     render: (row) => (
-      <div className={styles.nameCell}>
-        <img className={styles.logo} src={row.logoUrl} alt="" aria-hidden="true" />
+      <div className={`${styles.nameCell} ${styles.teamCell}`}>
         <div>
           <strong>{row.teamShortName}</strong>
           <span>{row.teamName}</span>
         </div>
+        <TeamRecordImage className={styles.logo} src={row.logoUrl} />
       </div>
     ),
   },
@@ -336,7 +389,7 @@ const soccerPlayerColumns = [
     label: "Player",
     render: (row) => (
       <div className={styles.nameCell}>
-        <img className={styles.avatar} src={row.imageUrl} alt="" aria-hidden="true" />
+        <TeamRecordImage className={styles.avatar} src={row.imageUrl} />
         <div>
           <strong>{row.playerName}</strong>
           <span>{row.position}</span>

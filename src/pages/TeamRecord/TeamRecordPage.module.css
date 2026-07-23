@@ -146,6 +146,17 @@
   min-width: 0;
 }
 
+.teamCell {
+  width: 100%;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.teamCell > div {
+  min-width: 0;
+  flex: 1;
+}
+
 .logo,
 .avatar {
   width: 44px;
@@ -156,11 +167,19 @@
   flex-shrink: 0;
 }
 
+.fallbackImage {
+  filter: grayscale(1) saturate(0.15) brightness(1.12);
+  opacity: 0.9;
+}
+
 .nameCell strong {
   display: block;
   color: var(--color-text-white);
   font-size: 14px;
   font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nameCell span {
@@ -169,6 +188,9 @@
   color: rgb(255 255 255 / 58%);
   font-size: 12px;
   line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rankBadge {
@@ -220,5 +242,22 @@
   .section {
     margin-top: 28px;
     padding: 18px;
+  }
+
+  .teamCell {
+    gap: 8px;
+  }
+
+  .teamCell .logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .teamCell strong {
+    font-size: 13px;
+  }
+
+  .teamCell span {
+    display: none;
   }
 }
