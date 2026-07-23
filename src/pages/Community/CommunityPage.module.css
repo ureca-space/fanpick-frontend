@@ -59,10 +59,6 @@
   min-width: 0;
 }
 
-.loadingSpace {
-  min-height: 520px;
-}
-
 .boardHeader {
   display: flex;
   align-items: flex-end;
@@ -188,6 +184,7 @@
 
 .pagination {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 5px;
   margin-top: 42px;
@@ -204,19 +201,85 @@
   font-size: 13px;
 }
 
+.pagination svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.4;
+}
+
 .pagination button:hover,
 .pagination .activePage {
   color: var(--color-text-white);
   background: var(--color-accent);
 }
 
+.pagination button:disabled {
+  cursor: default;
+  opacity: 0.38;
+}
+
+.pagination button:disabled:hover {
+  color: rgb(255 255 255 / 78%);
+  background: transparent;
+}
+
+.skeletonHeaderTitle {
+  width: 96px;
+  height: 12px;
+}
+
+.skeletonHeaderMeta {
+  justify-self: center;
+  width: 46px;
+  height: 12px;
+}
+
+.skeletonPostTitle {
+  width: min(100%, 420px);
+  height: 14px;
+}
+
+.skeletonPostAuthor {
+  justify-self: center;
+  width: 56px;
+  height: 13px;
+}
+
+.skeletonPostDate {
+  justify-self: center;
+  width: 42px;
+  height: 13px;
+}
+
+.skeletonPostViews {
+  justify-self: center;
+  width: 36px;
+  height: 13px;
+}
+
+.skeletonPageButton {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+}
+
 @media (max-width: 1300px) {
   .layout {
+    grid-template-columns: 190px minmax(0, 1fr) 240px;
+    grid-template-areas: "category board popular";
+    gap: 28px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .layout {
     grid-template-columns: 200px minmax(0, 1fr);
-    grid-template-areas:
-      "category board"
-      "category popular";
+    grid-template-areas: "category board";
     gap: 32px;
+  }
+
+  .desktopPopularPanel {
+    display: none;
   }
 }
 
@@ -225,11 +288,9 @@
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "category"
-      "board"
-      "popular";
+      "board";
     gap: 40px;
   }
-
 }
 
 @media (max-width: 700px) {
@@ -279,5 +340,4 @@
   .tableHeader {
     font-size: 11px;
   }
-
 }

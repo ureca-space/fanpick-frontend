@@ -127,7 +127,14 @@
 .teamButton.selected {
   border-color: var(--color-accent);
   color: var(--color-text-white);
-  background-color: rgb(227 27 54 / 18%);
+  background:
+    linear-gradient(90deg, rgb(227 27 54 / 28%), rgb(227 27 54 / 12%)),
+    rgb(227 27 54 / 12%);
+  box-shadow: inset 0 0 0 1px rgb(227 27 54 / 35%);
+}
+
+.teamButton.selected .teamText strong {
+  color: var(--color-text-white);
 }
 
 .teamIdentity {
@@ -157,6 +164,17 @@
   font-size: 13px;
 }
 
+.myPickBadge {
+  width: fit-content;
+  padding: 4px 7px;
+  border-radius: 999px;
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+
 .teamButton b {
   font-size: 26px;
 }
@@ -171,6 +189,10 @@
 
 .awayTeam .teamText {
   align-items: flex-end;
+}
+
+.awayTeam .myPickBadge {
+  align-self: flex-end;
 }
 
 .matchCard > small {
@@ -318,6 +340,10 @@
 
   .awayTeam .teamText {
     align-items: flex-start;
+  }
+
+  .awayTeam .myPickBadge {
+    align-self: flex-start;
   }
 
   .awayTeam > b {

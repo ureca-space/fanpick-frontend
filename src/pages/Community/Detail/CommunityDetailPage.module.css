@@ -37,18 +37,6 @@
   margin-bottom: 16px;
 }
 
-.controlButton {
-  display: grid;
-  min-width: 84px;
-  height: 42px;
-  place-items: center;
-  border: 1px solid rgb(255 255 255 / 18%);
-  border-radius: 8px;
-  background: var(--color-surface-card);
-  font-size: 13px;
-  font-weight: 700;
-}
-
 .article {
   overflow: hidden;
 }
@@ -136,10 +124,6 @@
   background: transparent;
 }
 
-.loadingSpace {
-  min-height: 720px;
-}
-
 .nicknameWithBadge {
   display: flex;
   align-items: center;
@@ -172,6 +156,7 @@
 }
 
 .commentSection {
+  min-height: 470px;
   padding: 28px 42px 46px;
 }
 
@@ -219,7 +204,7 @@
 
 .commentForm button:disabled {
   cursor: default;
-  background: #a6a6a6;
+  background: var(--color-surface-muted);
 }
 
 .commentList {
@@ -357,7 +342,7 @@
 
 .replyActions button:disabled {
   cursor: default;
-  background: #a6a6a6;
+  background: var(--color-surface-muted);
 }
 
 .replyItem {
@@ -384,6 +369,93 @@
   color: rgb(255 255 255 / 48%);
 }
 
+.detailSkeleton {
+  pointer-events: none;
+}
+
+.skeletonControl {
+  width: 62px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.skeletonCategory {
+  width: 72px;
+  height: 13px;
+}
+
+.skeletonTitle {
+  width: min(100%, 420px);
+  height: 28px;
+  margin-top: 14px;
+}
+
+.skeletonAuthor {
+  width: 112px;
+  height: 14px;
+}
+
+.skeletonMeta {
+  width: 80px;
+  height: 11px;
+}
+
+.skeletonAvatar {
+  width: 42px;
+  height: 42px;
+}
+
+.skeletonContentLines {
+  display: grid;
+  gap: 14px;
+}
+
+.skeletonContentLine {
+  height: 15px;
+}
+
+.skeletonCommentTitle {
+  width: 72px;
+  height: 13px;
+  margin-bottom: 14px;
+}
+
+.skeletonCommentBox {
+  width: 100%;
+  height: 126px;
+  border-radius: 8px;
+}
+
+.skeletonCommentList {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.skeletonCommentItem {
+  display: flex;
+  gap: 12px;
+  padding: 18px 12px;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+}
+
+.skeletonCommentItem > div {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+}
+
+.skeletonSmallAvatar {
+  width: 26px;
+  height: 26px;
+}
+
+.skeletonCommentLine {
+  width: min(100%, 420px);
+  height: 13px;
+}
+
 @media (max-width: 1300px) {
   .layout {
     grid-template-columns: 200px minmax(0, 1fr);
@@ -401,7 +473,6 @@
       "main"
       "popular";
   }
-
 }
 
 @media (max-width: 600px) {

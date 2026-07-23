@@ -75,7 +75,7 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
       >
         <button
           type="button"
-          className={`${styles.teamButton} ${!match.isFinished && isHomeSelected ? styles.selected : ""}`}
+          className={`${styles.teamButton} ${isHomeSelected ? styles.selected : ""}`}
           disabled={isHomeDisabled}
           onClick={() => onSelect(match, "home")}
         >
@@ -83,6 +83,9 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
             <TeamMark team={match.homeTeam} />
             <span className={styles.teamText}>
               <strong>{match.homeTeam.name}</strong>
+              {isHomeSelected && (
+                <small className={styles.myPickBadge}>내 선택</small>
+              )}
               {match.isFinished && <small>{homeRate}%</small>}
             </span>
           </span>
@@ -95,7 +98,7 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
 
         <button
           type="button"
-          className={`${styles.teamButton} ${styles.awayTeam} ${!match.isFinished && isAwaySelected ? styles.selected : ""}`}
+          className={`${styles.teamButton} ${styles.awayTeam} ${isAwaySelected ? styles.selected : ""}`}
           disabled={isAwayDisabled}
           onClick={() => onSelect(match, "away")}
         >
@@ -107,6 +110,9 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
           <span className={styles.teamIdentity}>
             <span className={styles.teamText}>
               <strong>{match.awayTeam.name}</strong>
+              {isAwaySelected && (
+                <small className={styles.myPickBadge}>내 선택</small>
+              )}
               {match.isFinished && <small>{awayRate}%</small>}
             </span>
             <TeamMark team={match.awayTeam} />

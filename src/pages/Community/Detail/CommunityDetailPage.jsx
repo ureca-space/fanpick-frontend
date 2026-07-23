@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import Button from "../../../components/Button/Button";
 import EmptyState from "../../../components/EmptyState/EmptyState";
 import FanPickDialog from "../../../components/FanPickDialog/FanPickDialog";
+import Skeleton from "../../../components/Skeleton/Skeleton";
 import useAuth from "../../../contexts/useAuth";
 import {
   createCommunityComment,
@@ -102,6 +104,66 @@ const ProfileAvatar = ({ avatarUrl, className, name }) => {
     </span>
   );
 };
+
+const CommunityDetailSkeleton = () => (
+  <section className={styles.page} aria-label="게시글 불러오는 중">
+    <div className={`container ${styles.layout}`}>
+      <CommunitySidebars isPopularLoading popularPosts={[]} />
+
+      <main className={styles.mainArea}>
+        <div className={styles.pageControls}>
+          <Skeleton.Box className={styles.skeletonControl} />
+          <div>
+            <Skeleton.Box className={styles.skeletonControl} />
+            <Skeleton.Box className={styles.skeletonControl} />
+          </div>
+        </div>
+
+        <article className={`${styles.article} ${styles.detailSkeleton}`}>
+          <div className={styles.articleHeader}>
+            <Skeleton.Line className={styles.skeletonCategory} />
+            <Skeleton.Line className={styles.skeletonTitle} />
+            <div className={styles.authorInfo}>
+              <Skeleton.Circle className={styles.skeletonAvatar} />
+              <div>
+                <Skeleton.Line className={styles.skeletonAuthor} />
+                <Skeleton.Line className={styles.skeletonMeta} />
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.articleContent}>
+            <div className={styles.skeletonContentLines}>
+              {["92%", "80%", "68%", "88%", "74%", "52%"].map((width) => (
+                <Skeleton.Line
+                  className={styles.skeletonContentLine}
+                  key={width}
+                  width={width}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.commentSection}>
+            <Skeleton.Line className={styles.skeletonCommentTitle} />
+            <Skeleton.Box className={styles.skeletonCommentBox} />
+            <div className={styles.skeletonCommentList}>
+              {Array.from({ length: 4 }, (_, index) => (
+                <div className={styles.skeletonCommentItem} key={index}>
+                  <Skeleton.Circle className={styles.skeletonSmallAvatar} />
+                  <div>
+                    <Skeleton.Line className={styles.skeletonAuthor} />
+                    <Skeleton.Line className={styles.skeletonCommentLine} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </article>
+      </main>
+    </div>
+  </section>
+);
 
 const CommunityDetailPage = () => {
   const { postId } = useParams();
@@ -368,11 +430,7 @@ const CommunityDetailPage = () => {
   };
 
   if (isLoading) {
-    return (
-      <section className={styles.page} aria-label="게시글 불러오는 중">
-        <div className={`container ${styles.loadingSpace}`} />
-      </section>
-    );
+    return <CommunityDetailSkeleton />;
   }
 
   if (errorMessage || !post) {
@@ -386,26 +444,28 @@ const CommunityDetailPage = () => {
 
         <main className={styles.mainArea}>
           <div className={styles.pageControls}>
-            <Link to="/community" className={styles.controlButton}>
+            <Button size="sm" to="/community" variant="secondary">
               목록
-            </Link>
+            </Button>
 
             <div>
               {previousPost && (
-                <Link
+                <Button
+                  size="sm"
                   to={`/community/${previousPost.id}`}
-                  className={styles.controlButton}
+                  variant="secondary"
                 >
                   이전글
-                </Link>
+                </Button>
               )}
               {nextPost && (
-                <Link
+                <Button
+                  size="sm"
                   to={`/community/${nextPost.id}`}
-                  className={styles.controlButton}
+                  variant="secondary"
                 >
                   다음글
-                </Link>
+                </Button>
               )}
             </div>
           </div>

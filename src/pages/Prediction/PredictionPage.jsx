@@ -926,7 +926,7 @@ const PredictionPage = () => {
         <header className={styles.hero}>
           <p className={styles.eyebrow}>FANPICK PREDICTION</p>
 
-          <h1 className={styles.title}>PREDICTION</h1>
+          <h1 className={styles.title}>승부 예측</h1>
 
           <p className={styles.description}>
             오늘의 경기와 나의 승부 예측 기록을 확인해 보세요.
