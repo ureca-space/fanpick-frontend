@@ -1,27 +1,89 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import useAuth from "../../../contexts/useAuth";
+import {
+  createCommunityPost,
+  fetchCommunityPost,
+  updateCommunityPost,
+} from "../../../services/communityApi";
 import styles from "./CommunityWritePage.module.css";
 
 const CATEGORY_OPTIONS = [
   { value: "lck", label: "LCK" },
-  { value: "baseball", label: "국내야구" },
-  { value: "soccer", label: "국내축구" },
+  { value: "baseball", label: "KBO" },
+  { value: "soccer", label: "K-LEAGUE" },
 ];
 
 const CommunityWritePage = () => {
   const navigate = useNavigate();
+  const { postId } = useParams();
+  const { user } = useAuth();
+  const isEditMode = Boolean(postId);
   const [category, setCategory] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event) => {
+  useEffect(() => {
+    if (!isEditMode) return;
+
+    const loadPost = async () => {
+      try {
+        const post = await fetchCommunityPost(postId);
+
+        if (post.user_id !== user?.id) {
+          alert("작성자만 게시글을 수정할 수 있습니다.");
+          navigate(`/community/${postId}`, { replace: true });
+          return;
+        }
+
+        setCategory(post.category);
+        setTitle(post.title);
+        setContent(post.content);
+      } catch (error) {
+        console.error("수정할 게시글 조회 오류:", error);
+        alert("게시글을 불러오지 못했습니다.");
+        navigate("/community", { replace: true });
+      }
+    };
+
+    if (user) loadPost();
+  }, [isEditMode, navigate, postId, user]);
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!category || !title.trim() || !content.trim() || isSubmitting) return;
+    if (!user) {
+      alert("로그인 후 글을 작성할 수 있습니다.");
+      navigate("/login", { state: { from: "/community/write" } });
+      return;
+    }
 
-    // - Supabase posts 테이블 연결 후 이 위치에서 저장
-    if (!category || !title.trim() || !content.trim()) return;
-
-    navigate("/community");
+    try {
+      setIsSubmitting(true);
+      if (isEditMode) {
+        await updateCommunityPost(postId, {
+          category,
+          title: title.trim(),
+          content: content.trim(),
+        });
+        navigate(`/community/${postId}`, { replace: true });
+      } else {
+        const post = await createCommunityPost({
+          user,
+          category,
+          title: title.trim(),
+          content: content.trim(),
+        });
+        navigate(`/community/${post.id}`, { replace: true });
+      }
+    } catch (error) {
+      console.error("게시글 저장 오류:", error);
+      alert(`게시글을 저장하지 못했습니다.\n${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -29,7 +91,7 @@ const CommunityWritePage = () => {
       <div className={`container ${styles.inner}`}>
         <form className={styles.editor} onSubmit={handleSubmit}>
           <div className={styles.editorHeader}>
-            <h1>글쓰기</h1>
+            <h1>{isEditMode ? "글 수정" : "글쓰기"}</h1>
 
             <div
               className={`${styles.selectWrap} ${isSelectOpen ? styles.selectOpen : ""}`}
@@ -106,9 +168,11 @@ const CommunityWritePage = () => {
             <button
               type="submit"
               className={styles.submitButton}
-              disabled={!category || !title.trim() || !content.trim()}
+              disabled={
+                !category || !title.trim() || !content.trim() || isSubmitting
+              }
             >
-              등록
+              {isSubmitting ? "저장 중..." : isEditMode ? "수정" : "등록"}
             </button>
           </div>
         </form>

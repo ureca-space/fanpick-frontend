@@ -9,6 +9,9 @@ const FanPickDialog = ({
   cancelText = "",
   onConfirm,
   onClose,
+  showCloseButton = true,
+  showAccentLine = true,
+  lockBodyScroll = true,
 }) => {
   const titleId = useId();
   const descriptionId = useId();
@@ -18,7 +21,9 @@ const FanPickDialog = ({
 
     const previousOverflow = document.body.style.overflow;
 
-    document.body.style.overflow = "hidden";
+    if (lockBodyScroll) {
+      document.body.style.overflow = "hidden";
+    }
 
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
@@ -29,10 +34,12 @@ const FanPickDialog = ({
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      if (lockBodyScroll) {
+        document.body.style.overflow = previousOverflow;
+      }
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, lockBodyScroll, onClose]);
 
   if (!isOpen) return null;
 
@@ -53,16 +60,18 @@ const FanPickDialog = ({
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
       >
-        <div className={styles.accentLine} />
+        {showAccentLine && <div className={styles.accentLine} />}
 
-        <button
-          className={styles.closeButton}
-          type="button"
-          aria-label="다이얼로그 닫기"
-          onClick={onClose}
-        >
-          ×
-        </button>
+        {showCloseButton && (
+          <button
+            className={styles.closeButton}
+            type="button"
+            aria-label="다이얼로그 닫기"
+            onClick={onClose}
+          >
+            ×
+          </button>
+        )}
 
         <h2 id={titleId} className={styles.title}>
           {title}

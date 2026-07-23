@@ -14,49 +14,10 @@
   gap: 32px;
 }
 
-.categoryPanel,
-.article,
-.popularPanel {
+.article {
   border: 1px solid rgb(255 255 255 / 10%);
   border-radius: 8px;
   background: var(--color-surface-card);
-}
-
-.categoryPanel {
-  grid-area: category;
-  padding: 38px 34px;
-}
-
-.writeButton {
-  display: grid;
-  width: 100%;
-  height: 48px;
-  place-items: center;
-  border-radius: 8px;
-  color: var(--color-text-white);
-  background: var(--color-accent);
-  font-weight: 700;
-}
-
-.categoryNav {
-  display: grid;
-  gap: 6px;
-  margin-top: 28px;
-}
-
-.categoryNav a {
-  padding: 14px 8px;
-  color: rgb(255 255 255 / 72%);
-}
-
-.categoryNav a:first-child {
-  margin-bottom: 8px;
-  padding-bottom: 22px;
-  border-bottom: 1px solid rgb(255 255 255 / 10%);
-}
-
-.categoryNav a:hover {
-  color: var(--color-text-white);
 }
 
 .mainArea {
@@ -118,21 +79,83 @@
 
 .avatar,
 .smallAvatar {
-  display: block;
+  display: flex;
   flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   border-radius: 50%;
-  background: #d9d9d9;
+  color: var(--color-text-white);
+  background: var(--color-accent);
+  font-weight: 700;
   object-fit: cover;
 }
 
 .avatar {
   width: 42px;
   height: 42px;
+  font-size: 15px;
 }
 
 .authorInfo div {
   display: grid;
   gap: 4px;
+}
+
+.authorMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 16px;
+}
+
+.authorMeta small {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.postActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.postActions a,
+.postActions button {
+  padding: 0;
+  color: rgb(255 255 255 / 48%);
+  background: transparent;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.postActions a:hover,
+.postActions button:hover {
+  color: var(--color-text-white);
+  background: transparent;
+}
+
+.loadingSpace {
+  min-height: 720px;
+}
+
+.nicknameWithBadge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.predictionBadge {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .authorInfo small,
@@ -171,6 +194,7 @@
 .smallAvatar {
   width: 26px;
   height: 26px;
+  font-size: 10px;
 }
 
 .commentForm textarea {
@@ -360,60 +384,16 @@
   color: rgb(255 255 255 / 48%);
 }
 
-.popularPanel {
-  grid-area: popular;
-  min-height: 270px;
-  padding: 30px;
-}
-
-.popularPanel h2 {
-  margin-bottom: 24px;
-  font-family: var(--font-display);
-  font-size: 20px;
-  line-height: 1.2;
-}
-
-.popularPanel ul {
-  display: grid;
-  gap: 16px;
-}
-
-.popularPanel a {
-  display: flex;
-  min-width: 0;
-  color: rgb(255 255 255 / 82%);
-  font-size: 13px;
-}
-
-.popularPanel span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.popularPanel b {
-  margin-left: 4px;
-  color: var(--color-accent);
-}
-
-@media (max-width: 1200px) {
+@media (max-width: 1300px) {
   .layout {
     grid-template-columns: 200px minmax(0, 1fr);
     grid-template-areas:
       "category main"
       "category popular";
   }
-
-  .popularPanel {
-    min-height: auto;
-  }
-
-  .popularPanel ul {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .layout {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
@@ -422,22 +402,6 @@
       "popular";
   }
 
-  .categoryPanel {
-    padding: 20px;
-  }
-
-  .categoryNav {
-    display: flex;
-    overflow-x: auto;
-  }
-
-  .categoryNav a,
-  .categoryNav a:first-child {
-    flex: 0 0 auto;
-    margin: 0;
-    padding: 10px 14px;
-    border: 0;
-  }
 }
 
 @media (max-width: 600px) {
@@ -460,9 +424,5 @@
 
   .articleContent {
     min-height: 260px;
-  }
-
-  .popularPanel ul {
-    grid-template-columns: 1fr;
   }
 }
