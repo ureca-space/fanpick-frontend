@@ -14,6 +14,12 @@ const MatchSchedulePage = lazy(
 const CalendarPage = lazy(() => import("../pages/Calendar/CalendarPage"));
 const PredictionPage = lazy(() => import("../pages/Prediction/PredictionPage"));
 const CommunityPage = lazy(() => import("../pages/Community/CommunityPage"));
+const CommunityWritePage = lazy(
+  () => import("../pages/Community/Write/CommunityWritePage"),
+);
+const CommunityDetailPage = lazy(
+  () => import("../pages/Community/Detail/CommunityDetailPage"),
+);
 const WorldCupPage = lazy(() => import("../pages/WorldCup/WorldCupPage"));
 const WorldCupPlayPage = lazy(
   () => import("../pages/WorldCupPlay/WorldCupPlayPage"),
@@ -47,6 +53,8 @@ const AppRouter = () => {
             <Route path="/matches" element={<MatchSchedulePage />} />
             <Route path="/prediction" element={<PredictionPage />} />
             <Route path="/community" element={<CommunityPage />} />
+            <Route path="/community/write" element={<CommunityWritePage />} />
+            <Route path="/community/:postId" element={<CommunityDetailPage />} />
 
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
