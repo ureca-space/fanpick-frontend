@@ -151,6 +151,7 @@
 
 .postTable {
   width: 100%;
+  min-height: 626px;
 }
 
 .postRow {
@@ -362,6 +363,10 @@
   .postRow {
     grid-template-columns: minmax(0, 1fr) 52px;
     min-height: 54px;
+  }
+
+  .postTable {
+    min-height: 586px;
   }
 
   .postRow > :nth-child(2),

@@ -24,7 +24,7 @@ const formatAuthorName = (name = "") =>
 const CommunityPage = () => {
   const [posts, setPosts] = useState([]);
   const [category, setCategory] = useState("all");
-  const [sortBy, setSortBy] = useState("popular");
+  const [sortBy, setSortBy] = useState("latest");
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -85,6 +85,11 @@ const CommunityPage = () => {
   const changeSort = (nextSort) => {
     setSortBy(nextSort);
     setCurrentPage(1);
+  };
+
+  const changePage = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -194,7 +199,7 @@ const CommunityPage = () => {
                       className={
                         currentPage === pageNumber ? styles.activePage : ""
                       }
-                      onClick={() => setCurrentPage(pageNumber)}
+                      onClick={() => changePage(pageNumber)}
                       aria-current={
                         currentPage === pageNumber ? "page" : undefined
                       }
