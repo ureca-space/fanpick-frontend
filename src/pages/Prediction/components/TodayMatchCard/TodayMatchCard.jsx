@@ -89,7 +89,7 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
           {match.isFinished ? (
             <b>{match.homeScore ?? "-"}</b>
           ) : (
-            selection && <b>{homeRate}%</b>
+            <b>{homeRate}%</b>
           )}
         </button>
 
@@ -102,7 +102,7 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
           {match.isFinished ? (
             <b>{match.awayScore ?? "-"}</b>
           ) : (
-            selection && <b>{awayRate}%</b>
+            <b>{awayRate}%</b>
           )}
           <span className={styles.teamIdentity}>
             <span className={styles.teamText}>
