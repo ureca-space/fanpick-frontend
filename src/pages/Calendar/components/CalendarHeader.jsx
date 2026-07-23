@@ -1,11 +1,15 @@
-﻿import css from "../Calendar.module.css";
-import { IoIosArrowBack } from "react-icons/io"
-import { IoIosArrowForward } from "react-icons/io";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import css from "./CalendarHeader.module.css";
 
 const CalendarHeader = ({ year, month, onPrevMonth, onNextMonth }) => {
   return (
     <header className={css.calendarHeader}>
-      <button type="button" onClick={onPrevMonth} className={css.navButton} aria-label="이전 달">
+      <button
+        type="button"
+        onClick={onPrevMonth}
+        className={css.navButton}
+        aria-label="Previous month"
+      >
         <IoIosArrowBack />
       </button>
 
@@ -13,7 +17,12 @@ const CalendarHeader = ({ year, month, onPrevMonth, onNextMonth }) => {
         {year}년 {month + 1}월
       </h1>
 
-      <button type="button" onClick={onNextMonth} className={css.navButton} aria-label="다음 달">
+      <button
+        type="button"
+        onClick={onNextMonth}
+        className={css.navButton}
+        aria-label="Next month"
+      >
         <IoIosArrowForward />
       </button>
     </header>

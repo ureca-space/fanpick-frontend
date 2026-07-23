@@ -1,7 +1,7 @@
 ﻿import CalendarCell from "./CalendarCell";
 import css from "../Calendar.module.css";
 
-const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
+const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
 const formatDate = (date) => {
   const y = date.getFullYear();

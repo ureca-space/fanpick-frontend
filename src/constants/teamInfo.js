@@ -7,7 +7,6 @@ const createKLeagueTeam = (code, name, shortName) => ({
 });
 
 const TEAM_INFO = {
-  // KBO
   DOOSAN: {
     name: "두산 베어스",
     shortName: "DOOSAN",
@@ -59,15 +58,14 @@ const TEAM_INFO = {
     logo: "/logos/kt.png",
   },
 
-  // K리그
   K01: createKLeagueTeam("K01", "울산 HD FC", "울산"),
   K02: createKLeagueTeam("K02", "수원 삼성 블루윙즈", "수원"),
   K03: createKLeagueTeam("K03", "포항 스틸러스", "포항"),
-  K04: createKLeagueTeam("K04", "제주SK FC", "제주"),
+  K04: createKLeagueTeam("K04", "제주 SK FC", "제주"),
   K05: createKLeagueTeam("K05", "전북 현대 모터스", "전북"),
   K06: createKLeagueTeam("K06", "부산 아이파크", "부산"),
-  K07: createKLeagueTeam("K07", "전남 드래곤즈", "전남"),
-  K08: createKLeagueTeam("K08", "성남 FC", "성남"),
+  K07: createKLeagueTeam("K07", "경남 FC", "경남"),
+  K08: createKLeagueTeam("K08", "강원 FC", "강원"),
   K09: createKLeagueTeam("K09", "FC 서울", "서울"),
   K10: createKLeagueTeam("K10", "대전 하나시티즌", "대전"),
   K17: createKLeagueTeam("K17", "대구 FC", "대구"),
@@ -79,16 +77,16 @@ const TEAM_INFO = {
   K27: createKLeagueTeam("K27", "FC 안양", "안양"),
   K29: createKLeagueTeam("K29", "수원 FC", "수원FC"),
   K31: createKLeagueTeam("K31", "서울 이랜드 FC", "서울E"),
-  K32: createKLeagueTeam("K32", "안산 그리너스 FC", "안산"),
+  K32: createKLeagueTeam("K32", "울산 현대미포", "울산미포"),
   K34: createKLeagueTeam("K34", "충남아산 FC", "충남아산"),
   K35: createKLeagueTeam("K35", "김천 상무", "김천"),
   K36: createKLeagueTeam("K36", "김포 FC", "김포"),
   K37: createKLeagueTeam("K37", "충북청주 FC", "충북청주"),
   K38: createKLeagueTeam("K38", "천안 시티 FC", "천안"),
-  K39: createKLeagueTeam("K39", "화성 FC", "화성"),
-  K40: createKLeagueTeam("K40", "파주프런티어FC", "파주"),
-  K41: createKLeagueTeam("K41", "김해FC2008", "김해"),
-  K42: createKLeagueTeam("K42", "용인FC", "용인"),
+  K39: createKLeagueTeam("K39", "부산 아이파크", "부산"),
+  K40: createKLeagueTeam("K40", "부산교통공사", "부산교통"),
+  K41: createKLeagueTeam("K41", "김천상무 프로축구단", "김천"),
+  K42: createKLeagueTeam("K42", "청주 FC", "청주"),
 };
 
 const LCK_TEAM_INFO = {
@@ -103,7 +101,7 @@ const LCK_TEAM_INFO = {
     logo: "https://cdn-api.pandascore.co/images/team/image/2882/699px_gen.g_esports_2026_allmode.png",
   },
   HLE: {
-    name: "한화생명 e스포츠",
+    name: "Hanwha Life Esports",
     shortName: "HLE",
     logo: "https://cdn-api.pandascore.co/images/team/image/2883/hanwha-life-esports-1s04vbu0.png",
   },
@@ -123,7 +121,7 @@ const LCK_TEAM_INFO = {
     logo: "https://cdn-api.pandascore.co/images/team/image/126370/220px_dr_xlogo_square.png",
   },
   NS: {
-    name: "농심 레드포스",
+    name: "Nongshim RedForce",
     shortName: "NS",
     logo: "https://cdn-api.pandascore.co/images/team/image/128217/nongshim_red_forcelogo_square.png",
   },
@@ -138,19 +136,46 @@ const LCK_TEAM_INFO = {
     logo: "https://cdn-api.pandascore.co/images/team/image/136063/dn_soo_perslogo_profile.png",
   },
   BRO: {
-    name: "HANJIN BRION",
+    name: "BRION",
     shortName: "BRO",
     logo: "https://cdn-api.pandascore.co/images/team/image/128218/628px_brion_2023_lightmode.png",
   },
 };
 
+const normalizeTeamLookupKey = (value) =>
+  String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s._\-()/]+/g, "");
+
+const buildTeamLookup = (teamInfo) => {
+  const lookup = new Map();
+
+  Object.entries(teamInfo).forEach(([code, info]) => {
+    [code, info?.name, info?.shortName]
+      .filter(Boolean)
+      .map(normalizeTeamLookupKey)
+      .forEach((key) => {
+        if (!lookup.has(key)) {
+          lookup.set(key, info);
+        }
+      });
+  });
+
+  return lookup;
+};
+
+const TEAM_LOOKUP = buildTeamLookup(TEAM_INFO);
+const LCK_TEAM_LOOKUP = buildTeamLookup(LCK_TEAM_INFO);
+
 export const getTeamInfo = (teamCode, sport) => {
-  const normalizedCode = teamCode?.trim().toUpperCase();
+  const directCode = String(teamCode ?? "").trim().toUpperCase();
+  const normalizedCode = normalizeTeamLookupKey(teamCode);
 
   const teamInfo =
     sport === "esports"
-      ? LCK_TEAM_INFO[normalizedCode]
-      : TEAM_INFO[normalizedCode];
+      ? LCK_TEAM_INFO[directCode] ?? LCK_TEAM_LOOKUP.get(normalizedCode)
+      : TEAM_INFO[directCode] ?? TEAM_LOOKUP.get(normalizedCode);
 
   return (
     teamInfo ?? {

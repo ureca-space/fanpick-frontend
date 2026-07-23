@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { getTeamInfo } from "../../constants/teamInfo";
 import SubNav from "../../components/SubNav/SubNav";
 import { MATCH_CENTER_SUB_NAV_ITEMS } from "../../constants/matchCenterNav";
-import { fetchKBOSchedule } from "./api/getSportSchedule";
 import CalendarFilter from "./components/CalendarFilter/CalendarFilter";
 import CalendarGrid from "./components/CalendarGrid/CalendarGrid";
 import CalendarHeader from "./components/CalendarHeader/CalendarHeader";
-import css from "./CalendarPage.module.css";
+import { fetchKBOSchedule } from "./api/getSportSchedule";
+import styles from "./CalendarPage.module.css";
 
 const SPORT_OPTIONS = [
   { label: "BASEBALL", value: "baseball" },
@@ -14,65 +13,7 @@ const SPORT_OPTIONS = [
   { label: "LOL", value: "lol" },
 ];
 
-const BASEBALL_TEAM_CODES = [
-  "DOOSAN",
-  "LG",
-  "KIA",
-  "KT",
-  "LOTTE",
-  "NC",
-  "SAMSUNG",
-  "SSG",
-  "HANWHA",
-  "KIWOOM",
-];
-
-const SOCCER_TEAM_CODES = [
-  "K01",
-  "K02",
-  "K03",
-  "K04",
-  "K05",
-  "K06",
-  "K07",
-  "K08",
-  "K09",
-  "K10",
-  "K17",
-  "K18",
-  "K20",
-  "K21",
-  "K22",
-  "K26",
-  "K27",
-  "K29",
-  "K31",
-  "K32",
-  "K34",
-  "K35",
-  "K36",
-  "K37",
-  "K38",
-  "K39",
-  "K40",
-  "K41",
-  "K42",
-];
-
-const LOL_TEAM_CODES = [
-  "T1",
-  "GEN",
-  "HLE",
-  "DK",
-  "KT",
-  "KRX",
-  "NS",
-  "BFX",
-  "DNS",
-  "BRO",
-];
-
-const SUPPORTED_SPORTS = new Set(SPORT_OPTIONS.map((item) => item.value));
+const SUPPORTED_SPORTS = new Set(["baseball", "soccer", "lol"]);
 const SAVED_MATCHES_STORAGE_KEY = "fanpick-calendar-saved-matches";
 
 const getMonthRange = (date) => {
@@ -80,7 +21,9 @@ const getMonthRange = (date) => {
   const month = date.getMonth();
   const fromDate = `${year}-${String(month + 1).padStart(2, "0")}-01`;
   const lastDay = new Date(year, month + 1, 0);
-  const toDate = `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, "0")}-${String(lastDay.getDate()).padStart(2, "0")}`;
+  const toDate = `${lastDay.getFullYear()}-${String(
+    lastDay.getMonth() + 1,
+  ).padStart(2, "0")}-${String(lastDay.getDate()).padStart(2, "0")}`;
 
   return { fromDate, toDate };
 };
@@ -103,7 +46,7 @@ const getUniqueTeams = (matches) => {
     });
   });
 
-  return [...teamMap.values()];
+  return Array.from(teamMap.values());
 };
 
 const isMatchingTeam = (team, selectedTeamCode) => {
@@ -129,34 +72,21 @@ const groupMatchesByDate = (matches) =>
     return acc;
   }, {});
 
-const formatMatchLabel = (match) =>
-  `${match.homeTeam?.shortName || match.homeTeam?.name || "-"} vs ${
-    match.awayTeam?.shortName || match.awayTeam?.name || "-"
-  }`;
+const formatMatchLabel = (match) => {
+  const homeName = match.homeTeam?.name || "-";
+  const awayName = match.awayTeam?.name || "-";
 
-const addTeamLogo = (team, sport) => ({
-  ...team,
-  logo: team.logo || getTeamInfo(team.code, sport).logo || "",
-});
-
-const getDefaultTeamOptions = (sport) => {
-  if (sport === "baseball") {
-    return BASEBALL_TEAM_CODES.map((code) => addTeamLogo({ code, ...getTeamInfo(code, "baseball") }, "baseball"));
-  }
-
-  if (sport === "soccer") {
-    return SOCCER_TEAM_CODES.map((code) => addTeamLogo({ code, ...getTeamInfo(code, "soccer") }, "soccer"));
-  }
-
-  if (sport === "lol") {
-    return LOL_TEAM_CODES.map((code) => addTeamLogo({ code, ...getTeamInfo(code, "esports") }, "esports"));
-  }
-
-  return [];
+  return `${homeName} vs ${awayName}`;
 };
+
+const addTeamLogo = (team) => ({
+  ...team,
+  logo: team.logo || "",
+});
 
 const CalendarPage = () => {
   const [selectedSport, setSelectedSport] = useState("baseball");
+  const [selectedTeamCode, setSelectedTeamCode] = useState("all");
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
   const [matches, setMatches] = useState([]);
   const [savedMatches, setSavedMatches] = useState(() => {
@@ -167,28 +97,20 @@ const CalendarPage = () => {
       return [];
     }
   });
-  const [selectedTeamCode, setSelectedTeamCode] = useState("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const isSupportedSport = SUPPORTED_SPORTS.has(selectedSport);
-  const { fromDate, toDate } = useMemo(
-    () => getMonthRange(currentMonth),
+  const { year, month } = useMemo(
+    () => ({
+      year: currentMonth.getFullYear(),
+      month: currentMonth.getMonth(),
+    }),
     [currentMonth],
   );
 
   useEffect(() => {
-    try {
-      window.localStorage.setItem(
-        SAVED_MATCHES_STORAGE_KEY,
-        JSON.stringify(savedMatches),
-      );
-    } catch {
-      // Ignore storage failures.
-    }
-  }, [savedMatches]);
-
-  useEffect(() => {
+    const { fromDate, toDate } = getMonthRange(currentMonth);
     const controller = new AbortController();
 
     const loadSchedule = async () => {
@@ -203,13 +125,11 @@ const CalendarPage = () => {
           signal: controller.signal,
         });
 
-        if (controller.signal.aborted) {
-          return;
+        if (!controller.signal.aborted) {
+          setMatches(nextMatches);
         }
-
-        setMatches(nextMatches);
       } catch (fetchError) {
-        if (fetchError?.name !== "AbortError") {
+        if (fetchError?.name !== "AbortError" && !controller.signal.aborted) {
           setError("Failed to load schedule data.");
           setMatches([]);
         }
@@ -225,11 +145,7 @@ const CalendarPage = () => {
     return () => {
       controller.abort();
     };
-  }, [fromDate, toDate, selectedSport]);
-
-  useEffect(() => {
-    setSelectedTeamCode("all");
-  }, [selectedSport]);
+  }, [currentMonth, selectedSport]);
 
   const visibleMatches = useMemo(() => {
     const sportMatches = matches.filter((match) => match.sport === selectedSport);
@@ -246,35 +162,41 @@ const CalendarPage = () => {
   }, [matches, selectedSport, selectedTeamCode]);
 
   const teamOptions = useMemo(() => {
-    const sportMatches = matches.filter((match) => match.sport === selectedSport);
-    const uniqueTeams = getUniqueTeams(sportMatches);
-    const fallbackTeams = getDefaultTeamOptions(selectedSport);
+    if (!isSupportedSport) {
+      return [];
+    }
 
-    const sourceTeams = uniqueTeams.length > 0 ? uniqueTeams : fallbackTeams;
-    const sportKey = selectedSport === "lol" ? "esports" : selectedSport;
-
-    return sourceTeams.map((team) => addTeamLogo(team, sportKey));
-  }, [matches, selectedSport]);
+    return getUniqueTeams(
+      matches.filter((match) => match.sport === selectedSport),
+    ).map(addTeamLogo);
+  }, [isSupportedSport, matches, selectedSport]);
 
   const matchByDate = useMemo(
     () => groupMatchesByDate(visibleMatches),
     [visibleMatches],
   );
 
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-
-  const handleSelectSport = (sport) => {
-    setSelectedSport(sport);
-    setSelectedTeamCode("all");
-  };
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        SAVED_MATCHES_STORAGE_KEY,
+        JSON.stringify(savedMatches),
+      );
+    } catch {
+      // ignore storage failures
+    }
+  }, [savedMatches]);
 
   const handlePrevMonth = () => {
-    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+    setCurrentMonth(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1),
+    );
   };
 
   const handleNextMonth = () => {
-    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+    setCurrentMonth(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1),
+    );
   };
 
   const handleMatchClick = (match) => {
@@ -295,68 +217,66 @@ const CalendarPage = () => {
     <>
       <SubNav
         activeItemId="calendar"
-        ariaLabel="match center menu"
+        ariaLabel="Match center menu"
         items={MATCH_CENTER_SUB_NAV_ITEMS}
       />
 
-      <section className={css.calendarPage}>
-        <div className="container">
-          <div className={css.inner}>
-            <header className={css.pageHeader}>
-              <p className={css.eyebrow}>FANPICK MATCH CENTER</p>
-              <h1 className={css.title}>CALENDAR</h1>
-            </header>
+      <main className={styles.page}>
+        <div className={`container ${styles.inner}`}>
+          <header className={styles.pageHeader}>
+            <p className={styles.eyebrow}>FANPICK MATCH CENTER</p>
+            <h1 className={styles.title}>CALENDAR</h1>
+          </header>
 
-            <div className={css.selectSportBtn}>
-              {SPORT_OPTIONS.map((sport) => (
-                <button
-                  key={sport.value}
-                  type="button"
-                  onClick={() => handleSelectSport(sport.value)}
-                  className={
-                    selectedSport === sport.value
-                      ? css.sportButtonActive
-                      : css.sportButton
-                  }
-                >
-                  {sport.label}
-                </button>
-              ))}
-            </div>
-
-            <CalendarFilter
-              selectedSport={selectedSport}
-              isSupportedSport={isSupportedSport}
-              loading={loading}
-              teamOptions={teamOptions}
-              selectedTeamCode={selectedTeamCode}
-              onSelectTeamCode={setSelectedTeamCode}
-              savedMatches={savedMatches}
-              onRemoveSavedMatch={handleRemoveSavedMatch}
-              formatMatchLabel={formatMatchLabel}
-            />
-
-            {loading ? (
-              <p className={css.statusMessage}>Loading schedule...</p>
-            ) : null}
-            {error ? <p className={css.statusMessageError}>{error}</p> : null}
-
-            <CalendarHeader
-              year={year}
-              month={month}
-              onPrevMonth={handlePrevMonth}
-              onNextMonth={handleNextMonth}
-            />
-
-            <CalendarGrid
-              year={year}
-              month={month}
-              matchByDate={matchByDate}
-              onMatchClick={handleMatchClick}
-            />
+          <div className={styles.selectSportBtn}>
+            {SPORT_OPTIONS.map((sport) => (
+              <button
+                key={sport.value}
+                type="button"
+                onClick={() => setSelectedSport(sport.value)}
+                className={
+                  selectedSport === sport.value
+                    ? styles.sportButtonActive
+                    : styles.sportButton
+                }
+              >
+                {sport.label}
+              </button>
+            ))}
           </div>
+
+          <CalendarFilter
+            selectedSport={selectedSport}
+            isSupportedSport={isSupportedSport}
+            loading={loading}
+            teamOptions={teamOptions}
+            selectedTeamCode={selectedTeamCode}
+            onSelectTeamCode={setSelectedTeamCode}
+            savedMatches={savedMatches}
+            onRemoveSavedMatch={handleRemoveSavedMatch}
+            formatMatchLabel={formatMatchLabel}
+          />
+
+          {loading ? (
+            <p className={styles.statusMessage}>Loading schedule...</p>
+          ) : null}
+          {error ? <p className={styles.statusMessageError}>{error}</p> : null}
+
+          <CalendarHeader
+            year={year}
+            month={month}
+            onPrevMonth={handlePrevMonth}
+            onNextMonth={handleNextMonth}
+          />
+
+          <CalendarGrid
+            year={year}
+            month={month}
+            matchByDate={matchByDate}
+            onMatchClick={handleMatchClick}
+          />
         </div>
-      </section>
+      </main>
     </>
   );
 };
