@@ -174,6 +174,10 @@
   text-align: center;
 }
 
+.postRow.threeColumnRow {
+  grid-template-columns: minmax(260px, 1fr) 100px 66px;
+}
+
 .postTable > a.postRow:hover {
   background: rgb(255 255 255 / 4%);
 }
@@ -214,6 +218,29 @@
 .popularPanel b {
   margin-left: 4px;
   color: var(--color-accent);
+}
+
+.myCommentContent {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  text-align: left;
+}
+
+.myCommentContent strong,
+.myCommentContent span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.myCommentContent strong {
+  font-size: 13px;
+}
+
+.myCommentContent span {
+  color: rgb(255 255 255 / 55%);
+  font-size: 11px;
 }
 
 .pagination {
@@ -354,6 +381,10 @@
     padding: 0 12px;
   }
 
+  .postRow.threeColumnRow {
+    grid-template-columns: minmax(170px, 1fr) 70px 52px;
+  }
+
   .postRow > :nth-child(4) {
     display: none;
   }
@@ -375,6 +406,10 @@
   .postRow {
     grid-template-columns: minmax(0, 1fr) 52px;
     min-height: 54px;
+  }
+
+  .postRow.threeColumnRow {
+    grid-template-columns: minmax(0, 1fr) 52px;
   }
 
   .postTable {

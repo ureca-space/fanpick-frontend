@@ -1,13 +1,13 @@
 import { supabase } from "../lib/supabase";
 
-export const fetchCommunityPosts = async (userId) => {
+export const fetchCommunityPosts = async () => {
   const [{ data: posts, error: postsError }, { data: comments, error: commentsError }] =
     await Promise.all([
       supabase
         .from("community_posts")
         .select("*")
         .order("created_at", { ascending: false }),
-      supabase.from("community_comments").select("post_id, user_id"),
+      supabase.from("community_comments").select("post_id"),
     ]);
 
   if (postsError) throw postsError;
@@ -17,17 +17,24 @@ export const fetchCommunityPosts = async (userId) => {
     counts[comment.post_id] = (counts[comment.post_id] ?? 0) + 1;
     return counts;
   }, {});
-  const myCommentedPostIds = new Set(
-    (comments ?? [])
-      .filter((comment) => comment.user_id === userId)
-      .map((comment) => comment.post_id),
-  );
-
   return (posts ?? []).map((post) => ({
     ...post,
     commentCount: commentCounts[post.id] ?? 0,
-    hasMyComment: myCommentedPostIds.has(post.id),
   }));
+};
+
+export const fetchMyCommunityComments = async (userId) => {
+  if (!userId) return [];
+
+  const { data, error } = await supabase
+    .from("community_comments")
+    .select("id, post_id, parent_id, content, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return data ?? [];
 };
 
 export const fetchCommunityPost = async (postId) => {

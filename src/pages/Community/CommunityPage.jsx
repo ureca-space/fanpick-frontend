@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import EmptyState from "../../components/EmptyState/EmptyState";
 import useAuth from "../../contexts/useAuth";
-import { fetchCommunityPosts } from "../../services/communityApi";
+import {
+  fetchCommunityPosts,
+  fetchMyCommunityComments,
+} from "../../services/communityApi";
 import { formatRelativeTime } from "../../utils/formatRelativeTime";
 import styles from "./CommunityPage.module.css";
 
@@ -31,6 +34,7 @@ const formatAuthorName = (name = "") =>
 const CommunityPage = () => {
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
+  const [myComments, setMyComments] = useState([]);
   const [category, setCategory] = useState("all");
   const [sortBy, setSortBy] = useState("latest");
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,7 +53,13 @@ const CommunityPage = () => {
       try {
         setIsLoading(true);
         setErrorMessage("");
-        setPosts(await fetchCommunityPosts(user?.id));
+        const [postData, commentData] = await Promise.all([
+          fetchCommunityPosts(),
+          fetchMyCommunityComments(user?.id),
+        ]);
+
+        setPosts(postData);
+        setMyComments(commentData);
       } catch (error) {
         console.error("커뮤니티 게시글 조회 오류:", error);
         setErrorMessage("게시글을 불러오지 못했습니다.");
@@ -68,7 +78,25 @@ const CommunityPage = () => {
     if (category === "my-posts") {
       nextPosts = posts.filter((post) => post.user_id === user?.id);
     } else if (category === "my-comments") {
-      nextPosts = posts.filter((post) => post.hasMyComment);
+      const postsById = new Map(posts.map((post) => [post.id, post]));
+
+      nextPosts = myComments
+        .map((comment) => {
+          const post = postsById.get(comment.post_id);
+
+          if (!post) return null;
+
+          return {
+            ...post,
+            id: `comment-${comment.id}`,
+            destinationId: post.id,
+            title: comment.content,
+            postTitle: post.title,
+            created_at: comment.created_at,
+            isMyComment: true,
+          };
+        })
+        .filter(Boolean);
     } else if (category !== "all") {
       nextPosts = posts.filter((post) => post.category === category);
     }
@@ -78,7 +106,7 @@ const CommunityPage = () => {
         ? b.view_count - a.view_count
         : new Date(b.created_at) - new Date(a.created_at),
     );
-  }, [category, posts, sortBy, user?.id]);
+  }, [category, myComments, posts, sortBy, user?.id]);
 
   const popularPosts = useMemo(
     () => [...posts].sort((a, b) => b.view_count - a.view_count).slice(0, 10),
@@ -184,37 +212,64 @@ const CommunityPage = () => {
             {!isLoading && !errorMessage && filteredPosts.length > 0 && (
               <>
                 <div className={styles.postTable}>
-                  <div className={`${styles.postRow} ${styles.tableHeader}`}>
-                    <span>제목</span>
-                    <span>작성자</span>
+                  <div
+                    className={[
+                      styles.postRow,
+                      styles.tableHeader,
+                      category === "my-comments" ? styles.threeColumnRow : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
+                    <span>
+                      {category === "my-comments" ? "댓글 / 게시글" : "제목"}
+                    </span>
+                    <span>
+                      {category === "my-comments" ? "종목" : "작성자"}
+                    </span>
                     <span>작성일</span>
-                    <span>조회수</span>
+                    {category !== "my-comments" && <span>조회수</span>}
                   </div>
                   {visiblePosts.map((post) => (
                     <Link
-                      to={`/community/${post.id}`}
-                      className={styles.postRow}
+                      to={`/community/${post.destinationId ?? post.id}`}
+                      className={[
+                        styles.postRow,
+                        post.isMyComment ? styles.threeColumnRow : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
                       key={post.id}
                     >
-                      <span className={styles.postTitle}>
-                        {!CATEGORIES.some(
-                          (item) =>
-                            item.id !== "all" && item.id === category,
-                        ) && (
-                          <small className={styles.postCategory}>
-                            {CATEGORY_LABELS[post.category]}
-                          </small>
-                        )}
-                        {post.title}
-                        <b>({post.commentCount})</b>
-                      </span>
+                      {post.isMyComment ? (
+                        <span className={styles.myCommentContent}>
+                          <strong>{post.title}</strong>
+                          <span>{post.postTitle}</span>
+                        </span>
+                      ) : (
+                        <span className={styles.postTitle}>
+                          {!CATEGORIES.some(
+                            (item) => item.id !== "all" && item.id === category,
+                          ) && (
+                            <small className={styles.postCategory}>
+                              {CATEGORY_LABELS[post.category]}
+                            </small>
+                          )}
+                          {post.title}
+                          <b>({post.commentCount})</b>
+                        </span>
+                      )}
                       <span title={post.author_name}>
-                        {formatAuthorName(post.author_name)}
+                        {post.isMyComment
+                          ? CATEGORY_LABELS[post.category]
+                          : formatAuthorName(post.author_name)}
                       </span>
                       <span>
                         {formatRelativeTime(post.created_at, currentTime)}
                       </span>
-                      <span>{post.view_count.toLocaleString()}</span>
+                      {!post.isMyComment && (
+                        <span>{post.view_count.toLocaleString()}</span>
+                      )}
                     </Link>
                   ))}
                 </div>
