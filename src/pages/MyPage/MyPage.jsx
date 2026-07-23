@@ -14,6 +14,8 @@ import {
   createSettledPredictionSummary,
   fetchMatchPredictionStats,
   fetchMyPredictions,
+  hasResolvedPredictionScore,
+  resolvePredictionResult,
 } from "../../services/predictionApi.js";
 import { supabase } from "../../lib/supabase.js";
 import { getPredictionBadgeMeta } from "../../utils/predictionBadge.js";
@@ -298,8 +300,10 @@ const normalizePredictionHistory = (
             ? awayTeam
             : getTeamInfo(selectedTeamCode, sport);
       const { awayScore, homeScore } = parseScore(match.score);
+      const resolvedResult = resolvePredictionResult(prediction);
       const hasScore =
-        ["live", "finished"].includes(match.status) &&
+        (["live", "finished"].includes(match.status) ||
+          hasResolvedPredictionScore(match)) &&
         homeScore !== null &&
         awayScore !== null;
       const matchTime = match.match_time?.slice(0, 5) ?? "미정";
@@ -313,8 +317,8 @@ const normalizePredictionHistory = (
         time: matchTime,
         sportLabel: SPORT_LABELS[sport] ?? sport?.toUpperCase() ?? "",
         league: match.league ?? "",
-        result: prediction.result ?? "pending",
-        resultLabel: RESULT_LABELS[prediction.result] ?? "예측진행중",
+        result: resolvedResult,
+        resultLabel: RESULT_LABELS[resolvedResult] ?? "예측진행중",
         selectedSide,
         selectedTeam,
         homeTeam,

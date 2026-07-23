@@ -14,6 +14,8 @@ import {
   createSettledPredictionSportStats,
   fetchMatchPredictionStats,
   fetchMyPredictions,
+  hasResolvedPredictionScore,
+  resolvePredictionResult,
 } from "../../services/predictionApi";
 import { getPredictionBadgeMeta } from "../../utils/predictionBadge";
 import {
@@ -226,13 +228,14 @@ const normalizeSupabaseMatch = (match) => {
     league: match.league,
     time,
     status: match.status,
+    score: match.score,
     participants: 0,
     homeRate: 50,
     homeTeam: getTeamInfo(match.home_team_code, sport),
     awayTeam: getTeamInfo(match.away_team_code, sport),
     homeScore,
     awayScore,
-    isFinished: match.status === "finished",
+    isFinished: match.status === "finished" || hasResolvedPredictionScore(match),
   };
 };
 
@@ -463,7 +466,14 @@ const PredictionPage = () => {
             match_id,
             selected_team_code,
             result,
-            matches (home_team_code, away_team_code)
+            matches (
+              home_team_code,
+              away_team_code,
+              match_date,
+              match_time,
+              score,
+              status
+            )
           `,
         )
         .eq("user_id", user.id);
@@ -491,7 +501,7 @@ const PredictionPage = () => {
       const savedResults = Object.fromEntries(
         (data ?? []).map((prediction) => [
           `match-${prediction.match_id}`,
-          prediction.result,
+          resolvePredictionResult(prediction),
         ]),
       );
 
@@ -832,6 +842,28 @@ const PredictionPage = () => {
     };
   });
 
+  const getResolvedMatchPredictionResult = (match, selection) => {
+    const selectedTeamCode =
+      selection === "home"
+        ? match.homeTeam.id
+        : selection === "away"
+          ? match.awayTeam.id
+          : "";
+
+    return resolvePredictionResult({
+      result: predictionResults[match.id],
+      selected_team_code: selectedTeamCode,
+      matches: {
+        away_team_code: match.awayTeam.id,
+        home_team_code: match.homeTeam.id,
+        match_date: match.dateKey,
+        match_time: match.time,
+        score: match.score,
+        status: match.status,
+      },
+    });
+  };
+
   const emptyMessage = searchKeyword.trim()
     ? "검색 조건에 맞는 경기가 없습니다."
     : visibleTab === "mine"
@@ -989,7 +1021,10 @@ const PredictionPage = () => {
                     key={match.id}
                     match={match}
                     selection={predictions[match.id]}
-                    result={predictionResults[match.id]}
+                    result={getResolvedMatchPredictionResult(
+                      match,
+                      predictions[match.id],
+                    )}
                   />
                 );
               })}
