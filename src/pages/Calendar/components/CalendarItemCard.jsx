@@ -24,24 +24,18 @@ const TeamBadge = ({ team }) => {
 const CalendarItemCard = ({ match }) => {
   return (
     <article className={css.calendarItemCard}>
-     
-
       <div className={css.itemTeams}>
-        <TeamBadge team={match.homeTeam} />
+        <div className={css.teamGroup}>
+          <TeamBadge team={match.homeTeam} />
+          <span className={css.teamName}>{match.homeTeam?.shortName || match.homeTeam?.name}</span>
+        </div>
+
         <span className={css.vs}>VS</span>
-        <TeamBadge team={match.awayTeam} />
-      </div>
 
-      <div className={css.itemMeta}>
-        <span>{match.time}</span>
-        <span>{match.venue}</span>
-      </div>
-
-      <div className={css.itemScore}>
-        <span>{match.homeScore}</span>
-        <span>:</span>
-        <span>{match.awayScore}</span>
-        <strong className={css.itemResult}>{match.resultText}</strong>
+        <div className={css.teamGroup}>
+          <span className={css.teamName}>{match.awayTeam?.shortName || match.awayTeam?.name}</span>
+          <TeamBadge team={match.awayTeam} />
+        </div>
       </div>
     </article>
   );

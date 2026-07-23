@@ -14,6 +14,7 @@ const SPORT_OPTIONS = [
 ];
 
 const SUPPORTED_SPORTS = new Set(["baseball", "soccer", "lol"]);
+const EXCLUDED_BASEBALL_TEAM_CODES = new Set(["NANUM", "DREAM"]);
 const SAVED_MATCHES_STORAGE_KEY = "fanpick-calendar-saved-matches";
 
 const getMonthRange = (date) => {
@@ -47,6 +48,10 @@ const getUniqueTeams = (matches) => {
   });
 
   return Array.from(teamMap.values());
+};
+
+const isExcludedCalendarTeam = (team) => {
+  return EXCLUDED_BASEBALL_TEAM_CODES.has(normalizeTeamValue(team?.code));
 };
 
 const isMatchingTeam = (team, selectedTeamCode) => {
@@ -149,12 +154,20 @@ const CalendarPage = () => {
 
   const visibleMatches = useMemo(() => {
     const sportMatches = matches.filter((match) => match.sport === selectedSport);
+    const filteredMatches =
+      selectedSport === "baseball"
+        ? sportMatches.filter(
+            (match) =>
+              !isExcludedCalendarTeam(match.homeTeam) &&
+              !isExcludedCalendarTeam(match.awayTeam),
+          )
+        : sportMatches;
 
     if (selectedTeamCode === "all") {
-      return sportMatches;
+      return filteredMatches;
     }
 
-    return sportMatches.filter(
+    return filteredMatches.filter(
       (match) =>
         isMatchingTeam(match.homeTeam, selectedTeamCode) ||
         isMatchingTeam(match.awayTeam, selectedTeamCode),
@@ -168,7 +181,9 @@ const CalendarPage = () => {
 
     return getUniqueTeams(
       matches.filter((match) => match.sport === selectedSport),
-    ).map(addTeamLogo);
+    )
+      .filter((team) => !(selectedSport === "baseball" && isExcludedCalendarTeam(team)))
+      .map(addTeamLogo);
   }, [isSupportedSport, matches, selectedSport]);
 
   const matchByDate = useMemo(
@@ -221,7 +236,7 @@ const CalendarPage = () => {
         items={MATCH_CENTER_SUB_NAV_ITEMS}
       />
 
-      <main className={styles.page}>
+      <main className={styles.calendarPage}>
         <div className={`container ${styles.inner}`}>
           <header className={styles.pageHeader}>
             <p className={styles.eyebrow}>FANPICK MATCH CENTER</p>

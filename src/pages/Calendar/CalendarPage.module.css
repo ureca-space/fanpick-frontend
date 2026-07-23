@@ -4,7 +4,9 @@
   margin: 0 auto;
   padding: 20px 12px 36px;
   color: var(--color-text-white);
-  background: var(--color-surface-dark);
+  background:
+    radial-gradient(circle at top, rgb(255 99 71 / 12%), transparent 34%),
+    linear-gradient(180deg, #0c1220 0%, #090d17 100%);
   box-sizing: border-box;
 }
 
