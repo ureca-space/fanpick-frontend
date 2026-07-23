@@ -4,18 +4,109 @@ const getMatchStatsId = (match) => String(match.databaseId ?? match.id);
 const normalizeMatchIds = (matchIds) =>
   [...new Set(matchIds.filter(Boolean).map(String))];
 const SETTLED_PREDICTION_RESULTS = new Set(["correct", "incorrect"]);
+const SCORE_SETTLE_DELAY_MS = 8 * 60 * 60 * 1000;
+
+const normalizeTeamCode = (teamCode) => teamCode?.trim().toUpperCase() ?? "";
+
+const parsePredictionScore = (score) => {
+  if (!score) {
+    return {
+      awayScore: null,
+      homeScore: null,
+    };
+  }
+
+  const [awayScore, homeScore] = String(score).split(":").map(Number);
+
+  return {
+    awayScore: Number.isFinite(awayScore) ? awayScore : null,
+    homeScore: Number.isFinite(homeScore) ? homeScore : null,
+  };
+};
+
+const createMatchTimeValue = (match) => {
+  if (!match?.match_date) {
+    return null;
+  }
+
+  const [year, month, day] = String(match.match_date).split("-").map(Number);
+  const [hourText, minuteText] = String(match.match_time ?? "00:00").split(":");
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const matchTime = new Date(
+    year,
+    month - 1,
+    day,
+    Number.isFinite(hour) ? hour : 0,
+    Number.isFinite(minute) ? minute : 0,
+  ).getTime();
+
+  return Number.isFinite(matchTime) ? matchTime : null;
+};
+
+export const hasResolvedPredictionScore = (match) => {
+  const { awayScore, homeScore } = parsePredictionScore(match?.score);
+
+  if (awayScore === null || homeScore === null) {
+    return false;
+  }
+
+  if (match?.status === "finished") {
+    return true;
+  }
+
+  const matchTime = createMatchTimeValue(match);
+
+  return (
+    matchTime !== null && Date.now() - matchTime >= SCORE_SETTLE_DELAY_MS
+  );
+};
+
+export const resolvePredictionResult = (prediction) => {
+  const storedResult = prediction?.result ?? "pending";
+  const match = prediction?.matches;
+
+  if (["cancelled", "postponed"].includes(match?.status)) {
+    return "cancelled";
+  }
+
+  if (SETTLED_PREDICTION_RESULTS.has(storedResult)) {
+    return storedResult;
+  }
+
+  if (!hasResolvedPredictionScore(match)) {
+    return "pending";
+  }
+
+  const { awayScore, homeScore } = parsePredictionScore(match?.score);
+
+  if (homeScore === awayScore) {
+    return "void";
+  }
+
+  const selectedTeamCode = normalizeTeamCode(prediction?.selected_team_code);
+  const winnerTeamCode =
+    homeScore > awayScore
+      ? normalizeTeamCode(match?.home_team_code)
+      : normalizeTeamCode(match?.away_team_code);
+
+  return selectedTeamCode && selectedTeamCode === winnerTeamCode
+    ? "correct"
+    : "incorrect";
+};
 
 export const isSettledPrediction = (prediction) =>
-  prediction?.matches?.status === "finished" &&
-  SETTLED_PREDICTION_RESULTS.has(prediction.result);
+  SETTLED_PREDICTION_RESULTS.has(resolvePredictionResult(prediction));
 
 export const createSettledPredictionSummary = (predictions) => {
-  const settledPredictions = predictions.filter(isSettledPrediction);
-  const correct = settledPredictions.filter(
-    (prediction) => prediction.result === "correct",
+  const settledPredictionResults = predictions
+    .map(resolvePredictionResult)
+    .filter((result) => SETTLED_PREDICTION_RESULTS.has(result));
+  const correct = settledPredictionResults.filter(
+    (result) => result === "correct",
   ).length;
-  const incorrect = settledPredictions.filter(
-    (prediction) => prediction.result === "incorrect",
+  const incorrect = settledPredictionResults.filter(
+    (result) => result === "incorrect",
   ).length;
   const total = correct + incorrect;
 

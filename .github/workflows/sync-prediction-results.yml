@@ -1,0 +1,40 @@
+name: Sync Prediction Results
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "20 0 * * *"
+    - cron: "8,18,28,38,48,58 4-15 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-prediction-results
+  cancel-in-progress: false
+
+jobs:
+  sync-prediction-results:
+    name: Settle finished predictions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync prediction results
+        run: node scripts/sync-prediction-results.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVER_KEY: ${{ secrets.SUPABASE_SERVER_KEY }}

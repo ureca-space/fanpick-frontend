@@ -346,7 +346,7 @@
     "awayTeam": "HANWHA",
     "homeTeam": "LG",
     "score": "",
-    "status": "scheduled",
+    "status": "postponed",
     "broadcast": "",
     "stadium": "잠실",
     "note": "그라운드사정"
@@ -378,7 +378,7 @@
     "awayTeam": "NC",
     "homeTeam": "KIA",
     "score": "",
-    "status": "scheduled",
+    "status": "postponed",
     "broadcast": "",
     "stadium": "광주",
     "note": "그라운드사정"
@@ -1066,10 +1066,10 @@
     "awayTeam": "NC",
     "homeTeam": "LG",
     "score": "",
-    "status": "scheduled",
+    "status": "cancelled",
     "broadcast": "",
     "stadium": "잠실",
-    "note": ""
+    "note": "우천취소"
   },
   {
     "id": "kbo-2026-07-22-ssg-lotte-1",
@@ -1081,8 +1081,8 @@
     "gameType": "REGULAR",
     "awayTeam": "SSG",
     "homeTeam": "LOTTE",
-    "score": "",
-    "status": "scheduled",
+    "score": "7:3",
+    "status": "finished",
     "broadcast": "",
     "stadium": "사직",
     "note": ""
@@ -1097,8 +1097,8 @@
     "gameType": "REGULAR",
     "awayTeam": "HANWHA",
     "homeTeam": "KIA",
-    "score": "",
-    "status": "scheduled",
+    "score": "7:3",
+    "status": "finished",
     "broadcast": "",
     "stadium": "광주",
     "note": ""
@@ -1114,10 +1114,10 @@
     "awayTeam": "DOOSAN",
     "homeTeam": "KT",
     "score": "",
-    "status": "scheduled",
+    "status": "postponed",
     "broadcast": "",
     "stadium": "수원",
-    "note": ""
+    "note": "그라운드사정"
   },
   {
     "id": "kbo-2026-07-22-samsung-kiwoom-1",
@@ -1129,8 +1129,8 @@
     "gameType": "REGULAR",
     "awayTeam": "SAMSUNG",
     "homeTeam": "KIWOOM",
-    "score": "",
-    "status": "scheduled",
+    "score": "1:3",
+    "status": "finished",
     "broadcast": "",
     "stadium": "고척",
     "note": ""
