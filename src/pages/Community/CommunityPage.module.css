@@ -107,6 +107,12 @@
   margin-bottom: 0;
 }
 
+.categoryNav .categoryStart {
+  margin-top: 10px;
+  padding-top: 24px;
+  border-top: 1px solid rgb(255 255 255 / 12%);
+}
+
 .categoryNav button:hover,
 .categoryNav .activeCategory {
   color: var(--color-text-white);
@@ -319,6 +325,12 @@
     margin: 0;
     padding: 10px 14px;
     border: 0;
+  }
+
+  .categoryNav .categoryStart {
+    margin-top: 0;
+    padding-top: 10px;
+    border-top: 0;
   }
 
   .popularPanel ul {

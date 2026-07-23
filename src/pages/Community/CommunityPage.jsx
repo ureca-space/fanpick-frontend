@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import EmptyState from "../../components/EmptyState/EmptyState";
+import useAuth from "../../contexts/useAuth";
 import { fetchCommunityPosts } from "../../services/communityApi";
 import { formatRelativeTime } from "../../utils/formatRelativeTime";
 import styles from "./CommunityPage.module.css";
@@ -12,6 +13,12 @@ export const CATEGORIES = [
   { id: "baseball", label: "KBO" },
   { id: "soccer", label: "K-LEAGUE" },
 ];
+const BOARD_FILTERS = [
+  { id: "all", label: "전체 게시글" },
+  ...CATEGORIES.slice(1),
+  { id: "my-posts", label: "작성한 글" },
+  { id: "my-comments", label: "작성한 댓글" },
+];
 
 const PAGE_SIZE = 10;
 const INITIAL_TIME = Date.now();
@@ -22,6 +29,7 @@ const formatAuthorName = (name = "") =>
   name.length > 4 ? `${name.slice(0, 3)}...` : name;
 
 const CommunityPage = () => {
+  const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [category, setCategory] = useState("all");
   const [sortBy, setSortBy] = useState("latest");
@@ -41,7 +49,7 @@ const CommunityPage = () => {
       try {
         setIsLoading(true);
         setErrorMessage("");
-        setPosts(await fetchCommunityPosts());
+        setPosts(await fetchCommunityPosts(user?.id));
       } catch (error) {
         console.error("커뮤니티 게시글 조회 오류:", error);
         setErrorMessage("게시글을 불러오지 못했습니다.");
@@ -51,21 +59,26 @@ const CommunityPage = () => {
     };
 
     loadPosts();
-  }, []);
+  }, [user?.id]);
 
-  const selectedCategory = CATEGORIES.find((item) => item.id === category);
+  const selectedCategory = BOARD_FILTERS.find((item) => item.id === category);
   const filteredPosts = useMemo(() => {
-    const nextPosts =
-      category === "all"
-        ? [...posts]
-        : posts.filter((post) => post.category === category);
+    let nextPosts = [...posts];
+
+    if (category === "my-posts") {
+      nextPosts = posts.filter((post) => post.user_id === user?.id);
+    } else if (category === "my-comments") {
+      nextPosts = posts.filter((post) => post.hasMyComment);
+    } else if (category !== "all") {
+      nextPosts = posts.filter((post) => post.category === category);
+    }
 
     return nextPosts.sort((a, b) =>
       sortBy === "popular"
         ? b.view_count - a.view_count
         : new Date(b.created_at) - new Date(a.created_at),
     );
-  }, [category, posts, sortBy]);
+  }, [category, posts, sortBy, user?.id]);
 
   const popularPosts = useMemo(
     () => [...posts].sort((a, b) => b.view_count - a.view_count).slice(0, 10),
@@ -106,11 +119,16 @@ const CommunityPage = () => {
               글쓰기
             </Link>
             <nav className={styles.categoryNav} aria-label="게시판 카테고리">
-              {CATEGORIES.map((item) => (
+              {BOARD_FILTERS.map((item, index) => (
                 <button
                   type="button"
                   key={item.id}
-                  className={category === item.id ? styles.activeCategory : ""}
+                  className={[
+                    category === item.id ? styles.activeCategory : "",
+                    index === 4 ? styles.categoryStart : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                   onClick={() => changeCategory(item.id)}
                 >
                   {item.label}
@@ -147,13 +165,23 @@ const CommunityPage = () => {
               />
             )}
             {!isLoading && errorMessage && <EmptyState title={errorMessage} />}
-            {!isLoading && !errorMessage && posts.length === 0 && (
+            {!isLoading && !errorMessage && filteredPosts.length === 0 && (
               <EmptyState
-                title="등록된 게시글이 없습니다."
-                description="첫 번째 이야기를 남겨보세요."
+                title={
+                  category === "my-posts"
+                    ? "작성한 게시글이 없습니다."
+                    : category === "my-comments"
+                      ? "댓글을 작성한 게시글이 없습니다."
+                      : "등록된 게시글이 없습니다."
+                }
+                description={
+                  category === "all"
+                    ? "첫 번째 이야기를 남겨보세요."
+                    : undefined
+                }
               />
             )}
-            {!isLoading && !errorMessage && posts.length > 0 && (
+            {!isLoading && !errorMessage && filteredPosts.length > 0 && (
               <>
                 <div className={styles.postTable}>
                   <div className={`${styles.postRow} ${styles.tableHeader}`}>
@@ -169,7 +197,10 @@ const CommunityPage = () => {
                       key={post.id}
                     >
                       <span className={styles.postTitle}>
-                        {category === "all" && (
+                        {!CATEGORIES.some(
+                          (item) =>
+                            item.id !== "all" && item.id === category,
+                        ) && (
                           <small className={styles.postCategory}>
                             {CATEGORY_LABELS[post.category]}
                           </small>
