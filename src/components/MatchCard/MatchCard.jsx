@@ -1,8 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../../contexts/useAuth";
+import {
+  createPredictionLocation,
+  createPredictionPath,
+} from "../../utils/predictionPath";
+import Button from "../Button/Button";
 import FanPickDialog from "../FanPickDialog/FanPickDialog";
 import styles from "./MatchCard.module.css";
+
+const MATCH_STATUS_LABELS = {
+  live: "LIVE",
+  finished: "종료",
+  cancelled: "취소",
+  postponed: "연기",
+};
+
+const SCORE_VISIBLE_STATUSES = new Set(["live", "finished"]);
 
 const TeamLogo = ({ src, name, shortName }) => {
   const [hasError, setHasError] = useState(false);
@@ -38,10 +52,16 @@ const MatchCard = ({ match }) => {
 
   const awayVoteRate = 100 - homeVoteRate;
 
-  const predictionPath = `/prediction?matchId=${match.id}`;
+  const predictionMatchId = match.databaseId ?? match.id;
+  const predictionPath = createPredictionPath({ matchId: predictionMatchId });
+  const isPredicted = Boolean(match.isPredicted);
+  const statusLabel = MATCH_STATUS_LABELS[match.status];
+  const hasScore =
+    SCORE_VISIBLE_STATUSES.has(match.status) && Boolean(match.score);
+  const scoreText = hasScore ? match.score.replace(":", " : ") : "VS";
 
   const handleVoteClick = () => {
-    if (isAuthLoading) return;
+    if (isAuthLoading || isPredicted) return;
 
     if (!isLoggedIn) {
       setIsDialogOpen(true);
@@ -60,11 +80,7 @@ const MatchCard = ({ match }) => {
 
     navigate("/login", {
       state: {
-        from: {
-          pathname: "/prediction",
-          search: `?matchId=${match.id}`,
-          hash: "",
-        },
+        from: createPredictionLocation({ matchId: predictionMatchId }),
       },
     });
   };
@@ -75,7 +91,19 @@ const MatchCard = ({ match }) => {
         <div className={styles.cardHeader}>
           <span className={styles.sportBadge}>{match.sportLabel}</span>
 
-          <span className={styles.league}>{match.league}</span>
+          <div className={styles.headerMeta}>
+            {statusLabel && (
+              <span
+                className={`${styles.statusBadge} ${
+                  match.status === "live" ? styles.statusBadgeLive : ""
+                }`}
+              >
+                {statusLabel}
+              </span>
+            )}
+
+            <span className={styles.league}>{match.league}</span>
+          </div>
         </div>
 
         <div className={styles.matchInfo}>
@@ -99,7 +127,9 @@ const MatchCard = ({ match }) => {
             <span className={styles.teamName}>{match.homeTeam.name}</span>
           </div>
 
-          <span className={styles.vs}>VS</span>
+          <span className={`${styles.vs} ${hasScore ? styles.score : ""}`}>
+            {scoreText}
+          </span>
 
           <div className={styles.team}>
             <TeamLogo
@@ -138,14 +168,15 @@ const MatchCard = ({ match }) => {
           </div>
         </div>
 
-        <button
-          className={styles.voteButton}
-          type="button"
+        <Button
+          disabled={isAuthLoading || isPredicted}
+          fullWidth
           onClick={handleVoteClick}
-          disabled={isAuthLoading}
+          size="sm"
+          variant="outline"
         >
-          투표하기
-        </button>
+          {isPredicted ? "투표완료" : "투표하기"}
+        </Button>
       </article>
 
       <FanPickDialog
