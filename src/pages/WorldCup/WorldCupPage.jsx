@@ -1,100 +1,117 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import EmptyState from "../../components/EmptyState/EmptyState";
 import MatchFilter from "../../components/MatchFilter/MatchFilter";
+import PaginationControls from "../../components/PaginationControls/PaginationControls";
+import SearchInput from "../../components/SearchInput/SearchInput";
+import ViewAllLink from "../../components/ViewAllLink/ViewAllLink";
 import WorldCupCard from "./components/WorldCupCard/WorldCupCard";
+import {
+  WORLD_CUP_FILTERS,
+  WORLD_CUP_SECTION_LABELS,
+  WORLD_CUPS,
+} from "./data/worldCupData";
 import styles from "./WorldCupPage.module.css";
 
-const WORLD_CUP_FILTERS = [
-  { id: "all", label: "전체" },
-  { id: "soccer", label: "SOCCER" },
-  { id: "baseball", label: "BASEBALL" },
-  { id: "esports", label: "LOL" },
-];
+const WORLD_CUPS_PER_PAGE = 2;
 
-const WORLD_CUPS = [
-  {
-    id: "baseball-team",
-    playId: "baseball",
-    category: "BASEBALL",
-    title: "KBO 최애 팀",
-    round: "16강",
-    description: "응원하고 싶은 KBO 팀을 골라보세요.",
-    leftImage: "/logos/lg.png",
-    rightImage: "/logos/hanwha.png",
-  },
-  {
-    id: "baseball-player",
-    playId: "baseball",
-    category: "BASEBALL",
-    title: "KBO 최애 선수",
-    round: "32강",
-    description: "실력과 매력을 모두 갖춘 최애 선수를 찾아보세요.",
-    leftImage: "/logos/kiwoom.png",
-    rightImage: "/logos/samsung.png",
-  },
-  {
-    id: "baseball-situation",
-    playId: "baseball",
-    category: "BASEBALL",
-    title: "야구 보면서 가장 짜증나는 상황 월드컵",
-    round: "32강",
-    description: "여러분들이 야구 보면서 뭐가 제일 화가 나는지 고르세요.",
-    leftImage: "/logos/kiwoom.png",
-    rightImage: "/logos/samsung.png",
-  },
-  {
-    id: "soccer-team",
-    playId: "soccer",
-    category: "SOCCER",
-    title: "K리그 최애",
-    round: "16강",
-    description: "가장 마음이 가는 K리그 팀을 선택해 보세요.",
-    leftImage: "",
-    rightImage: "",
-  },
-  {
-    id: "soccer-player",
-    playId: "soccer",
-    category: "SOCCER",
-    title: "축구 최애 선수",
-    round: "32강",
-    description: "나만의 최고의 축구 선수를 가려보세요.",
-    leftImage: "",
-    rightImage: "",
-  },
-  {
-    id: "lol-team",
-    playId: "esports",
-    category: "LOL",
-    title: "LCK 최애",
-    round: "16강",
-    description: "내 마음속 최고의 LCK 팀을 선택해 보세요.",
-    leftImage: "",
-    rightImage: "",
-  },
-  {
-    id: "lol-player",
-    playId: "esports",
-    category: "LOL",
-    title: "LCK 최애 선수",
-    round: "32강",
-    description: "플레이와 매력을 비교해 최애 선수를 찾아보세요.",
-    leftImage: "",
-    rightImage: "",
-  },
-];
+const VALID_FILTER_IDS = WORLD_CUP_FILTERS.map((filter) => filter.id);
+
+const getValidFilter = (filterId) =>
+  VALID_FILTER_IDS.includes(filterId) ? filterId : "all";
 
 const WorldCupPage = () => {
   const navigate = useNavigate();
-  const [activeFilter, setActiveFilter] = useState("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [sectionPages, setSectionPages] = useState({});
 
-  const filteredWorldCups =
+  const activeFilter = getValidFilter(searchParams.get("league"));
+  const searchKeyword = searchParams.get("keyword") || "";
+  const hasSearchKeyword = searchKeyword.trim() !== "";
+  const normalizedKeyword = searchKeyword.trim().toLowerCase();
+
+  const filteredWorldCups = WORLD_CUPS.filter((worldCup) => {
+    const matchesFilter =
+      activeFilter === "all" || worldCup.playId === activeFilter;
+    const searchableText =
+      `${worldCup.title} ${worldCup.description} ${worldCup.category}`.toLowerCase();
+    const matchesKeyword =
+      !normalizedKeyword || searchableText.includes(normalizedKeyword);
+
+    return matchesFilter && matchesKeyword;
+  });
+
+  const sectionIds =
     activeFilter === "all"
-      ? WORLD_CUPS
-      : WORLD_CUPS.filter((worldCup) => worldCup.playId === activeFilter);
+      ? WORLD_CUP_FILTERS.filter((filter) => filter.id !== "all").map(
+          (filter) => filter.id,
+        )
+      : [activeFilter];
 
-  const handleStart = (playId) => {
-    navigate(`/worldcup/${playId}`);
+  const sections = sectionIds
+    .map((sectionId) => ({
+      id: sectionId,
+      label: WORLD_CUP_SECTION_LABELS[sectionId],
+      worldCups: filteredWorldCups.filter(
+        (worldCup) => worldCup.playId === sectionId,
+      ),
+    }))
+    .filter((section) => section.worldCups.length > 0);
+
+  const getSectionPage = (sectionId, totalPages) =>
+    Math.min(sectionPages[sectionId] || 0, Math.max(totalPages - 1, 0));
+
+  const handleMoveSection = (sectionId, direction, totalPages) => {
+    const currentPage = getSectionPage(sectionId, totalPages);
+    const nextPage = Math.min(
+      Math.max(currentPage + direction, 0),
+      Math.max(totalPages - 1, 0),
+    );
+
+    setSectionPages((previousPages) => ({
+      ...previousPages,
+      [sectionId]: nextPage,
+    }));
+  };
+
+  const handleStart = (worldCup) => {
+    const playPath =
+      worldCup.candidates.length > 0 ? worldCup.id : worldCup.playId;
+
+    navigate(`/worldcup/${playPath}`);
+  };
+
+  const handleFilterChange = (filterId) => {
+    const nextFilter = getValidFilter(filterId);
+
+    setSearchParams((previousParams) => {
+      const nextParams = new URLSearchParams(previousParams);
+
+      if (nextFilter === "all") {
+        nextParams.delete("league");
+      } else {
+        nextParams.set("league", nextFilter);
+      }
+
+      return nextParams;
+    });
+  };
+
+  const handleSearchChange = (keyword) => {
+    setSearchParams(
+      (previousParams) => {
+        const nextParams = new URLSearchParams(previousParams);
+
+        if (keyword.trim()) {
+          nextParams.set("keyword", keyword);
+        } else {
+          nextParams.delete("keyword");
+        }
+
+        return nextParams;
+      },
+      { replace: true },
+    );
   };
 
   return (
@@ -108,26 +125,112 @@ const WorldCupPage = () => {
           </p>
         </header>
 
-        <div className={styles.filterArea}>
-          <MatchFilter
-            filters={WORLD_CUP_FILTERS}
-            activeFilter={activeFilter}
-            onChange={setActiveFilter}
-          />
+        <div className={styles.controlArea}>
+          <div className={styles.filterArea}>
+            <MatchFilter
+              filters={WORLD_CUP_FILTERS}
+              activeFilter={activeFilter}
+              onChange={handleFilterChange}
+            />
+          </div>
+
+          <div className={styles.searchArea}>
+            <SearchInput
+              value={searchKeyword}
+              onChange={handleSearchChange}
+              placeholder="월드컵 제목을 검색해보세요"
+              ariaLabel="월드컵 검색"
+              debounceDelay={500}
+            />
+          </div>
         </div>
 
-        <section
-          className={styles.worldCupGrid}
-          aria-label="이상형 월드컵 목록"
-        >
-          {filteredWorldCups.map((worldCup) => (
-            <WorldCupCard
-              key={worldCup.id}
-              worldCup={worldCup}
-              onStart={() => handleStart(worldCup.playId)}
-            />
-          ))}
-        </section>
+        {hasSearchKeyword && filteredWorldCups.length > 0 && (
+          <div className={styles.searchResultHeader} aria-live="polite">
+            <p>
+              <strong>{searchKeyword}</strong> 검색 결과
+            </p>
+
+            <span>{filteredWorldCups.length} PICK BATTLES</span>
+          </div>
+        )}
+
+        {hasSearchKeyword && filteredWorldCups.length > 0 ? (
+          <div className={styles.worldCupGrid}>
+            {filteredWorldCups.map((worldCup) => (
+              <WorldCupCard
+                key={worldCup.id}
+                worldCup={worldCup}
+                onStart={() => handleStart(worldCup)}
+              />
+            ))}
+          </div>
+        ) : sections.length > 0 ? (
+          <div className={styles.worldCupSections}>
+            {sections.map((section) => {
+              const totalPages = Math.ceil(
+                section.worldCups.length / WORLD_CUPS_PER_PAGE,
+              );
+              const currentPage = getSectionPage(section.id, totalPages);
+              const visibleWorldCups = section.worldCups.slice(
+                currentPage * WORLD_CUPS_PER_PAGE,
+                (currentPage + 1) * WORLD_CUPS_PER_PAGE,
+              );
+
+              return (
+                <section
+                  key={section.id}
+                  className={styles.worldCupSection}
+                  aria-labelledby={`${section.id}-world-cup-title`}
+                >
+                  <div className={styles.sectionHeader}>
+                    <h2
+                      id={`${section.id}-world-cup-title`}
+                      className={styles.sectionTitle}
+                    >
+                      {section.label}
+                    </h2>
+
+                    {activeFilter === "all" && (
+                      <ViewAllLink
+                        onClick={() => handleFilterChange(section.id)}
+                      />
+                    )}
+                  </div>
+
+                  <PaginationControls
+                    ariaLabel={`${section.label} 월드컵 카드 페이지 이동`}
+                    className={styles.sectionNavigation}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    previousLabel={`${section.label} 이전 월드컵 보기`}
+                    nextLabel={`${section.label} 다음 월드컵 보기`}
+                    onPrevious={() =>
+                      handleMoveSection(section.id, -1, totalPages)
+                    }
+                    onNext={() => handleMoveSection(section.id, 1, totalPages)}
+                  />
+
+                  <div className={styles.worldCupGrid}>
+                    {visibleWorldCups.map((worldCup) => (
+                      <WorldCupCard
+                        key={worldCup.id}
+                        worldCup={worldCup}
+                        onStart={() => handleStart(worldCup)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        ) : (
+          <EmptyState
+            className={styles.emptyMessage}
+            title="검색 조건에 맞는 월드컵이 없습니다."
+            description="검색어를 바꾸거나 필터를 전체로 변경해 보세요."
+          />
+        )}
       </div>
     </main>
   );
