@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FiChevronLeft,
   FiChevronRight,
@@ -13,7 +13,9 @@ import {
   fetchCommunityPosts,
   fetchMyCommunityComments,
 } from "../../services/communityApi";
+import { subscribeToCommunityChanges } from "../../services/communityRealtime";
 import { formatRelativeTime } from "../../utils/formatRelativeTime";
+import useRelativeTimeClock from "../../hooks/useRelativeTimeClock";
 import {
   CommunityCategoryPanel,
   CommunityPopularPanel,
@@ -24,7 +26,6 @@ import styles from "./CommunityPage.module.css";
 
 const PAGE_SIZE = 10;
 const MAX_VISIBLE_PAGE_COUNT = 5;
-const INITIAL_TIME = Date.now();
 const CATEGORY_LABELS = Object.fromEntries(
   CATEGORIES.map((item) => [item.id, item.label]),
 );
@@ -72,6 +73,7 @@ const CommunityPaginationSkeleton = () => (
 
 const CommunityPage = () => {
   const { user } = useAuth();
+  const userId = user?.id;
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedFilter = searchParams.get("filter");
   const category = BOARD_FILTERS.some(
@@ -85,23 +87,20 @@ const CommunityPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [currentTime, setCurrentTime] = useState(INITIAL_TIME);
+  const currentTime = useRelativeTimeClock();
   const contentStartRef = useRef(null);
 
-  useEffect(() => {
-    const timer = window.setInterval(() => setCurrentTime(Date.now()), 60000);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const loadPosts = async () => {
+  const loadPosts = useCallback(
+    async ({ showLoading = true } = {}) => {
       try {
-        setIsLoading(true);
+        if (showLoading) {
+          setIsLoading(true);
+        }
+
         setErrorMessage("");
         const [postData, commentData] = await Promise.all([
           fetchCommunityPosts(),
-          fetchMyCommunityComments(user?.id),
+          fetchMyCommunityComments(userId),
         ]);
 
         setPosts(postData);
@@ -110,19 +109,39 @@ const CommunityPage = () => {
         console.error("커뮤니티 게시글 조회 오류:", error);
         setErrorMessage("게시글을 불러오지 못했습니다.");
       } finally {
-        setIsLoading(false);
+        if (showLoading) {
+          setIsLoading(false);
+        }
       }
-    };
+    },
+    [userId],
+  );
 
-    loadPosts();
-  }, [user?.id]);
+  useEffect(() => {
+    const timerId = window.setTimeout(() => {
+      loadPosts();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [loadPosts]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToCommunityChanges({
+      channelName: "community-post-list",
+      onChange: () => loadPosts({ showLoading: false }),
+    });
+
+    return unsubscribe;
+  }, [loadPosts]);
 
   const selectedCategory = BOARD_FILTERS.find((item) => item.id === category);
   const filteredPosts = useMemo(() => {
     let nextPosts = [...posts];
 
     if (category === "my-posts") {
-      nextPosts = posts.filter((post) => post.user_id === user?.id);
+      nextPosts = posts.filter((post) => post.user_id === userId);
     } else if (category === "my-comments") {
       const postsById = new Map(posts.map((post) => [post.id, post]));
 
@@ -152,20 +171,21 @@ const CommunityPage = () => {
         ? b.view_count - a.view_count
         : new Date(b.created_at) - new Date(a.created_at),
     );
-  }, [category, myComments, posts, sortBy, user?.id]);
+  }, [category, myComments, posts, sortBy, userId]);
 
   const popularPosts = useMemo(
     () => [...posts].sort((a, b) => b.view_count - a.view_count).slice(0, 10),
     [posts],
   );
   const pageCount = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE));
+  const activePage = Math.min(currentPage, pageCount);
   const visiblePosts = filteredPosts.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
+    (activePage - 1) * PAGE_SIZE,
+    activePage * PAGE_SIZE,
   );
-  const visiblePageNumbers = getVisiblePageNumbers(currentPage, pageCount);
-  const isFirstPage = currentPage === 1;
-  const isLastPage = currentPage === pageCount;
+  const visiblePageNumbers = getVisiblePageNumbers(activePage, pageCount);
+  const isFirstPage = activePage === 1;
+  const isLastPage = activePage === pageCount;
 
   const changeCategory = (nextCategory) => {
     setCurrentPage(1);
@@ -350,7 +370,7 @@ const CommunityPage = () => {
                     </button>
                     <button
                       type="button"
-                      onClick={() => changePage(currentPage - 1)}
+                      onClick={() => changePage(activePage - 1)}
                       disabled={isFirstPage}
                       aria-label="이전 페이지"
                     >
@@ -361,11 +381,11 @@ const CommunityPage = () => {
                         type="button"
                         key={pageNumber}
                         className={
-                          currentPage === pageNumber ? styles.activePage : ""
+                          activePage === pageNumber ? styles.activePage : ""
                         }
                         onClick={() => changePage(pageNumber)}
                         aria-current={
-                          currentPage === pageNumber ? "page" : undefined
+                          activePage === pageNumber ? "page" : undefined
                         }
                       >
                         {pageNumber}
@@ -373,7 +393,7 @@ const CommunityPage = () => {
                     ))}
                     <button
                       type="button"
-                      onClick={() => changePage(currentPage + 1)}
+                      onClick={() => changePage(activePage + 1)}
                       disabled={isLastPage}
                       aria-label="다음 페이지"
                     >

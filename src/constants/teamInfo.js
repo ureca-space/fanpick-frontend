@@ -144,13 +144,40 @@ const LCK_TEAM_INFO = {
   },
 };
 
+const normalizeTeamLookupKey = (value) =>
+  String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s._\-()/]+/g, "");
+
+const buildTeamLookup = (teamInfo) => {
+  const lookup = new Map();
+
+  Object.entries(teamInfo).forEach(([code, info]) => {
+    [code, info?.name, info?.shortName]
+      .filter(Boolean)
+      .map(normalizeTeamLookupKey)
+      .forEach((key) => {
+        if (!lookup.has(key)) {
+          lookup.set(key, info);
+        }
+      });
+  });
+
+  return lookup;
+};
+
+const TEAM_LOOKUP = buildTeamLookup(TEAM_INFO);
+const LCK_TEAM_LOOKUP = buildTeamLookup(LCK_TEAM_INFO);
+
 export const getTeamInfo = (teamCode, sport) => {
-  const normalizedCode = teamCode?.trim().toUpperCase();
+  const directCode = String(teamCode ?? "").trim().toUpperCase();
+  const normalizedCode = normalizeTeamLookupKey(teamCode);
 
   const teamInfo =
     sport === "esports"
-      ? LCK_TEAM_INFO[normalizedCode]
-      : TEAM_INFO[normalizedCode];
+      ? LCK_TEAM_INFO[directCode] ?? LCK_TEAM_LOOKUP.get(normalizedCode)
+      : TEAM_INFO[directCode] ?? TEAM_LOOKUP.get(normalizedCode);
 
   return (
     teamInfo ?? {

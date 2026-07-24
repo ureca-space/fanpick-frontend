@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import EmptyState from "../../../components/EmptyState/EmptyState";
 import MatchFilter from "../../../components/MatchFilter/MatchFilter";
-import PredictionResultInsight from "../../../components/PredictionResultInsight/PredictionResultInsight";
+import PredictionResultMatchCard from "../../../components/PredictionResultMatchCard/PredictionResultMatchCard";
 import Skeleton from "../../../components/Skeleton/Skeleton";
+import StandingsTable from "../../../components/StandingsTable/StandingsTable";
 import { getTeamInfo } from "../../../constants/teamInfo";
 import useAuth from "../../../contexts/useAuth";
 import { supabase } from "../../../lib/supabase";
@@ -14,6 +15,7 @@ import {
   markPredictedMatches,
 } from "../../../services/predictionApi";
 import { fetchTeamStandings } from "../../../services/teamStandings";
+import { normalizeMatchTimingStatus } from "../../../utils/matchStatus";
 import CommunitySubNav from "../components/CommunitySubNav/CommunitySubNav";
 import styles from "./CommunitySportsPage.module.css";
 
@@ -70,33 +72,6 @@ const PAGE_META = {
   },
 };
 
-const STANDING_COLUMNS = {
-  kbo: [
-    { key: "games", label: "경기" },
-    { key: "wins", label: "승" },
-    { key: "draws", label: "무", optional: true },
-    { key: "losses", label: "패" },
-    { key: "games_behind", label: "게임차", optional: true },
-    { key: "win_rate", label: "승률", render: (row) => formatWinRate(row.win_rate) },
-  ],
-  kleague: [
-    { key: "games", label: "경기" },
-    { key: "points", label: "승점" },
-    { key: "wins", label: "승" },
-    { key: "draws", label: "무", optional: true },
-    { key: "losses", label: "패" },
-    { key: "score_diff", label: "득실", optional: true },
-  ],
-  lck: [
-    { key: "games", label: "경기" },
-    { key: "wins", label: "승" },
-    { key: "losses", label: "패" },
-    { key: "score_diff", label: "득실", optional: true },
-    { key: "win_rate", label: "승률", render: (row) => formatWinRate(row.win_rate) },
-    { key: "kda", label: "KDA", optional: true },
-  ],
-};
-
 const SPORT_BY_ID = Object.fromEntries(LEAGUES.map((league) => [league.id, league]));
 const LEAGUE_ID_BY_SPORT = Object.fromEntries(
   LEAGUES.map((league) => [league.sport, league.id]),
@@ -147,17 +122,6 @@ const parseScore = (score) => {
   };
 };
 
-const formatValue = (value) =>
-  value === null || value === undefined || value === "" ? "-" : value;
-
-const formatWinRate = (value) => {
-  const rate = Number(value);
-
-  if (!Number.isFinite(rate)) return "-";
-
-  return rate.toFixed(3);
-};
-
 const getDisplayTeam = (teamCode, sport) => {
   const code = teamCode?.trim().toUpperCase() ?? "";
   const team = getTeamInfo(code, sport);
@@ -173,7 +137,14 @@ const getDisplayTeam = (teamCode, sport) => {
 const normalizeMatch = (match) => {
   const leagueId = LEAGUE_ID_BY_SPORT[match.sport] ?? "kbo";
   const league = SPORT_BY_ID[leagueId];
-  const { awayScore, homeScore } = parseScore(match.score);
+  const time = match.match_time?.slice(0, 5) ?? "--:--";
+  const timingStatus = normalizeMatchTimingStatus({
+    matchDate: match.match_date,
+    matchTime: time,
+    score: match.score,
+    status: match.status,
+  });
+  const { awayScore, homeScore } = parseScore(timingStatus.score);
 
   return {
     id: match.id,
@@ -182,11 +153,13 @@ const normalizeMatch = (match) => {
     leagueLabel: league?.label ?? match.league,
     sport: match.sport,
     sportLabel: league?.sportLabel ?? match.sport?.toUpperCase(),
+    match_date: match.match_date,
+    match_time: match.match_time,
     dateKey: match.match_date,
     dateLabel: formatShortDate(match.match_date),
-    time: match.match_time?.slice(0, 5) ?? "--:--",
-    status: match.status,
-    score: match.score,
+    time,
+    status: timingStatus.status,
+    score: timingStatus.score,
     awayScore,
     homeScore,
     awayTeam: getDisplayTeam(match.away_team_code, match.sport),
@@ -239,8 +212,8 @@ const fetchRecentResultMatches = async () => {
 
   return (data ?? [])
     .filter((match) => match.match_date && match.away_team_code && match.home_team_code)
-    .filter(isResultMatch)
-    .map(normalizeMatch);
+    .map(normalizeMatch)
+    .filter(isResultMatch);
 };
 
 const SportsPageSkeleton = ({ leagues, view }) => (
@@ -272,142 +245,6 @@ const SportsPageSkeleton = ({ leagues, view }) => (
     ))}
   </div>
 );
-
-const TeamLogo = ({ team, variant = "default" }) => (
-  <span
-    className={[
-      styles.teamLogo,
-      variant === "standing" ? styles.standingLogo : "",
-    ]
-      .filter(Boolean)
-      .join(" ")}
-  >
-    {team.logo ? (
-      <img src={team.logo} alt="" loading="lazy" />
-    ) : (
-      <span>{team.shortName?.slice(0, 2) ?? "-"}</span>
-    )}
-  </span>
-);
-
-const StandingsTable = ({ league, standings }) => {
-  const columns = STANDING_COLUMNS[league.id] ?? STANDING_COLUMNS.kbo;
-
-  return (
-    <div className={styles.tableWrap}>
-      <table className={styles.standingsTable}>
-        <thead>
-          <tr>
-            <th>순위</th>
-            <th>팀</th>
-            {columns.map((column) => (
-              <th
-                className={column.optional ? styles.optionalColumn : ""}
-                key={column.key}
-              >
-                {column.label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {standings.map((standing) => {
-            const team = getDisplayTeam(standing.team_code, league.sport);
-
-            return (
-              <tr key={`${league.id}-${standing.team_id ?? standing.team_code}`}>
-                <td>{standing.rank}</td>
-                <td>
-                  <span className={styles.standingTeam}>
-                    <TeamLogo team={team} variant="standing" />
-                    <b>{team.name || standing.team_name}</b>
-                  </span>
-                </td>
-                {columns.map((column) => (
-                  <td
-                    className={column.optional ? styles.optionalColumn : ""}
-                    key={column.key}
-                  >
-                    {column.render
-                      ? column.render(standing)
-                      : formatValue(standing[column.key])}
-                  </td>
-                ))}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
-};
-
-const MatchTeam = ({ align = "left", score, team }) => (
-  <div className={`${styles.matchTeam} ${align === "right" ? styles.rightTeam : ""}`}>
-    <TeamLogo team={team} />
-    <span>{team.name}</span>
-    {score !== null && <b>{score}</b>}
-  </div>
-);
-
-const PredictionRateBar = ({ awayRate, awayTeam, homeRate, homeTeam }) => (
-  <div className={styles.predictionRates}>
-    <div className={styles.rateLabels}>
-      <span>
-        {awayTeam.name} <b>{awayRate}%</b>
-      </span>
-      <span>
-        <b>{homeRate}%</b> {homeTeam.name}
-      </span>
-    </div>
-    <div className={styles.rateTrack}>
-      <span style={{ width: `${awayRate}%` }} />
-    </div>
-  </div>
-);
-
-const CommunityMatchCard = ({ match, showPrediction = false }) => {
-  const awayRate = Number(match.awayVotes ?? 50);
-  const homeRate = Number(match.homeVotes ?? 50);
-
-  return (
-    <article className={styles.matchCard}>
-      <div className={styles.matchTop}>
-        <span>
-          {match.sportLabel} · {match.leagueLabel}
-        </span>
-        <b>
-          {match.dateLabel} · {match.time}
-        </b>
-      </div>
-
-      <div className={styles.matchScore}>
-        <MatchTeam team={match.awayTeam} score={match.awayScore} />
-        <strong>VS</strong>
-        <MatchTeam align="right" team={match.homeTeam} score={match.homeScore} />
-      </div>
-
-      {showPrediction && (
-        <PredictionRateBar
-          awayRate={awayRate}
-          awayTeam={match.awayTeam}
-          homeRate={homeRate}
-          homeTeam={match.homeTeam}
-        />
-      )}
-
-      {showPrediction && (
-        <>
-          <PredictionResultInsight match={match} />
-
-          <p className={styles.participants}>
-            {match.participants.toLocaleString()}명 참여
-          </p>
-        </>
-      )}
-    </article>
-  );
-};
 
 const LeagueSection = ({ children, description, league, title }) => (
   <section className={styles.sectionCard}>
@@ -583,7 +420,7 @@ const CommunitySportsPage = ({ view = "standings" }) => {
                     {visibleMatches.length > 0 ? (
                       <div className={styles.matchGrid}>
                         {visibleMatches.map((match) => (
-                          <CommunityMatchCard
+                          <PredictionResultMatchCard
                             key={`${view}-${match.id}`}
                             match={match}
                             showPrediction={view === "prediction-results"}

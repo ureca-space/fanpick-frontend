@@ -17,6 +17,7 @@ import {
   fetchMyPredictionSelections,
   markPredictedMatches,
 } from "../../services/predictionApi";
+import { normalizeMatchTimingStatus } from "../../utils/matchStatus";
 import styles from "./MatchSchedulePage.module.css";
 
 const FILTERS = [
@@ -375,6 +376,13 @@ const getStadiumName = (stadium) => {
 
 const normalizeSupabaseMatch = (match) => {
   const matchDate = parseDateKey(match.match_date);
+  const time = match.match_time?.slice(0, 5) ?? "미정";
+  const timingStatus = normalizeMatchTimingStatus({
+    matchDate: match.match_date,
+    matchTime: time,
+    score: match.score,
+    status: match.status,
+  });
 
   const homeTeam = getTeamInfo(match.home_team_code, match.sport);
   const awayTeam = getTeamInfo(match.away_team_code, match.sport);
@@ -394,7 +402,7 @@ const normalizeSupabaseMatch = (match) => {
     )}`,
 
     day: DAY_LABELS[matchDate.getDay()],
-    time: match.match_time?.slice(0, 5) ?? "미정",
+    time,
     venue: getStadiumName(match.venue),
 
     homeTeam,
@@ -403,8 +411,8 @@ const normalizeSupabaseMatch = (match) => {
     homeVotes: 50,
     awayVotes: 50,
 
-    status: match.status,
-    score: match.score,
+    status: timingStatus.status,
+    score: timingStatus.score,
     gameType: match.game_type,
     broadcast: match.broadcast,
     note: match.note,

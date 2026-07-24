@@ -121,6 +121,27 @@ const getKoreaDate = () => {
   }).format(new Date());
 };
 
+const createKoreaMatchTimestamp = (date, time) => {
+  if (!date || !time) {
+    return null;
+  }
+
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+
+  if (![year, month, day, hour, minute].every(Number.isFinite)) {
+    return null;
+  }
+
+  return Date.UTC(year, month - 1, day, hour - 9, minute);
+};
+
+const isFutureKoreaMatch = (date, time) => {
+  const matchTimestamp = createKoreaMatchTimestamp(date, time);
+
+  return matchTimestamp !== null && matchTimestamp > Date.now();
+};
+
 const getScheduleTargets = () => {
   const { year, month } = getKoreaYearMonth();
 
@@ -204,7 +225,7 @@ const fetchKLeagueSchedule = async ({ leagueId, year, month }) => {
   return scheduleList;
 };
 
-const getStatus = ({ match, date, awayScore, homeScore }) => {
+const getStatus = ({ match, date, time, awayScore, homeScore }) => {
   const statusText = [match.gameStatus, match.codeName, match.meetName]
     .map(cleanText)
     .join(" ");
@@ -219,9 +240,9 @@ const getStatus = ({ match, date, awayScore, homeScore }) => {
 
   /*
    * 미래 경기의 0:0 값을 종료 경기로 잘못 판단하지 않도록
-   * 오늘 이후 경기는 항상 scheduled로 처리한다.
+   * 한국 시간 기준 경기 시작 전이면 scheduled로 처리한다.
    */
-  if (date > getKoreaDate()) {
+  if (date > getKoreaDate() || isFutureKoreaMatch(date, time)) {
     return "scheduled";
   }
 
@@ -290,6 +311,7 @@ const parseKLeagueSchedule = ({ matches, league }) => {
     const status = getStatus({
       match,
       date,
+      time,
       awayScore,
       homeScore,
     });
@@ -320,7 +342,7 @@ const parseKLeagueSchedule = ({ matches, league }) => {
           matchupSequence,
         ].join("-");
 
-  const score =
+    const score =
       ["finished", "live"].includes(status) &&
       awayScore !== null &&
       homeScore !== null

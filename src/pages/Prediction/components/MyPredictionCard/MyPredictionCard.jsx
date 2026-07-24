@@ -3,15 +3,25 @@ import { RESULT_LABELS, RESULT_STYLES, SPORT_ICONS } from "../../predictionUtils
 import TeamMark from "../TeamMark/TeamMark";
 import styles from "./MyPredictionCard.module.css";
 
+const MATCH_STATUS_LABELS = {
+  cancelled: "경기취소",
+  postponed: "경기취소",
+};
+
 // - 사용자가 선택한 경기 결과 표시
 // - 진행 중, 성공, 실패 상태에 맞는 CSS 적용
 const MyPredictionCard = ({ match, selection, result = "pending" }) => {
   // - API에 비율이 없으면 기본값 50% 사용
   const homeRate = match.homeRate ?? 50;
   const awayRate = match.awayRate ?? 50;
+  const isHomeSelected = selection === "home";
   const isAwaySelected = selection === "away";
   const resultStyle = RESULT_STYLES[result] ?? "waiting";
   const SportIcon = SPORT_ICONS[match.sport];
+  const closedStatusLabel = MATCH_STATUS_LABELS[match.status] ?? "";
+  const isClosed = match.isFinished || Boolean(closedStatusLabel);
+  const headingStatusLabel =
+    closedStatusLabel || (match.isFinished ? "경기종료" : "경기예정");
 
   return (
     <article className={styles.matchCard}>
@@ -27,39 +37,50 @@ const MyPredictionCard = ({ match, selection, result = "pending" }) => {
 
       <div className={styles.matchHeading}>
         <p>
-          <strong>{match.time}</strong>{" "}
-          {match.isFinished ? "경기종료" : "경기예정"}
+          <strong>{match.time}</strong> {headingStatusLabel}
         </p>
         <span className={styles[resultStyle]}>{RESULT_LABELS[result]}</span>
       </div>
 
-      <div className={`${styles.scoreBoard} ${styles[resultStyle]}`}>
+      <div
+        className={`${styles.scoreBoard} ${styles[resultStyle]} ${
+          isClosed ? styles.finishedBoard : ""
+        }`}
+      >
         <div
-          className={`${styles.scoreTeam} ${!isAwaySelected ? styles.myPick : ""}`}
+          className={`${styles.scoreTeam} ${isHomeSelected ? styles.myPick : ""}`}
         >
-          <TeamMark team={match.homeTeam} />
-          <span>
-            <strong>{match.homeTeam.name}</strong>
-            {!isAwaySelected && (
-              <small className={styles.myPickBadge}>내 선택</small>
-            )}
-            <small>{homeRate}%</small>
+          <span className={styles.teamIdentity}>
+            <TeamMark team={match.homeTeam} />
+
+            <span className={styles.teamText}>
+              <strong>{match.homeTeam.name}</strong>
+              {isHomeSelected && (
+                <small className={styles.myPickBadge}>내 선택</small>
+              )}
+              {isClosed && <small>{homeRate}%</small>}
+            </span>
           </span>
-          <b>{match.homeScore ?? "-"}</b>
+
+          <b>{isClosed ? (match.homeScore ?? "-") : `${homeRate}%`}</b>
         </div>
 
         <div
           className={`${styles.scoreTeam} ${styles.awayScore} ${isAwaySelected ? styles.myPick : ""}`}
         >
-          <b>{match.awayScore ?? "-"}</b>
-          <span>
-            <strong>{match.awayTeam.name}</strong>
-            {isAwaySelected && (
-              <small className={styles.myPickBadge}>내 선택</small>
-            )}
-            <small>{awayRate}%</small>
+          <b>{isClosed ? (match.awayScore ?? "-") : `${awayRate}%`}</b>
+
+          <span className={styles.teamIdentity}>
+            <span className={styles.teamText}>
+              <strong>{match.awayTeam.name}</strong>
+              {isAwaySelected && (
+                <small className={styles.myPickBadge}>내 선택</small>
+              )}
+              {isClosed && <small>{awayRate}%</small>}
+            </span>
+
+            <TeamMark team={match.awayTeam} />
           </span>
-          <TeamMark team={match.awayTeam} />
         </div>
       </div>
 
@@ -86,11 +107,13 @@ export const MyPredictionCardSkeleton = () => (
 
     <div className={styles.scoreBoard}>
       <div className={styles.scoreTeam}>
-        <Skeleton.Circle className={styles.skeletonTeamMark} />
+        <span className={styles.teamIdentity}>
+          <Skeleton.Circle className={styles.skeletonTeamMark} />
 
-        <span>
-          <Skeleton.Line className={styles.skeletonTeamName} />
-          <Skeleton.Line className={styles.skeletonTeamSubtext} />
+          <span className={styles.teamText}>
+            <Skeleton.Line className={styles.skeletonTeamName} />
+            <Skeleton.Line className={styles.skeletonTeamSubtext} />
+          </span>
         </span>
 
         <Skeleton.Line className={styles.skeletonScore} />
@@ -99,12 +122,14 @@ export const MyPredictionCardSkeleton = () => (
       <div className={`${styles.scoreTeam} ${styles.awayScore}`}>
         <Skeleton.Line className={styles.skeletonScore} />
 
-        <span>
-          <Skeleton.Line className={styles.skeletonTeamName} />
-          <Skeleton.Line className={styles.skeletonTeamSubtext} />
-        </span>
+        <span className={styles.teamIdentity}>
+          <span className={styles.teamText}>
+            <Skeleton.Line className={styles.skeletonTeamName} />
+            <Skeleton.Line className={styles.skeletonTeamSubtext} />
+          </span>
 
-        <Skeleton.Circle className={styles.skeletonTeamMark} />
+          <Skeleton.Circle className={styles.skeletonTeamMark} />
+        </span>
       </div>
     </div>
 

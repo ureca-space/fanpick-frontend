@@ -33,6 +33,10 @@ const getMatchTeamCode = (match, side) => {
 };
 
 const getWinnerSide = (match) => {
+  if (match?.status === "cancelled" || match?.status === "postponed") {
+    return match.status;
+  }
+
   const { awayScore, homeScore } = parseScore(match.score);
 
   if (awayScore === null || homeScore === null) {
@@ -70,6 +74,10 @@ const getMyPredictionResult = (match, winnerSide) => {
     return null;
   }
 
+  if (winnerSide === "cancelled" || winnerSide === "postponed") {
+    return winnerSide;
+  }
+
   if (!winnerSide) {
     return "pending";
   }
@@ -92,6 +100,8 @@ const RESULT_LABELS = {
   correct: "예측 성공",
   incorrect: "예측 실패",
   pending: "정산 대기",
+  cancelled: "경기 취소",
+  postponed: "경기 연기",
   void: "무승부 무효",
 };
 
@@ -137,9 +147,23 @@ const PredictionResultInsight = ({ className = "", match }) => {
       <div className={styles.item}>
         <span>실제 승자</span>
         <strong>
-          {winnerSide === "draw" ? "무승부" : getTeamName(winnerTeam)}
+          {winnerSide === "cancelled"
+            ? "경기취소"
+            : winnerSide === "postponed"
+              ? "경기연기"
+              : winnerSide === "draw"
+                ? "무승부"
+                : getTeamName(winnerTeam)}
         </strong>
-        <b>{winnerSide === "draw" ? "무효" : "승리"}</b>
+        <b>
+          {winnerSide === "cancelled"
+            ? "취소"
+            : winnerSide === "postponed"
+              ? "연기"
+              : winnerSide === "draw"
+                ? "무효"
+                : "승리"}
+        </b>
       </div>
 
       <div className={styles.item}>

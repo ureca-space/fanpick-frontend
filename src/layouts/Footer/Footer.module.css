@@ -131,7 +131,7 @@
 .wordmark {
   flex-shrink: 0;
   color: #444758;
-  font-family: Arial, sans-serif;
+  font-family: var(--font-display);
   font-size: 27px;
   font-weight: 900;
   font-style: italic;

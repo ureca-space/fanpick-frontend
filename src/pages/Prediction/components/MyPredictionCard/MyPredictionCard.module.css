@@ -10,6 +10,7 @@
   align-items: center;
   gap: 9px;
   margin-bottom: 18px;
+  font-family: var(--font-display);
   font-size: 16px;
 }
 
@@ -57,28 +58,60 @@
   background-color: rgb(255 255 255 / 4%);
 }
 
+.finishedBoard {
+  border-color: rgb(255 255 255 / 12%);
+  background-color: rgb(255 255 255 / 5%);
+}
+
+.finishedBoard .scoreTeam {
+  color: rgb(255 255 255 / 56%);
+}
+
+.finishedBoard .scoreTeam + .scoreTeam {
+  border-left-color: rgb(255 255 255 / 12%);
+}
+
 .scoreTeam {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   min-width: 0;
   height: 92px;
-  padding: 0 26px;
-  color: rgb(255 255 255 / 56%);
+  padding: 0 28px;
+  border: 1px solid transparent;
+  color: var(--color-text-white);
+  background-color: transparent;
+  font-size: 17px;
 }
 
 .scoreTeam + .scoreTeam {
   border-left: 1px solid rgb(255 255 255 / 10%);
 }
 
-.scoreTeam span {
+.scoreTeam:first-child {
+  border-radius: 7px 0 0 7px;
+}
+
+.scoreTeam:last-child {
+  border-radius: 0 7px 7px 0;
+}
+
+.teamIdentity {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   min-width: 0;
 }
 
-.scoreTeam strong {
+.teamText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.teamText strong {
   max-width: 100%;
   overflow: hidden;
   line-height: 1.35;
@@ -86,9 +119,9 @@
   white-space: nowrap;
 }
 
-.scoreTeam small {
+.teamText small {
   margin-top: 3px;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .myPickBadge {
@@ -103,16 +136,23 @@
 }
 
 .scoreTeam > b {
-  font-size: 34px;
+  font-size: 26px;
 }
 
 .awayScore {
-  grid-template-columns: auto 1fr auto;
   text-align: right;
 }
 
-.awayScore span {
+.awayScore .teamIdentity {
+  margin-left: auto;
+}
+
+.awayScore .teamText {
   align-items: flex-end;
+}
+
+.awayScore .myPickBadge {
+  align-self: flex-end;
 }
 
 .matchCard > small {
@@ -178,51 +218,70 @@
   margin-top: 16px;
 }
 
-.scoreBoard.waiting {
+.scoreTeam.myPick {
   border-color: var(--color-accent);
+  color: var(--color-text-white);
+  background-color: rgb(227 27 54 / 16%);
+  box-shadow: inset 0 0 0 1px rgb(227 27 54 / 34%);
 }
 
-.scoreBoard.waiting .myPick {
+.scoreTeam.myPick .teamText strong {
   color: var(--color-text-white);
-  background:
-    linear-gradient(90deg, rgb(227 27 54 / 28%), rgb(227 27 54 / 12%)),
-    rgb(227 27 54 / 12%);
-  box-shadow: inset 0 0 0 1px rgb(227 27 54 / 34%);
+}
+
+.scoreBoard.correct .myPick {
+  border-color: var(--color-primary-light);
+  background-color: var(--color-primary-light);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 16%);
+}
+
+.scoreBoard.incorrect .myPick {
+  border-color: var(--color-prediction-away);
+  background-color: rgb(223 93 118 / 14%);
+  box-shadow: inset 0 0 0 1px rgb(223 93 118 / 32%);
+}
+
+.scoreBoard.incorrect .myPickBadge {
+  background-color: var(--color-prediction-away);
+}
+
+.scoreBoard.void .myPick {
+  border-color: rgb(245 158 11 / 72%);
+  background-color: rgb(245 158 11 / 14%);
+  box-shadow: inset 0 0 0 1px rgb(245 158 11 / 32%);
+}
+
+.scoreBoard.cancelled .myPick {
+  border-color: rgb(148 163 184 / 72%);
+  border-style: dashed;
+  background-color: rgb(148 163 184 / 12%);
+  box-shadow: inset 0 0 0 1px rgb(148 163 184 / 24%);
+}
+
+.scoreBoard.cancelled .myPickBadge {
+  background-color: rgb(100 116 139 / 92%);
 }
 
 .matchHeading span.waiting {
   background-color: var(--color-accent);
 }
 
-.scoreBoard.correct {
-  border-color: var(--color-primary-light);
-}
-
-.scoreBoard.correct .myPick {
-  color: var(--color-text-white);
-  background-color: var(--color-primary-light);
-}
-
 .matchHeading span.correct {
   background-color: var(--color-primary-light);
 }
 
-.scoreBoard.incorrect,
-.scoreBoard.finished {
-  border-color: rgb(255 255 255 / 12%);
-  background-color: rgb(255 255 255 / 5%);
+.matchHeading span.void {
+  background-color: rgb(245 158 11 / 92%);
 }
 
-.scoreBoard.incorrect .myPick,
-.scoreBoard.finished .myPick {
-  color: var(--color-text-white);
-  background:
-    linear-gradient(90deg, rgb(227 27 54 / 22%), rgb(255 255 255 / 8%)),
-    rgb(255 255 255 / 8%);
-  box-shadow: inset 0 0 0 1px rgb(227 27 54 / 28%);
+.matchHeading span.cancelled {
+  background-color: rgb(100 116 139 / 92%);
 }
 
-.matchHeading span.incorrect,
+.matchHeading span.incorrect {
+  background-color: var(--color-prediction-away);
+}
+
 .matchHeading span.finished {
   background-color: rgb(255 255 255 / 16%);
 }
@@ -271,7 +330,10 @@
   }
 
   .scoreTeam {
-    grid-template-columns: auto minmax(0, 1fr) max-content;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    gap: 12px;
+    width: 100%;
     min-height: 74px;
     height: auto;
     padding: 14px 16px;
@@ -283,32 +345,46 @@
     border-left: 0;
   }
 
+  .scoreTeam:first-child {
+    border-radius: 7px 7px 0 0;
+  }
+
+  .scoreTeam:last-child {
+    border-radius: 0 0 7px 7px;
+  }
+
   .awayScore {
     text-align: left;
   }
 
-  .awayScore > :last-child {
+  .awayScore .teamIdentity {
+    flex-direction: row-reverse;
     grid-row: 1;
     grid-column: 1;
+    justify-content: flex-end;
+    margin-left: 0;
   }
 
-  .awayScore span {
-    grid-row: 1;
-    grid-column: 2;
+  .awayScore .teamText {
     align-items: flex-start;
+  }
+
+  .awayScore .myPickBadge {
+    align-self: flex-start;
   }
 
   .awayScore > b {
     grid-row: 1;
-    grid-column: 3;
+    grid-column: 2;
   }
 
   .scoreTeam > b {
-    font-size: 26px;
+    justify-self: end;
+    font-size: 20px;
     line-height: 1;
   }
 
-  .scoreTeam strong {
+  .teamText strong {
     font-size: 15px;
   }
 
@@ -336,11 +412,11 @@
     padding: 13px 14px;
   }
 
-  .scoreTeam small {
+  .teamText small {
     font-size: 12px;
   }
 
   .scoreTeam > b {
-    font-size: 24px;
+    font-size: 19px;
   }
 }

@@ -18,6 +18,7 @@ import {
   createPredictionLocation,
   createPredictionPath,
 } from "../../../../utils/predictionPath";
+import { createMatchDateTime, isFutureMatch } from "../../../../utils/matchStatus";
 import styles from "./HotMatchSection.module.css";
 
 const FILTERS = [
@@ -44,28 +45,6 @@ const formatMatchDate = (dateKey) => {
   const [, month, day] = dateKey.split("-");
 
   return `${month}.${day}`;
-};
-
-const createMatchDateTime = (matchDate, matchTime) => {
-  if (!matchDate) return null;
-
-  const [year, month, day] = matchDate.split("-").map(Number);
-  const [hour = 23, minute = 59] = (matchTime ?? "")
-    .slice(0, 5)
-    .split(":")
-    .map(Number);
-
-  const dateTime = new Date(
-    year,
-    month - 1,
-    day,
-    Number.isFinite(hour) ? hour : 23,
-    Number.isFinite(minute) ? minute : 59,
-    0,
-    0,
-  );
-
-  return Number.isNaN(dateTime.getTime()) ? null : dateTime;
 };
 
 const createPredictionStatsByMatchId = (predictionStats) =>
@@ -124,7 +103,7 @@ const fetchHotMatch = async (sport, now, predictionStatsByMatchId) => {
       `,
     )
     .eq("sport", sport)
-    .eq("status", "scheduled")
+    .in("status", ["scheduled", "live", "finished"])
     .gte("match_date", todayKey)
     .order("match_date", {
       ascending: true,
@@ -156,13 +135,19 @@ const fetchHotMatch = async (sport, now, predictionStatsByMatchId) => {
       ({ match, matchDateTime }) =>
         match.home_team_code &&
         match.away_team_code &&
-        matchDateTime &&
-        matchDateTime.getTime() > now.getTime(),
+        matchDateTime !== null &&
+        isFutureMatch(
+          {
+            matchDate: match.match_date,
+            matchTime: match.match_time,
+          },
+          now.getTime(),
+        ),
     )
     .sort(
       (current, next) =>
         next.participants - current.participants ||
-        current.matchDateTime.getTime() - next.matchDateTime.getTime(),
+        current.matchDateTime - next.matchDateTime,
     )[0];
 
   return hotMatchCandidate

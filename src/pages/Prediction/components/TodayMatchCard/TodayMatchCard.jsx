@@ -4,6 +4,11 @@ import { SPORT_ICONS } from "../../predictionUtils";
 import TeamMark from "../TeamMark/TeamMark";
 import styles from "./TodayMatchCard.module.css";
 
+const CLOSED_STATUS_LABELS = {
+  cancelled: "경기취소",
+  postponed: "경기취소",
+};
+
 // - 오늘의 경기 표시
 // - 홈팀 또는 원정팀 선택 처리
 const TodayMatchCard = forwardRef(function TodayMatchCard(
@@ -22,27 +27,34 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
   const awayRate = match.awayRate ?? 50;
   const SportIcon = SPORT_ICONS[match.sport];
   const hasSelection = Boolean(selection);
+  const closedStatusLabel = CLOSED_STATUS_LABELS[match.status] ?? "";
+  const isClosed = match.isFinished || Boolean(closedStatusLabel);
   const canChangeSelection =
-    hasSelection && canChangePrediction && !match.isFinished;
+    hasSelection && canChangePrediction && !isClosed;
   const isHomeSelected = selection === "home";
   const isAwaySelected = selection === "away";
+  const isCancelled = Boolean(closedStatusLabel);
   const isHomeDisabled =
-    match.isFinished ||
+    isClosed ||
     isSaving ||
     (hasSelection && !canChangeSelection);
   const isAwayDisabled =
-    match.isFinished ||
+    isClosed ||
     isSaving ||
     (hasSelection && !canChangeSelection);
-  const statusLabel = match.isFinished
-    ? selection
-      ? "경기종료"
-      : "미참여"
-    : selection
-      ? canChangeSelection
-        ? "변경가능"
-        : "투표완료"
-      : "예측진행중";
+  const headingStatusLabel =
+    closedStatusLabel || (match.isFinished ? "경기종료" : "경기예정");
+  const statusLabel = closedStatusLabel
+    ? closedStatusLabel
+    : match.isFinished
+      ? selection
+        ? "경기종료"
+        : "미참여"
+      : selection
+        ? canChangeSelection
+          ? "변경가능"
+          : "투표완료"
+        : "예측진행중";
 
   return (
     <article
@@ -62,16 +74,21 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
 
       <div className={styles.matchHeading}>
         <p>
-          <strong>{match.time}</strong>{" "}
-          {match.isFinished ? "경기종료" : "경기예정"}
+          <strong>{match.time}</strong> {headingStatusLabel}
         </p>
-        <span className={match.isFinished ? styles.finished : ""}>
+        <span
+          className={
+            isCancelled ? styles.cancelled : isClosed ? styles.finished : ""
+          }
+        >
           {statusLabel}
         </span>
       </div>
 
       <div
-        className={`${styles.teams} ${match.isFinished ? styles.finishedTeams : ""}`}
+        className={`${styles.teams} ${isClosed ? styles.finishedTeams : ""} ${
+          isCancelled ? styles.cancelledTeams : ""
+        }`}
       >
         <button
           type="button"
@@ -86,10 +103,10 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
               {isHomeSelected && (
                 <small className={styles.myPickBadge}>내 선택</small>
               )}
-              {match.isFinished && <small>{homeRate}%</small>}
+              {isClosed && <small>{homeRate}%</small>}
             </span>
           </span>
-          {match.isFinished ? (
+          {isClosed ? (
             <b>{match.homeScore ?? "-"}</b>
           ) : (
             <b>{homeRate}%</b>
@@ -102,7 +119,7 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
           disabled={isAwayDisabled}
           onClick={() => onSelect(match, "away")}
         >
-          {match.isFinished ? (
+          {isClosed ? (
             <b>{match.awayScore ?? "-"}</b>
           ) : (
             <b>{awayRate}%</b>
@@ -113,7 +130,7 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
               {isAwaySelected && (
                 <small className={styles.myPickBadge}>내 선택</small>
               )}
-              {match.isFinished && <small>{awayRate}%</small>}
+              {isClosed && <small>{awayRate}%</small>}
             </span>
             <TeamMark team={match.awayTeam} />
           </span>
