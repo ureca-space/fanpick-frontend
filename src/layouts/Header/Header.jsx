@@ -17,14 +17,14 @@ const menuList = [
     path: "/matches",
   },
   {
+    label: "COMMUNITY",
+    path: "/community",
+  },
+  {
     label: "PICK BATTLE",
     loginDescription: "픽 배틀에 참여하려면 먼저 로그인해 주세요.",
     path: "/worldcup",
     requiresAuth: true,
-  },
-  {
-    label: "COMMUNITY",
-    path: "/community",
   },
 ];
 

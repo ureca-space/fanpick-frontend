@@ -62,6 +62,19 @@ const formatCommentTime = (date, updatedAt, currentTime) => {
   return updatedAt && updatedAt !== date ? `${formatted} · 수정됨` : formatted;
 };
 
+const submitFormOnEnter = (event) => {
+  if (
+    event.key !== "Enter" ||
+    event.shiftKey ||
+    event.nativeEvent?.isComposing
+  ) {
+    return;
+  }
+
+  event.preventDefault();
+  event.currentTarget.form?.requestSubmit();
+};
+
 const normalizePost = (post) => ({
   ...post,
   author: post.author_name,
@@ -540,6 +553,7 @@ const CommunityDetailPage = () => {
                 <textarea
                   value={comment}
                   onChange={(event) => setComment(event.target.value)}
+                  onKeyDown={submitFormOnEnter}
                   placeholder={
                     user
                       ? "댓글을 입력하세요"
@@ -645,6 +659,7 @@ const CommunityDetailPage = () => {
                           <textarea
                             value={reply}
                             onChange={(event) => setReply(event.target.value)}
+                            onKeyDown={submitFormOnEnter}
                             placeholder={`${item.author}님에게 답글 입력`}
                             aria-label="답글 내용"
                             autoFocus
