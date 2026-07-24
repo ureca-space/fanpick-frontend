@@ -1,6 +1,6 @@
 /* 공통 CSS */
 
-@import url("https://fonts.googleapis.com/css2?family=Anton&family=Graduate&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Graduate&display=swap");
 
 :root {
   --font-korean:
@@ -10,7 +10,6 @@
     "Segoe UI",
     sans-serif;
   --font-display: "Graduate", var(--font-korean);
-  --font-condensed: "Anton", var(--font-korean);
 
   font-family: var(--font-korean);
 

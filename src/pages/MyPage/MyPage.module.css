@@ -803,7 +803,15 @@
 }
 
 .historyResult[data-result="incorrect"] {
-  background-color: rgb(255 255 255 / 18%);
+  background-color: var(--color-prediction-away);
+}
+
+.historyResult[data-result="void"] {
+  background-color: rgb(245 158 11 / 92%);
+}
+
+.historyResult[data-result="cancelled"] {
+  background-color: rgb(100 116 139 / 92%);
 }
 
 .historyResult[data-result="pending"] {

@@ -4,8 +4,9 @@ import Button from "../../components/Button/Button";
 import EmptyState from "../../components/EmptyState/EmptyState";
 import FanPickDialog from "../../components/FanPickDialog/FanPickDialog";
 import PaginationControls from "../../components/PaginationControls/PaginationControls";
-import PredictionResultInsight from "../../components/PredictionResultInsight/PredictionResultInsight";
+import PredictionResultMatchCard from "../../components/PredictionResultMatchCard/PredictionResultMatchCard";
 import Skeleton from "../../components/Skeleton/Skeleton";
+import StandingsTable from "../../components/StandingsTable/StandingsTable";
 import SubNav from "../../components/SubNav/SubNav";
 import useAuth from "../../contexts/useAuth";
 import { getTeamInfo } from "../../constants/teamInfo.js";
@@ -22,6 +23,7 @@ import {
   createPredictionLocation,
   createPredictionPath,
 } from "../../utils/predictionPath.js";
+import { normalizeMatchTimingStatus } from "../../utils/matchStatus.js";
 import {
   FAVORITE_TEAMS_CHANGED_EVENT,
   fetchFavoriteTeamIds,
@@ -36,6 +38,7 @@ const UPCOMING_MATCH_LIMIT = 6;
 const FINISHED_MATCH_LIMIT = 6;
 const PREDICTION_RESULT_LIMIT = 6;
 const ROSTER_PAGE_SIZE = 8;
+const REALTIME_REFRESH_DEBOUNCE_MS = 500;
 const SPORT_LABELS = {
   baseball: "BASEBALL",
   esports: "LOL",
@@ -56,6 +59,7 @@ const MATCH_STATUS_LABELS = {
   cancelled: "취소",
   postponed: "연기",
 };
+const CLOSED_MATCH_STATUSES = new Set(["cancelled", "postponed"]);
 const SCORE_VISIBLE_STATUSES = new Set(["live", "finished"]);
 const STANDING_SOURCE_LABELS = {
   KBO_OFFICIAL: "KBO 공식",
@@ -114,128 +118,6 @@ const normalizeTeamCode = (teamCode) => teamCode?.trim().toUpperCase() || "";
 const getStandingSourceLabel = (source) =>
   STANDING_SOURCE_LABELS[source] ?? source ?? "공식 순위";
 
-const formatStandingValue = (value) =>
-  value === null || value === undefined || value === "" ? "-" : value;
-
-const formatStandingNumber = (value) => {
-  if (value === null || value === undefined || value === "") {
-    return "-";
-  }
-
-  const number = Number(value);
-
-  return Number.isFinite(number) ? number.toLocaleString("ko-KR") : value;
-};
-
-const formatStandingDecimal = (value) => {
-  if (value === null || value === undefined || value === "") {
-    return "-";
-  }
-
-  const number = Number(value);
-
-  if (!Number.isFinite(number)) {
-    return value;
-  }
-
-  return number.toFixed(2).replace(/\.?0+$/, "");
-};
-
-const formatStandingWinRate = (winRate) =>
-  winRate === null || winRate === undefined ? "-" : winRate.toFixed(3);
-
-const STANDING_COLUMNS_BY_LEAGUE = {
-  kbo: [
-    { key: "games", label: "경기", render: (row) => row.games },
-    { key: "wins", label: "승", render: (row) => row.wins },
-    { key: "draws", label: "무", render: (row) => row.draws },
-    { key: "losses", label: "패", render: (row) => row.losses },
-    {
-      key: "winRate",
-      label: "승률",
-      render: (row) => formatStandingWinRate(row.winRate),
-    },
-    {
-      key: "gamesBehind",
-      label: "게임차",
-      render: (row) => formatStandingValue(row.gamesBehind),
-    },
-    {
-      key: "recent",
-      label: "최근10경기",
-      render: (row) => formatStandingValue(row.recent),
-    },
-    {
-      key: "streak",
-      label: "연속",
-      render: (row) => formatStandingValue(row.streak),
-    },
-  ],
-  kleague: [
-    { key: "games", label: "경기", render: (row) => row.games },
-    {
-      key: "points",
-      label: "승점",
-      render: (row) => formatStandingValue(row.points),
-    },
-    { key: "wins", label: "승", render: (row) => row.wins },
-    { key: "draws", label: "무", render: (row) => row.draws },
-    { key: "losses", label: "패", render: (row) => row.losses },
-    {
-      key: "scoreFor",
-      label: "득점",
-      render: (row) => formatStandingValue(row.scoreFor),
-    },
-    {
-      key: "scoreAgainst",
-      label: "실점",
-      render: (row) => formatStandingValue(row.scoreAgainst),
-    },
-    {
-      key: "scoreDiff",
-      label: "득실",
-      render: (row) => formatStandingValue(row.scoreDiff),
-    },
-  ],
-  lck: [
-    { key: "wins", label: "승", render: (row) => row.wins },
-    { key: "losses", label: "패", render: (row) => row.losses },
-    {
-      key: "scoreDiff",
-      label: "득실차",
-      render: (row) => formatStandingValue(row.scoreDiff),
-    },
-    {
-      key: "winRate",
-      label: "승률",
-      render: (row) => formatStandingDecimal(row.winRate),
-    },
-    {
-      key: "kda",
-      label: "KDA",
-      render: (row) => formatStandingDecimal(row.kda),
-    },
-    {
-      key: "kills",
-      label: "킬",
-      render: (row) => formatStandingNumber(row.kills),
-    },
-    {
-      key: "deaths",
-      label: "데스",
-      render: (row) => formatStandingNumber(row.deaths),
-    },
-    {
-      key: "assists",
-      label: "어시스트",
-      render: (row) => formatStandingNumber(row.assists),
-    },
-  ],
-};
-
-const getStandingColumns = (leagueId) =>
-  STANDING_COLUMNS_BY_LEAGUE[leagueId] ?? STANDING_COLUMNS_BY_LEAGUE.kbo;
-
 const getStandingSummaryText = (standingRow, leagueId) => {
   if (leagueId === "kleague" && standingRow.points !== null) {
     return `${standingRow.points}점 · ${standingRow.wins}승 ${standingRow.draws}무 ${standingRow.losses}패`;
@@ -246,6 +128,23 @@ const getStandingSummaryText = (standingRow, leagueId) => {
   }
 
   return `${standingRow.wins}승 ${standingRow.draws}무 ${standingRow.losses}패`;
+};
+
+const escapePostgrestListValue = (value) =>
+  `"${String(value).replaceAll('"', '""')}"`;
+
+const createTeamMatchFilter = (team) => {
+  const matchCodes = [
+    ...new Set(team.matchCodes.map((teamCode) => normalizeTeamCode(teamCode))),
+  ].filter(Boolean);
+
+  if (matchCodes.length === 0) {
+    return "";
+  }
+
+  const codeList = matchCodes.map(escapePostgrestListValue).join(",");
+
+  return `home_team_code.in.(${codeList}),away_team_code.in.(${codeList})`;
 };
 
 const isTeamMatch = (match, team) => {
@@ -393,6 +292,9 @@ const hasFinishedScore = (match) => {
   return match.status === "finished" && awayScore !== null && homeScore !== null;
 };
 
+const isResultMatch = (match) =>
+  hasFinishedScore(match) || CLOSED_MATCH_STATUSES.has(match.status);
+
 const formatScoreText = (match) => {
   const { awayScore, homeScore } = parseScore(match.score);
 
@@ -407,51 +309,6 @@ const formatScoreText = (match) => {
   return `${homeScore} : ${awayScore}`;
 };
 
-const getTeamSide = (match, team) => {
-  const homeTeamCode = normalizeTeamCode(match.homeTeamCode);
-  const awayTeamCode = normalizeTeamCode(match.awayTeamCode);
-
-  if (team.matchCodes.includes(homeTeamCode)) {
-    return "home";
-  }
-
-  if (team.matchCodes.includes(awayTeamCode)) {
-    return "away";
-  }
-
-  return "";
-};
-
-const getTeamMatchResult = (match, team) => {
-  if (!hasFinishedScore(match)) {
-    return "pending";
-  }
-
-  const { awayScore, homeScore } = parseScore(match.score);
-  const teamSide = getTeamSide(match, team);
-
-  if (homeScore === awayScore) {
-    return "draw";
-  }
-
-  if (teamSide === "home") {
-    return homeScore > awayScore ? "win" : "loss";
-  }
-
-  if (teamSide === "away") {
-    return awayScore > homeScore ? "win" : "loss";
-  }
-
-  return "pending";
-};
-
-const TEAM_RESULT_LABELS = {
-  draw: "무승부",
-  loss: "패배",
-  pending: "결과 대기",
-  win: "승리",
-};
-
 const compareMatchesAscending = (firstMatch, secondMatch) =>
   `${firstMatch.dateKey} ${firstMatch.time}`.localeCompare(
     `${secondMatch.dateKey} ${secondMatch.time}`,
@@ -462,6 +319,13 @@ const compareMatchesDescending = (firstMatch, secondMatch) =>
 
 const normalizeMatch = (match) => {
   const matchDate = parseDateKey(match.match_date);
+  const time = match.match_time?.slice(0, 5) || "미정";
+  const timingStatus = normalizeMatchTimingStatus({
+    matchDate: match.match_date,
+    matchTime: time,
+    score: match.score,
+    status: match.status,
+  });
 
   return {
     id: match.external_id ?? `match-${match.id}`,
@@ -471,14 +335,15 @@ const normalizeMatch = (match) => {
       matchDate.getDate(),
     )}`,
     day: DAY_LABELS[matchDate.getDay()],
-    time: match.match_time?.slice(0, 5) || "미정",
+    time,
     sport: match.sport,
     sportLabel: SPORT_LABELS[match.sport] ?? match.sport?.toUpperCase() ?? "",
     league: match.league,
-    status: match.status,
-    score: match.score,
+    status: timingStatus.status,
+    score: timingStatus.score,
     hasScore:
-      SCORE_VISIBLE_STATUSES.has(match.status) && Boolean(match.score),
+      SCORE_VISIBLE_STATUSES.has(timingStatus.status) &&
+      Boolean(timingStatus.score),
     homeTeamCode: normalizeTeamCode(match.home_team_code),
     awayTeamCode: normalizeTeamCode(match.away_team_code),
     homeTeam: getTeamInfo(match.home_team_code, match.sport),
@@ -705,14 +570,9 @@ const TeamDetailMatchCard = ({
   isAuthLoading,
   match,
   onVoteClick,
-  team,
-  variant = "schedule",
 }) => {
   const { homeRate, awayRate } = getPredictionRates(match);
-  const result = getTeamMatchResult(match, team);
   const hasScore = formatScoreText(match) !== "VS";
-  const showPrediction = variant !== "result";
-  const showAction = variant === "schedule";
 
   return (
     <article className={styles.matchCard}>
@@ -737,78 +597,57 @@ const TeamDetailMatchCard = ({
         </div>
       </div>
 
-      {showPrediction && (
-        <div className={styles.matchPrediction}>
-          <div className={styles.predictionLabels}>
-            <span>
-              {match.homeTeam.name}
-              <strong>{homeRate}%</strong>
-            </span>
+      <div className={styles.matchPrediction}>
+        <div className={styles.predictionLabels}>
+          <span>
+            {match.homeTeam.name}
+            <strong>{homeRate}%</strong>
+          </span>
 
-            <span>
-              <strong>{awayRate}%</strong>
-              {match.awayTeam.name}
-            </span>
-          </div>
-
-          <div className={styles.predictionBar}>
-            <span
-              className={styles.homePredictionBar}
-              style={{ width: `${homeRate}%` }}
-            />
-
-            <span
-              className={styles.awayPredictionBar}
-              style={{ width: `${awayRate}%` }}
-            />
-          </div>
+          <span>
+            <strong>{awayRate}%</strong>
+            {match.awayTeam.name}
+          </span>
         </div>
-      )}
 
-      {variant === "prediction" && (
-        <>
-          <PredictionResultInsight match={match} />
+        <div className={styles.predictionBar}>
+          <span
+            className={styles.homePredictionBar}
+            style={{ width: `${homeRate}%` }}
+          />
 
-          <div className={styles.predictionResultSummary}>
-            <span>참여자</span>
-            <strong>{(match.participants ?? 0).toLocaleString()}명 참여</strong>
-          </div>
-        </>
-      )}
+          <span
+            className={styles.awayPredictionBar}
+            style={{ width: `${awayRate}%` }}
+          />
+        </div>
+      </div>
 
       <div className={styles.matchMeta}>
         <span className={styles.matchLeague}>{match.league}</span>
 
-        {variant === "result" ? (
-          <span className={styles.teamResultBadge} data-result={result}>
-            {TEAM_RESULT_LABELS[result]}
+        {MATCH_STATUS_LABELS[match.status] && (
+          <span
+            className={`${styles.matchStatus} ${
+              match.status === "live" ? styles.matchStatusLive : ""
+            }`}
+          >
+            {MATCH_STATUS_LABELS[match.status]}
           </span>
-        ) : (
-          MATCH_STATUS_LABELS[match.status] && (
-            <span
-              className={`${styles.matchStatus} ${
-                match.status === "live" ? styles.matchStatusLive : ""
-              }`}
-            >
-              {MATCH_STATUS_LABELS[match.status]}
-            </span>
-          )
         )}
       </div>
 
-      {showAction && (
-        <div className={styles.matchAction}>
-          <Button
-            disabled={isAuthLoading || match.isPredicted}
-            fullWidth
-            onClick={() => onVoteClick(match.databaseId ?? match.id)}
-            size="sm"
-            variant="outline"
-          >
-            {match.isPredicted ? "투표완료" : "투표하기"}
-          </Button>
-        </div>
-      )}
+      <div className={styles.matchAction}>
+        <Button
+          disabled={isAuthLoading || match.isPredicted}
+          fullWidth
+          onClick={() => onVoteClick(match.databaseId ?? match.id)}
+          size="sm"
+          variant="outline"
+        >
+          {match.isPredicted ? "투표완료" : "투표하기"}
+        </Button>
+      </div>
     </article>
   );
 };
@@ -898,7 +737,6 @@ const TeamDetailPage = () => {
   const visibleStandings =
     hasUsableOfficialStandings ? officialStandings : standings;
   const isOfficialStanding = hasUsableOfficialStandings;
-  const standingColumns = getStandingColumns(team?.league);
   const teamStanding = visibleStandings.find((standingRow) =>
     isStandingTeamActive(standingRow, team),
   );
@@ -957,6 +795,7 @@ const TeamDetailPage = () => {
     }
 
     let isMounted = true;
+    let standingsRefreshTimerId = null;
 
     const loadOfficialStandings = async () => {
       try {
@@ -977,10 +816,44 @@ const TeamDetailPage = () => {
       }
     };
 
+    const scheduleStandingsRefresh = () => {
+      if (standingsRefreshTimerId) {
+        globalThis.clearTimeout(standingsRefreshTimerId);
+      }
+
+      standingsRefreshTimerId = globalThis.setTimeout(() => {
+        loadOfficialStandings();
+      }, REALTIME_REFRESH_DEBOUNCE_MS);
+    };
+
     loadOfficialStandings();
+
+    const standingsChannel = supabase
+      .channel(`team-detail-standings-${team.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "team_standings",
+          filter: `league_id=eq.${team.league}`,
+        },
+        scheduleStandingsRefresh,
+      )
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR") {
+          console.error("팀 순위 실시간 구독 연결에 실패했습니다.");
+        }
+      });
 
     return () => {
       isMounted = false;
+
+      if (standingsRefreshTimerId) {
+        globalThis.clearTimeout(standingsRefreshTimerId);
+      }
+
+      supabase.removeChannel(standingsChannel);
     };
   }, [team]);
 
@@ -990,6 +863,8 @@ const TeamDetailPage = () => {
     }
 
     let isMounted = true;
+    let teamMatchIds = new Set();
+    let predictionRefreshTimerId = null;
 
     const loadTeamMatches = async ({ showLoading = true } = {}) => {
       try {
@@ -998,7 +873,8 @@ const TeamDetailPage = () => {
           setMatchesError("");
         }
 
-        const { data, error } = await supabase
+        const teamMatchFilter = createTeamMatchFilter(team);
+        let matchQuery = supabase
           .from("matches")
           .select(
             `
@@ -1017,8 +893,13 @@ const TeamDetailPage = () => {
           )
           .eq("sport", team.matchSport)
           .order("match_date", { ascending: true })
-          .order("match_time", { ascending: true })
-          .limit(240);
+          .order("match_time", { ascending: true });
+
+        if (teamMatchFilter) {
+          matchQuery = matchQuery.or(teamMatchFilter);
+        }
+
+        const { data, error } = await matchQuery.limit(500);
 
         if (error) {
           throw error;
@@ -1033,15 +914,14 @@ const TeamDetailPage = () => {
             (match) =>
               match.match_date &&
               match.home_team_code &&
-              match.away_team_code &&
-              !["cancelled", "postponed"].includes(match.status),
+              match.away_team_code,
           )
           .map(normalizeMatch);
         const nextTeamMatches = normalizedMatches.filter((match) =>
           isTeamMatch(match, team),
         );
-        const activeTeamMatches = nextTeamMatches.filter(
-          (match) => !["cancelled", "postponed"].includes(match.status),
+        teamMatchIds = new Set(
+          nextTeamMatches.map((match) => String(match.databaseId)),
         );
         const leagueStandingTeams = FEATURED_TEAMS.filter(
           (featuredTeam) => featuredTeam.league === team.league,
@@ -1052,7 +932,7 @@ const TeamDetailPage = () => {
           userId
             ? fetchMyPredictionSelections(
                 userId,
-                activeTeamMatches.map((match) => match.databaseId),
+                nextTeamMatches.map((match) => match.databaseId),
               ).catch((error) => {
                 console.error("팀 경기 예측 여부 조회 실패", error);
                 return [];
@@ -1065,23 +945,25 @@ const TeamDetailPage = () => {
         }
 
         const enrichedTeamMatches = markPredictedMatches(
-          applyPredictionStatsToMatches(activeTeamMatches, predictionStats),
+          applyPredictionStatsToMatches(nextTeamMatches, predictionStats),
           myPredictions,
         );
         const todayKey = formatDateKey(new Date());
         const upcomingMatches = enrichedTeamMatches
           .filter(
             (match) =>
-              match.status !== "finished" && match.dateKey >= todayKey,
+              match.status !== "finished" &&
+              !CLOSED_MATCH_STATUSES.has(match.status) &&
+              match.dateKey >= todayKey,
           )
           .sort(compareMatchesAscending)
           .slice(0, UPCOMING_MATCH_LIMIT);
         const finishedMatches = enrichedTeamMatches
-          .filter(hasFinishedScore)
+          .filter(isResultMatch)
           .sort(compareMatchesDescending)
           .slice(0, FINISHED_MATCH_LIMIT);
         const nextPredictionResultMatches = enrichedTeamMatches
-          .filter((match) => hasFinishedScore(match) && match.participants > 0)
+          .filter((match) => isResultMatch(match) && match.participants > 0)
           .sort(compareMatchesDescending)
           .slice(0, PREDICTION_RESULT_LIMIT);
 
@@ -1107,6 +989,15 @@ const TeamDetailPage = () => {
         }
       }
     };
+    const schedulePredictionRefresh = () => {
+      if (predictionRefreshTimerId) {
+        globalThis.clearTimeout(predictionRefreshTimerId);
+      }
+
+      predictionRefreshTimerId = globalThis.setTimeout(() => {
+        loadTeamMatches({ showLoading: false });
+      }, REALTIME_REFRESH_DEBOUNCE_MS);
+    };
 
     loadTeamMatches();
 
@@ -1123,10 +1014,40 @@ const TeamDetailPage = () => {
         );
       },
     });
+    const predictionChannel = supabase
+      .channel(`team-detail-predictions-${team.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "predictions",
+        },
+        ({ new: nextPrediction, old: previousPrediction }) => {
+          const matchId = String(
+            nextPrediction?.match_id ?? previousPrediction?.match_id ?? "",
+          );
+
+          if (!matchId || teamMatchIds.has(matchId)) {
+            schedulePredictionRefresh();
+          }
+        },
+      )
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR") {
+          console.error("팀 예측 결과 실시간 구독 연결에 실패했습니다.");
+        }
+      });
 
     return () => {
       isMounted = false;
       unsubscribe();
+
+      if (predictionRefreshTimerId) {
+        globalThis.clearTimeout(predictionRefreshTimerId);
+      }
+
+      supabase.removeChannel(predictionChannel);
     };
   }, [team, userId]);
 
@@ -1418,7 +1339,6 @@ const TeamDetailPage = () => {
                   isAuthLoading={isAuthLoading}
                   match={match}
                   onVoteClick={handleMatchVoteClick}
-                  team={team}
                 />
               ))}
             </div>
@@ -1444,7 +1364,10 @@ const TeamDetailPage = () => {
           </div>
 
           {isMatchesLoading ? (
-            <div className={styles.matchGrid} aria-label="팀 경기 결과 로딩 중">
+            <div
+              className={styles.resultMatchGrid}
+              aria-label="팀 경기 결과 로딩 중"
+            >
               {Array.from({ length: FINISHED_MATCH_LIMIT }, (_, index) => (
                 <TeamMatchCardSkeleton key={index} />
               ))}
@@ -1455,13 +1378,13 @@ const TeamDetailPage = () => {
               description="잠시 후 다시 시도해 주세요."
             />
           ) : resultMatches.length > 0 ? (
-            <div className={styles.matchGrid}>
+            <div className={styles.resultMatchGrid}>
               {resultMatches.map((match) => (
-                <TeamDetailMatchCard
+                <PredictionResultMatchCard
+                  focusTeam={team}
                   key={match.id}
                   match={match}
-                  team={team}
-                  variant="result"
+                  showPrediction={false}
                 />
               ))}
             </div>
@@ -1509,42 +1432,14 @@ const TeamDetailPage = () => {
                 </div>
               )}
 
-              <div className={styles.standingTableWrapper}>
-                <table className={styles.standingTable}>
-                  <thead>
-                    <tr>
-                      <th>순위</th>
-                      <th>팀</th>
-                      {standingColumns.map((column) => (
-                        <th key={column.key}>{column.label}</th>
-                      ))}
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {visibleStandings.map((standingRow) => (
-                      <tr
-                        key={standingRow.id ?? standingRow.team.id}
-                        data-active={isStandingTeamActive(standingRow, team)}
-                      >
-                        <td>{standingRow.rank}</td>
-                        <td>
-                          <div className={styles.standingTeam}>
-                            <TeamLogo
-                              className={styles.standingLogo}
-                              team={standingRow.team}
-                            />
-                            <span>{standingRow.team.name}</span>
-                          </div>
-                        </td>
-                        {standingColumns.map((column) => (
-                          <td key={column.key}>{column.render(standingRow)}</td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <StandingsTable
+                activeTeam={team}
+                league={{
+                  id: team.league,
+                  sport: team.matchSport,
+                }}
+                standings={visibleStandings}
+              />
             </>
           ) : (
             <EmptyState
@@ -1568,7 +1463,7 @@ const TeamDetailPage = () => {
 
           {isMatchesLoading ? (
             <div
-              className={styles.matchGrid}
+              className={styles.resultMatchGrid}
               aria-label="팀 승부 예측 결과 로딩 중"
             >
               {Array.from({ length: PREDICTION_RESULT_LIMIT }, (_, index) => (
@@ -1581,13 +1476,11 @@ const TeamDetailPage = () => {
               description="잠시 후 다시 시도해 주세요."
             />
           ) : predictionResultMatches.length > 0 ? (
-            <div className={styles.matchGrid}>
+            <div className={styles.resultMatchGrid}>
               {predictionResultMatches.map((match) => (
-                <TeamDetailMatchCard
+                <PredictionResultMatchCard
                   key={match.id}
                   match={match}
-                  team={team}
-                  variant="prediction"
                 />
               ))}
             </div>
