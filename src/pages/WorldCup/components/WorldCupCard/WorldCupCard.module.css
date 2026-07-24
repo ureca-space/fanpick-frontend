@@ -1,0 +1,131 @@
+.worldCupCard {
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 8px;
+  background-color: var(--color-surface-card);
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.worldCupCard:hover {
+  border-color: rgb(255 255 255 / 24%);
+  transform: translateY(-4px);
+}
+
+.cardContent {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  padding: 22px;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.categoryBadge,
+.roundBadge {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.categoryBadge {
+  padding: 5px 8px;
+  border: 1px solid rgb(255 255 255 / 48%);
+  border-radius: 3px;
+}
+
+.roundBadge {
+  color: var(--color-accent);
+}
+
+.imageArea {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  min-height: 126px;
+  margin-top: 18px;
+}
+
+.battleImage,
+.imageFallback {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto;
+}
+
+.battleImage {
+  object-fit: contain;
+}
+
+.imageFallback {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: rgb(255 255 255 / 65%);
+  background-color: var(--color-surface-fallback);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.vs {
+  color: var(--color-accent);
+  font-family: var(--font-condensed);
+  font-size: 18px;
+}
+
+.cardTitle {
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 22px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardDescription {
+  margin-top: 12px;
+  color: rgb(255 255 255 / 64%);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.startButton {
+  --button-min-height: 46px;
+  --button-radius: 0;
+  --button-font-size: 14px;
+
+  border-width: 1px 0 0;
+  border-top: 1px solid rgb(255 255 255 / 8%);
+  font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .worldCupCard {
+    min-height: 300px;
+  }
+
+  .cardContent {
+    padding: 18px;
+  }
+
+  .cardTitle {
+    font-size: 18px;
+  }
+
+  .cardDescription {
+    font-size: 13px;
+  }
+}
