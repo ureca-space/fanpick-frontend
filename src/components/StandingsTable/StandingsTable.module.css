@@ -1,0 +1,138 @@
+.tableWrap {
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tableWrap::-webkit-scrollbar {
+  display: none;
+}
+
+.standingsTable {
+  width: 100%;
+  min-width: 780px;
+  table-layout: fixed;
+  border-collapse: collapse;
+  color: var(--color-text-white);
+  font-size: 13px;
+}
+
+.standingsTable th,
+.standingsTable td {
+  height: 58px;
+  border-bottom: 1px solid rgb(255 255 255 / 9%);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.standingsTable th {
+  height: 42px;
+  color: rgb(255 255 255 / 55%);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.standingsTable td {
+  color: rgb(255 255 255 / 72%);
+  font-weight: 800;
+}
+
+.standingsTable tr[data-active="true"] {
+  background-color: rgb(227 27 54 / 11%);
+}
+
+.standingsTable tr[data-active="true"] td {
+  color: var(--color-text-white);
+}
+
+.standingsTable th:first-child,
+.standingsTable td:first-child {
+  width: 56px;
+}
+
+.standingsTable th:nth-child(2),
+.standingsTable td:nth-child(2) {
+  width: 32%;
+  text-align: left;
+}
+
+.standingTeam {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 12px;
+}
+
+.standingTeam b {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-white);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teamLogo {
+  display: grid;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  overflow: hidden;
+  place-items: center;
+}
+
+.teamLogo img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.teamLogo span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-text-white);
+  background: var(--color-surface-muted);
+  font-family: var(--font-display);
+  font-size: 11px;
+  line-height: 1;
+}
+
+@media (max-width: 760px) {
+  .optionalColumn {
+    display: none;
+  }
+
+  .standingsTable th,
+  .standingsTable td {
+    height: 54px;
+    font-size: 12px;
+  }
+
+  .standingsTable th:nth-child(2),
+  .standingsTable td:nth-child(2) {
+    width: 42%;
+  }
+}
+
+@media (max-width: 560px) {
+  .standingsTable {
+    font-size: 11px;
+  }
+
+  .standingsTable th:first-child,
+  .standingsTable td:first-child {
+    width: 38px;
+  }
+
+  .standingTeam {
+    gap: 8px;
+  }
+
+  .standingTeam b {
+    font-size: 12px;
+  }
+}

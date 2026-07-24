@@ -1,0 +1,266 @@
+.matchCard {
+  display: grid;
+  min-width: 0;
+  gap: 22px;
+  padding: 24px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  background: rgb(24 26 42 / 62%);
+}
+
+.matchCard[data-focus-result="win"] {
+  border-color: rgb(227 27 54 / 34%);
+}
+
+.matchCard[data-focus-result="loss"] {
+  border-color: rgb(148 163 184 / 22%);
+}
+
+.matchCard[data-focus-result="draw"] {
+  border-color: rgb(245 158 11 / 34%);
+}
+
+.matchCard[data-focus-result="cancelled"],
+.matchCard[data-focus-result="postponed"] {
+  border-color: rgb(148 163 184 / 26%);
+  border-style: dashed;
+}
+
+.matchTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.matchTop span {
+  color: rgb(255 255 255 / 65%);
+  font-family: var(--font-display);
+  font-size: 12px;
+}
+
+.matchDate {
+  color: rgb(255 255 255 / 72%);
+  font-size: 13px;
+}
+
+.focusResultBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 14%);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.focusResultBadge[data-result="win"] {
+  background-color: var(--color-accent);
+}
+
+.focusResultBadge[data-result="loss"] {
+  color: rgb(255 255 255 / 68%);
+  background-color: rgb(255 255 255 / 10%);
+}
+
+.focusResultBadge[data-result="draw"] {
+  background-color: rgb(245 158 11 / 92%);
+}
+
+.focusResultBadge[data-result="cancelled"],
+.focusResultBadge[data-result="postponed"] {
+  background-color: rgb(100 116 139 / 92%);
+}
+
+.matchScore {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+}
+
+.matchScore > strong {
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 20px;
+  text-align: center;
+}
+
+.matchTeam {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+}
+
+.rightTeam {
+  grid-template-columns: auto minmax(0, 1fr) 42px;
+}
+
+.rightTeam .teamVisual {
+  order: 3;
+}
+
+.rightTeam .teamName {
+  order: 2;
+  text-align: right;
+}
+
+.rightTeam .teamScore {
+  order: 1;
+}
+
+.teamLogo {
+  display: grid;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  overflow: hidden;
+  place-items: center;
+}
+
+.teamLogo img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.teamLogo span {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-text-white);
+  background: var(--color-surface-muted);
+  font-family: var(--font-display);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.teamVisual {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.teamName {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 14px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teamScore {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 24px;
+}
+
+.predictionRates {
+  display: grid;
+  gap: 8px;
+}
+
+.rateLabels {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgb(255 255 255 / 72%);
+  font-size: 12px;
+}
+
+.rateLabels span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rateLabels span:last-child {
+  text-align: right;
+}
+
+.rateLabels b {
+  color: var(--color-text-white);
+}
+
+.rateTrack {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-prediction-away);
+}
+
+.rateTrack span {
+  display: block;
+  height: 100%;
+  background: var(--color-prediction-home);
+}
+
+.participants {
+  color: rgb(255 255 255 / 55%);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.focusResultArea {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -8px;
+}
+
+@media (max-width: 560px) {
+  .matchCard {
+    padding: 18px;
+  }
+
+  .matchScore {
+    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .matchTeam {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .rightTeam {
+    grid-template-columns: minmax(0, 1fr) 30px;
+  }
+
+  .teamLogo {
+    width: 30px;
+    height: 30px;
+  }
+
+  .teamName {
+    font-size: 12px;
+  }
+
+  .teamScore {
+    grid-column: 1 / -1;
+    font-size: 22px;
+  }
+
+  .rightTeam .teamScore {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+
+  .rightTeam .teamVisual {
+    order: 2;
+  }
+
+  .rightTeam .teamName {
+    order: 1;
+  }
+}

@@ -22,7 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.agents
 
 # 환병 변수
 .env
 .env.local
+.env.sync
+

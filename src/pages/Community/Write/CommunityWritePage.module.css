@@ -1,0 +1,191 @@
+.page {
+  min-height: 100vh;
+  padding: var(--section-padding) 0;
+  color: var(--color-text-white);
+  background-color: var(--color-surface-dark);
+  font-family: var(--font-korean);
+}
+
+.inner {
+  display: flex;
+  justify-content: center;
+}
+
+.editor {
+  width: min(100%, 760px);
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  background: var(--color-surface-card);
+}
+
+.editorHeader {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 38px 48px 24px;
+}
+
+.editorHeader h1 {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.selectWrap {
+  position: relative;
+  z-index: 2;
+  width: 190px;
+}
+
+.selectWrap::after {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid rgb(255 255 255 / 65%);
+  border-bottom: 2px solid rgb(255 255 255 / 65%);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+  content: "";
+}
+
+.selectWrap.selectOpen::after {
+  transform: translateY(-25%) rotate(225deg);
+}
+
+.selectButton {
+  width: 100%;
+  height: 38px;
+  padding: 0 36px 0 14px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 8px;
+  color: rgb(255 255 255 / 80%);
+  outline: 0;
+  background: var(--color-surface-muted);
+  cursor: pointer;
+  text-align: left;
+}
+
+.selectButton:hover {
+  border-color: rgb(255 255 255 / 55%);
+  background: var(--color-surface-fallback);
+}
+
+.selectButton:focus,
+.selectOpen .selectButton {
+  border-color: var(--color-accent);
+}
+
+.selectWrap:focus-within::after {
+  border-color: var(--color-accent);
+}
+
+.selectMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  padding: 6px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 8px;
+  background: var(--color-surface-card);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 28%);
+}
+
+.selectMenu button {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: rgb(255 255 255 / 72%);
+  background: transparent;
+  text-align: left;
+}
+
+.selectMenu button:hover,
+.selectMenu .selectedOption {
+  color: var(--color-text-white);
+  background: var(--color-surface-muted);
+}
+
+.titleInput,
+.contentInput {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 0;
+  outline: 0;
+  color: var(--color-text-white);
+  background: transparent;
+}
+
+.titleInput {
+  height: 86px;
+  padding: 0 48px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.contentInput {
+  min-height: 520px;
+  padding: 38px 48px;
+  resize: vertical;
+  line-height: 1.7;
+}
+
+.titleInput::placeholder,
+.contentInput::placeholder {
+  color: rgb(255 255 255 / 55%);
+}
+
+.titleInput:focus,
+.contentInput:focus {
+  background: rgb(255 255 255 / 2%);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 24px 44px;
+}
+
+@media (max-width: 700px) {
+  .editorHeader {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 28px 24px 18px;
+  }
+
+  .editorHeader h1 {
+    font-size: 24px;
+  }
+
+  .selectWrap {
+    width: 100%;
+  }
+
+  .titleInput {
+    height: 76px;
+    padding: 0 24px;
+    font-size: 18px;
+  }
+
+  .contentInput {
+    min-height: 400px;
+    padding: 28px 24px;
+  }
+
+  .actions {
+    padding: 20px 24px;
+  }
+
+  .actions > * {
+    flex: 1;
+    min-width: 0;
+  }
+}

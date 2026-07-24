@@ -1,0 +1,110 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--button-min-height, 48px);
+  padding: 0 var(--button-padding-x, 20px);
+  border: 1px solid transparent;
+  border-radius: var(--button-radius, 6px);
+  color: var(--color-text-white);
+  background-color: transparent;
+  cursor: pointer;
+  font-family: var(--font-korean);
+  font-size: var(--button-font-size, 14px);
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.sm {
+  --button-min-height: 43px;
+  --button-padding-x: 18px;
+  --button-radius: 5px;
+  --button-font-size: 14px;
+}
+
+.md {
+  --button-min-height: 48px;
+  --button-padding-x: 20px;
+  --button-radius: 6px;
+  --button-font-size: 14px;
+}
+
+.lg {
+  --button-min-height: 52px;
+  --button-padding-x: 24px;
+  --button-radius: 6px;
+  --button-font-size: 15px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.primary {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+}
+
+.primary:hover:not(:disabled):not([aria-disabled="true"]) {
+  border-color: var(--color-accent-hover);
+  background-color: var(--color-accent-hover);
+}
+
+.secondary {
+  border-color: rgb(255 255 255 / 10%);
+  background-color: rgb(255 255 255 / 10%);
+}
+
+.secondary:hover:not(:disabled):not([aria-disabled="true"]) {
+  border-color: rgb(255 255 255 / 16%);
+  background-color: rgb(255 255 255 / 16%);
+}
+
+.outline {
+  border-color: rgb(255 255 255 / 50%);
+  color: var(--color-text-white);
+  background-color: transparent;
+}
+
+.outline:hover:not(:disabled):not([aria-disabled="true"]) {
+  border-color: var(--color-text-white);
+  color: var(--color-surface-dark);
+  background-color: var(--color-text-white);
+}
+
+.ghost {
+  border-color: transparent;
+  color: rgb(255 255 255 / 76%);
+  background-color: transparent;
+}
+
+.ghost:hover:not(:disabled):not([aria-disabled="true"]) {
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 8%);
+}
+
+.button:disabled,
+.button[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.68;
+}
+
+.outline:disabled,
+.outline[aria-disabled="true"] {
+  border-color: transparent;
+  color: rgb(255 255 255 / 55%);
+  background-color: var(--color-surface-muted);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}

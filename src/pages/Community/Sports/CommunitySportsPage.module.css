@@ -1,0 +1,176 @@
+.page {
+  min-height: 100vh;
+  padding: var(--section-padding) 0;
+  color: var(--color-text-white);
+  background-color: var(--color-surface-dark);
+  font-family: var(--font-korean);
+}
+
+.inner {
+  display: grid;
+  gap: 48px;
+}
+
+.pageHeader {
+  max-width: 720px;
+}
+
+.eyebrow {
+  margin-bottom: 16px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 1.4px;
+}
+
+.title {
+  position: relative;
+  width: fit-content;
+  padding-bottom: 18px;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: var(--font-size-section-title);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.title::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: var(--color-accent);
+  content: "";
+}
+
+.controlArea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.filterArea {
+  flex: 1;
+  min-width: 0;
+}
+
+.sections {
+  display: grid;
+  gap: 36px;
+}
+
+.sectionCard {
+  display: grid;
+  gap: 28px;
+  padding: 28px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  background: var(--color-surface-card);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.sectionHeader h2 {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.sectionHeader > span {
+  color: rgb(255 255 255 / 55%);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sectionEyebrow {
+  margin-bottom: 12px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.matchGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.compactEmpty {
+  min-height: 180px;
+}
+
+.standingsSkeleton {
+  display: grid;
+  gap: 14px;
+}
+
+.skeletonEyebrow {
+  width: 108px;
+  height: 12px;
+  margin-bottom: 14px;
+}
+
+.skeletonTitle {
+  width: 180px;
+  height: 28px;
+}
+
+.skeletonRow {
+  width: 100%;
+  height: 42px;
+}
+
+.skeletonMatchCard {
+  height: 170px;
+}
+
+@media (max-width: 900px) {
+  .inner {
+    gap: 40px;
+  }
+
+  .controlArea {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .sectionCard {
+    padding: 22px;
+  }
+
+  .sectionHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sectionHeader h2 {
+    font-size: 24px;
+  }
+
+  .matchGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .page {
+    padding: 42px 0 64px;
+  }
+
+  .sectionCard {
+    padding: 18px;
+  }
+}

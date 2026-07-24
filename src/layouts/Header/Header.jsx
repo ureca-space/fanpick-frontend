@@ -1,28 +1,45 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import CommunityNotifications from "../../components/CommunityNotifications/CommunityNotifications";
+import FanPickDialog from "../../components/FanPickDialog/FanPickDialog";
+import { LOGOUT_REDIRECT_STORAGE_KEY } from "../../constants/authFlow";
+import useAuth from "../../contexts/useAuth";
+import { supabase } from "../../lib/supabase";
 import styles from "./Header.module.css";
 
 const menuList = [
   {
-    label: "BASEBALL",
-    path: "/sports/baseball",
+    label: "TEAMS",
+    path: "/teams",
   },
   {
-    label: "SOCCER",
-    path: "/sports/football",
+    label: "MATCH SCHEDULE",
+    path: "/matches",
   },
   {
-    label: "BASKETBALL",
-    path: "/sports/basketball",
+    label: "PICK BATTLE",
+    loginDescription: "픽 배틀에 참여하려면 먼저 로그인해 주세요.",
+    path: "/worldcup",
+    requiresAuth: true,
   },
   {
-    label: "LOL",
-    path: "/sports/lol",
+    label: "COMMUNITY",
+    path: "/community",
   },
 ];
 
 const Header = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, isLoggedIn, isAuthLoading } = useAuth();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [loginDialogState, setLoginDialogState] = useState({
+    description: "",
+    from: null,
+    isOpen: false,
+  });
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -42,8 +59,159 @@ const Header = () => {
     setIsMenuOpen((prev) => !prev);
   };
 
+  const clearPendingLogoutRedirect = () => {
+    window.sessionStorage.removeItem(LOGOUT_REDIRECT_STORAGE_KEY);
+  };
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    closeMenu();
+    closeLoginDialog();
+    setIsLoggingOut(true);
+    window.sessionStorage.setItem(LOGOUT_REDIRECT_STORAGE_KEY, "1");
+
+    try {
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        clearPendingLogoutRedirect();
+        console.error("로그아웃 오류:", error);
+
+        const currentPath = `${location.pathname}${location.search}${location.hash}`;
+
+        navigate(currentPath, {
+          replace: true,
+          state: {
+            ...location.state,
+            authDialog: "logoutError",
+          },
+        });
+
+        return;
+      }
+
+      navigate("/", {
+        replace: true,
+        state: {
+          authDialog: "logout",
+        },
+      });
+
+      window.setTimeout(clearPendingLogoutRedirect, 1_000);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const handleMenuLinkClick = (event, menu) => {
+    if (menu.requiresAuth && !isAuthLoading && !isLoggedIn) {
+      event.preventDefault();
+      closeMenu();
+      setLoginDialogState({
+        description:
+          menu.loginDescription ?? "이 메뉴를 이용하려면 먼저 로그인해 주세요.",
+        from: {
+          pathname: menu.path,
+        },
+        isOpen: true,
+      });
+      return;
+    }
+
+    if (menu.requiresAuth && isAuthLoading) {
+      event.preventDefault();
+      return;
+    }
+
+    closeMenu();
+  };
+
+  const closeLoginDialog = () => {
+    setLoginDialogState((previous) => ({
+      ...previous,
+      isOpen: false,
+    }));
+  };
+
+  const handleMoveToLogin = () => {
+    const from = loginDialogState.from;
+
+    closeLoginDialog();
+
+    navigate("/login", {
+      state: {
+        from,
+      },
+    });
+  };
+
   const getNavLinkClass = ({ isActive }) =>
     `${styles.navLink} ${isActive ? styles.active : ""}`;
+
+  const renderAuthMenu = (isMobile = false) => {
+    if (isAuthLoading) return null;
+
+    const tabIndex = isMobile ? (isMenuOpen ? 0 : -1) : undefined;
+
+    if (isLoggedIn) {
+      return (
+        <>
+          <CommunityNotifications
+            className={isMobile ? styles.mobileNotifications : ""}
+            onNavigate={closeMenu}
+            tabIndex={tabIndex}
+            userId={user?.id}
+          />
+
+          <NavLink
+            to="/mypage"
+            className={getNavLinkClass}
+            onClick={closeMenu}
+            tabIndex={tabIndex}
+          >
+            MY PAGE
+          </NavLink>
+
+          <span className={styles.divider} aria-hidden="true" />
+
+          <button
+            type="button"
+            className={`${styles.navLink} ${styles.logoutButton}`}
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            tabIndex={tabIndex}
+          >
+            {isLoggingOut ? "LOGGING OUT..." : "LOGOUT"}
+          </button>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <NavLink
+          to="/login"
+          className={getNavLinkClass}
+          onClick={closeMenu}
+          tabIndex={tabIndex}
+        >
+          LOGIN
+        </NavLink>
+
+        <span className={styles.divider} aria-hidden="true" />
+
+        <NavLink
+          to="/signup"
+          className={getNavLinkClass}
+          onClick={closeMenu}
+          tabIndex={tabIndex}
+        >
+          JOIN US
+        </NavLink>
+      </>
+    );
+  };
 
   return (
     <header className={styles.header}>
@@ -54,37 +222,24 @@ const Header = () => {
           onClick={handleLogoClick}
           aria-label="FAN PICK 홈으로 이동"
         >
-          <img src="/logos/fanpick_logo.svg" alt="FanPick" />
+          <img src="/fanpick_logo.svg" alt="FanPick" />
         </Link>
 
-        {/* 데스크톱 스포츠 메뉴 */}
         <nav className={styles.navigation} aria-label="스포츠 메뉴">
           {menuList.map((menu) => (
             <NavLink
               key={menu.path}
               to={menu.path}
               className={getNavLinkClass}
-              onClick={closeMenu}
+              onClick={(event) => handleMenuLinkClick(event, menu)}
             >
               {menu.label}
             </NavLink>
           ))}
         </nav>
 
-        {/* 데스크톱 회원 메뉴 */}
-        <div className={styles.authMenu}>
-          <NavLink to="/login" className={getNavLinkClass} onClick={closeMenu}>
-            LOGIN
-          </NavLink>
+        <div className={styles.authMenu}>{renderAuthMenu()}</div>
 
-          <span className={styles.divider} aria-hidden="true" />
-
-          <NavLink to="/signup" className={getNavLinkClass} onClick={closeMenu}>
-            JOIN US
-          </NavLink>
-        </div>
-
-        {/* 모바일 햄버거 버튼 */}
         <button
           type="button"
           className={`${styles.menuButton} ${
@@ -101,7 +256,6 @@ const Header = () => {
         </button>
       </div>
 
-      {/* 모바일 드롭다운 메뉴 */}
       <div
         id="mobile-menu"
         className={`${styles.mobileMenu} ${
@@ -118,7 +272,7 @@ const Header = () => {
               key={menu.path}
               to={menu.path}
               className={getNavLinkClass}
-              onClick={closeMenu}
+              onClick={(event) => handleMenuLinkClick(event, menu)}
               tabIndex={isMenuOpen ? 0 : -1}
             >
               {menu.label}
@@ -126,28 +280,18 @@ const Header = () => {
           ))}
         </nav>
 
-        <div className={styles.mobileAuthMenu}>
-          <NavLink
-            to="/login"
-            className={getNavLinkClass}
-            onClick={closeMenu}
-            tabIndex={isMenuOpen ? 0 : -1}
-          >
-            LOGIN
-          </NavLink>
-
-          <span className={styles.divider} aria-hidden="true" />
-
-          <NavLink
-            to="/signup"
-            className={getNavLinkClass}
-            onClick={closeMenu}
-            tabIndex={isMenuOpen ? 0 : -1}
-          >
-            JOIN US
-          </NavLink>
-        </div>
+        <div className={styles.mobileAuthMenu}>{renderAuthMenu(true)}</div>
       </div>
+
+      <FanPickDialog
+        isOpen={loginDialogState.isOpen}
+        title="로그인이 필요합니다"
+        description={loginDialogState.description}
+        confirmText="로그인하기"
+        cancelText="취소"
+        onClose={closeLoginDialog}
+        onConfirm={handleMoveToLogin}
+      />
     </header>
   );
 };

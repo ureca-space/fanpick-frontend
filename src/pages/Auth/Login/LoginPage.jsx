@@ -1,17 +1,23 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { supabase } from "../../../lib/supabase";
 import styles from "../AuthPage.module.css";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [loginForm, setLoginForm] = useState({
-    username: "",
+    email: "",
     password: "",
   });
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   const isLoginAvailable =
-    loginForm.username.trim() !== "" && loginForm.password.trim() !== "";
+    loginForm.email.trim() !== "" && loginForm.password.trim() !== "";
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -20,14 +26,54 @@ const LoginPage = () => {
       ...prev,
       [name]: value,
     }));
+
+    setLoginError("");
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!isLoginAvailable) return;
+    if (!isLoginAvailable || isSubmitting) return;
 
-    console.log("로그인 정보", loginForm);
+    setIsSubmitting(true);
+    setLoginError("");
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginForm.email.trim(),
+        password: loginForm.password,
+      });
+
+      if (error) {
+        if (error.message === "Invalid login credentials") {
+          setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.");
+        } else {
+          setLoginError(error.message);
+        }
+
+        return;
+      }
+
+      const previousLocation = location.state?.from;
+
+      const redirectPath = previousLocation
+        ? `${previousLocation.pathname ?? "/"}${
+            previousLocation.search ?? ""
+          }${previousLocation.hash ?? ""}`
+        : "/";
+
+      navigate(redirectPath, {
+        replace: true,
+        state: {
+          authDialog: "login",
+        },
+      });
+    } catch (error) {
+      console.error("로그인 오류:", error);
+      setLoginError("로그인 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -36,28 +82,28 @@ const LoginPage = () => {
         <h1 className={styles.title}>로그인</h1>
 
         <form className={styles.authForm} onSubmit={handleSubmit}>
-          <label className={styles.srOnly} htmlFor="username">
-            아이디
+          <label className={styles.srOnly} htmlFor="login-email">
+            이메일
           </label>
 
           <input
-            id="username"
+            id="login-email"
             className={styles.input}
-            type="text"
-            name="username"
-            value={loginForm.username}
+            type="email"
+            name="email"
+            value={loginForm.email}
             onChange={handleChange}
-            placeholder="아이디를 입력해 주세요."
-            autoComplete="username"
+            placeholder="이메일을 입력해 주세요."
+            autoComplete="email"
           />
 
           <div className={styles.passwordField}>
-            <label className={styles.srOnly} htmlFor="password">
+            <label className={styles.srOnly} htmlFor="login-password">
               비밀번호
             </label>
 
             <input
-              id="password"
+              id="login-password"
               className={styles.input}
               type={isPasswordVisible ? "text" : "password"}
               name="password"
@@ -91,21 +137,19 @@ const LoginPage = () => {
             </button>
           </div>
 
+          {loginError && <p className={styles.errorMessage}>{loginError}</p>}
+
           <button
             className={styles.submitButton}
             type="submit"
-            disabled={!isLoginAvailable}
+            disabled={!isLoginAvailable || isSubmitting}
           >
-            로그인
+            {isSubmitting ? "로그인 중..." : "로그인"}
           </button>
         </form>
 
         <nav className={styles.accountMenu} aria-label="계정 메뉴">
           <Link to="/signup">회원가입</Link>
-
-          <span className={styles.divider} aria-hidden="true" />
-
-          <Link to="/find-id">아이디 찾기</Link>
 
           <span className={styles.divider} aria-hidden="true" />
 

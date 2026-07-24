@@ -1,0 +1,200 @@
+.calendarPage {
+  width: 100%;
+  min-height: calc(100vh - var(--header-height));
+  margin: 0 auto;
+  padding: var(--section-padding) 0 80px;
+  color: var(--color-text-white);
+  background-color: var(--color-surface-dark);
+}
+
+.inner {
+  display: grid;
+  gap: 24px;
+}
+
+.pageHeader {
+  max-width: 720px;
+}
+
+.eyebrow {
+  margin-bottom: 16px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.title {
+  position: relative;
+  width: fit-content;
+  padding-bottom: 18px;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: var(--font-size-section-title);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.title::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: var(--color-accent);
+  content: "";
+}
+
+.sportFilters {
+  max-width: 640px;
+}
+
+.statusMessageError {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--color-accent-strong);
+}
+
+@media (max-width: 720px) {
+  .calendarPage {
+    padding-top: 40px;
+  }
+
+  .statusMessageError {
+    font-size: 12px;
+  }
+}
+
+.calendarSkeleton {
+  width: min(100%, var(--content-width));
+  margin: 0 auto;
+}
+
+.skeletonWeekdays,
+.skeletonDays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.skeletonWeekdays {
+  margin-top: 30px;
+  border-top: 1px solid rgb(255 255 255 / 14%);
+  border-left: 1px solid rgb(255 255 255 / 14%);
+  background-color: rgb(255 255 255 / 3%);
+}
+
+.skeletonWeekday {
+  padding: 18px 10px;
+  border-right: 1px solid rgb(255 255 255 / 14%);
+  border-bottom: 1px solid rgb(255 255 255 / 14%);
+  color: var(--color-text-white);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.skeletonDays {
+  border-top: 1px solid rgb(255 255 255 / 12%);
+  border-left: 1px solid rgb(255 255 255 / 12%);
+}
+
+.skeletonDay {
+  min-height: 182px;
+  padding: 14px 12px 12px;
+  border-right: 1px solid rgb(255 255 255 / 10%);
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  background-color: var(--color-primary);
+}
+
+.skeletonDate {
+  width: 28px;
+  height: 18px;
+  margin-bottom: 16px;
+}
+
+.skeletonMatch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  background-color: rgb(255 255 255 / 4%);
+}
+
+.skeletonLogo {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+}
+
+.skeletonTeam {
+  width: min(100%, 90px);
+}
+
+.skeletonMeta {
+  width: 56px;
+  height: 10px;
+  margin-top: 12px;
+}
+
+@media (max-width: 1100px) {
+  .skeletonDay {
+    min-height: 170px;
+    padding: 12px 10px 10px;
+  }
+}
+
+@media (max-width: 900px) {
+  .skeletonWeekday {
+    padding: 14px 6px;
+    font-size: 13px;
+  }
+
+  .skeletonDay {
+    min-height: 150px;
+  }
+}
+
+@media (max-width: 720px) {
+  .skeletonWeekday {
+    padding: 12px 4px;
+    font-size: 11px;
+  }
+
+  .skeletonDay {
+    min-height: 136px;
+    padding: 10px 8px 8px;
+  }
+
+  .skeletonMatch {
+    justify-content: center;
+    padding: 8px;
+  }
+
+  .skeletonTeam {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .skeletonWeekday {
+    padding: 10px 2px;
+    font-size: 10px;
+  }
+
+  .skeletonDay {
+    min-height: 128px;
+    padding: 9px 6px 7px;
+  }
+}
+
+@media (max-width: 520px) {
+  .statusMessageError {
+    font-size: 11px;
+  }
+}

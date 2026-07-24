@@ -1,0 +1,145 @@
+.categoryPanel,
+.popularPanel {
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  background: var(--color-surface-card);
+}
+
+.categoryPanel {
+  grid-area: category;
+  padding: 38px 34px;
+}
+
+.categoryNav {
+  display: grid;
+  gap: 6px;
+  margin-top: 28px;
+}
+
+.categoryNav button,
+.categoryNav a {
+  padding: 14px 8px;
+  color: rgb(255 255 255 / 72%);
+  background: transparent;
+  text-align: left;
+}
+
+.categoryNav .categoryStart {
+  margin-top: 10px;
+  padding-top: 24px;
+  border-top: 1px solid rgb(255 255 255 / 12%);
+}
+
+.categoryNav button:hover,
+.categoryNav a:hover,
+.categoryNav .activeCategory {
+  color: var(--color-text-white);
+  font-weight: 700;
+}
+
+.popularPanel {
+  grid-area: popular;
+  min-height: 390px;
+  padding: 30px;
+}
+
+.popularPanel h2 {
+  margin-bottom: 24px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.popularPanel ul {
+  display: grid;
+  gap: 16px;
+}
+
+.popularPanel a {
+  display: flex;
+  min-width: 0;
+  color: rgb(255 255 255 / 82%);
+  font-size: 13px;
+}
+
+.popularPanel a span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.popularPanel b {
+  flex: 0 0 auto;
+  margin-left: 4px;
+  color: var(--color-accent);
+}
+
+.popularSkeletonItem {
+  min-width: 0;
+}
+
+.popularSkeletonLine {
+  width: 100%;
+  height: 14px;
+}
+
+@media (max-width: 1300px) {
+  .popularPanel {
+    min-height: 390px;
+  }
+}
+
+@media (max-width: 900px) {
+  .categoryPanel {
+    padding: 20px;
+  }
+
+  .popularPanel {
+    min-height: 230px;
+    padding: 24px;
+  }
+
+  .popularPanel ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .categoryNav {
+    display: flex;
+    overflow-x: auto;
+    margin-top: 18px;
+    scrollbar-width: none;
+  }
+
+  .categoryNav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .categoryNav button,
+  .categoryNav a,
+  .categoryNav .categoryStart {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 10px 14px;
+    border: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .popularPanel {
+    min-height: 390px;
+  }
+
+  .popularPanel ul {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .categoryPanel {
+    padding: 16px;
+  }
+
+  .popularPanel {
+    padding: 22px;
+  }
+}

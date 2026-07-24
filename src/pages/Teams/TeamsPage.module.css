@@ -1,0 +1,396 @@
+.teamsPage {
+  min-height: 100vh;
+  padding: var(--section-padding) 0;
+  color: var(--color-text-white);
+  background-color: var(--color-surface-dark);
+}
+
+.pageHeader {
+  max-width: 760px;
+}
+
+.eyebrow {
+  margin-bottom: 16px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 1.4px;
+}
+
+.title {
+  position: relative;
+  width: fit-content;
+  padding-bottom: 18px;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: var(--font-size-section-title);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.title::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: var(--color-accent);
+  content: "";
+}
+
+.description {
+  max-width: 690px;
+  margin-top: 24px;
+  color: rgb(255 255 255 / 58%);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.controlArea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  margin-top: 48px;
+}
+
+.filterArea {
+  flex: 1;
+  min-width: 0;
+}
+
+.searchArea {
+  flex: 0 0 420px;
+  width: 420px;
+}
+
+.leagueSections {
+  display: grid;
+  gap: 82px;
+  margin-top: 48px;
+}
+
+.leagueSection {
+  min-width: 0;
+}
+
+.leagueHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+}
+
+.leagueNavigation {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.leagueTitle {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 28px;
+}
+
+.teamCard {
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 8px;
+  background-color: var(--color-surface-card);
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.teamCard:hover {
+  border-color: rgb(255 255 255 / 24%);
+  transform: translateY(-4px);
+}
+
+.teamCardButton {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  padding: 22px;
+  color: inherit;
+  background-color: transparent;
+  text-align: left;
+}
+
+.teamCardButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.leagueBadge,
+.ratingBadge {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.leagueBadge {
+  padding: 5px 8px;
+  border: 1px solid rgb(255 255 255 / 48%);
+  border-radius: 3px;
+}
+
+.ratingBadge {
+  color: var(--color-accent);
+}
+
+.logoArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 110px;
+  margin-top: 22px;
+}
+
+.teamLogo,
+.logoFallback {
+  display: block;
+  object-fit: contain;
+  object-position: center;
+}
+
+.teamLogo {
+  max-width: 96px;
+  max-height: 88px;
+}
+
+.logoFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  color: var(--color-text-white);
+  background-color: var(--color-surface-fallback);
+  font-family: var(--font-korean);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.cardContent {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.teamName {
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 22px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teamMeta {
+  margin-top: 6px;
+  color: rgb(255 255 255 / 46%);
+  font-size: 13px;
+}
+
+.teamTone {
+  margin-top: 16px;
+  color: rgb(255 255 255 / 64%);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.tagList span {
+  padding: 5px 8px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 999px;
+  color: rgb(255 255 255 / 58%);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.favoriteButton {
+  --button-min-height: 46px;
+  --button-radius: 0;
+  --button-font-size: 14px;
+
+  border-width: 1px 0 0;
+  border-top: 1px solid rgb(255 255 255 / 8%);
+  font-weight: 700;
+}
+
+.searchResultHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 48px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+}
+
+.searchResultHeader p {
+  color: rgb(255 255 255 / 55%);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.searchResultHeader strong {
+  color: var(--color-text-white);
+  font-weight: 700;
+}
+
+.searchResultHeader span {
+  flex-shrink: 0;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.searchResultHeader + .teamGrid,
+.controlArea + .teamGrid {
+  margin-top: 28px;
+}
+
+.emptyMessage {
+  margin-top: 64px;
+}
+
+@media (max-width: 1180px) {
+  .teamGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .controlArea {
+    align-items: stretch;
+  }
+
+  .controlArea {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .searchArea {
+    flex-basis: auto;
+    width: min(100%, 420px);
+  }
+
+  .teamGrid {
+    --team-grid-gutter: 40px;
+
+    display: flex;
+    gap: 18px;
+    margin: 28px calc(var(--team-grid-gutter) * -1) 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding: 0 var(--team-grid-gutter) 10px;
+    scroll-padding-inline: var(--team-grid-gutter);
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .teamGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .teamCard {
+    flex: 0 0 clamp(230px, 42vw, 286px);
+    scroll-snap-align: start;
+  }
+}
+
+@media (max-width: 700px) {
+  .description {
+    font-size: 15px;
+  }
+
+  .controlArea {
+    margin-top: 36px;
+  }
+
+  .searchArea {
+    width: 100%;
+  }
+
+  .leagueSections {
+    gap: 60px;
+    margin-top: 36px;
+  }
+
+  .leagueHeader {
+    padding-bottom: 14px;
+  }
+
+  .leagueTitle {
+    font-size: 20px;
+  }
+
+  .teamGrid {
+    --team-grid-gutter: 20px;
+
+    gap: 16px;
+  }
+
+  .teamCard {
+    flex: 0 0 clamp(220px, 72vw, 270px);
+    min-height: 340px;
+  }
+
+  .teamCardButton {
+    padding: 18px;
+  }
+
+  .teamName {
+    font-size: 18px;
+  }
+
+  .teamTone {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .teamGrid {
+    gap: 14px;
+  }
+}

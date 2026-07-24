@@ -1,0 +1,41 @@
+name: Sync LCK Schedule
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "10 0 * * *"
+    - cron: "6,16,26,36,46,56 4-14 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-lck-schedule
+  cancel-in-progress: false
+
+jobs:
+  sync-lck:
+    name: Sync LCK matches to Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync LCK schedule
+        run: node scripts/sync-lck-schedule.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVER_KEY: ${{ secrets.SUPABASE_SERVER_KEY }}
+          PANDASCORE_API_KEY: ${{ secrets.PANDASCORE_API_KEY }}

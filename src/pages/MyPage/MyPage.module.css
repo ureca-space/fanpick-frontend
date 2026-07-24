@@ -1,0 +1,1184 @@
+.myPage {
+  min-height: 100vh;
+  padding: var(--section-padding) 0;
+  color: var(--color-text-white);
+  background-color: var(--color-surface-dark);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+
+/* 페이지 제목 */
+
+.pageHeader {
+  max-width: 720px;
+}
+
+.eyebrow {
+  margin-bottom: 16px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 1.4px;
+}
+
+.pageTitle {
+  position: relative;
+  width: fit-content;
+  padding-bottom: 18px;
+  margin: 0;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: var(--font-size-section-title);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.pageTitle::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: var(--color-accent);
+  content: "";
+}
+
+.pageDescription {
+  max-width: 650px;
+  margin-top: 24px;
+  color: rgb(255 255 255 / 60%);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.skeletonStaticCard {
+  pointer-events: none;
+}
+
+.skeletonEyebrow {
+  width: 160px;
+  height: 13px;
+  margin-bottom: 16px;
+}
+
+.skeletonPageTitle {
+  width: 220px;
+  height: 54px;
+}
+
+.skeletonPageDescription {
+  width: min(100%, 520px);
+  height: 16px;
+  margin-top: 24px;
+}
+
+/* 프로필 */
+
+.profileSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+  padding: 36px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  background-color: var(--color-surface-card);
+}
+
+.profileMain {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 28px;
+  min-width: 0;
+}
+
+.avatarArea {
+  flex-shrink: 0;
+}
+
+.profileAvatar {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  font-family: var(--font-korean);
+  font-size: 42px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profileAvatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileAvatarInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.profileAvatarOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--color-text-white);
+  background-color: rgb(0 0 0 / 62%);
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.profileAvatar:hover .profileAvatarOverlay,
+.profileAvatarUploading .profileAvatarOverlay {
+  opacity: 1;
+}
+
+.profileAvatarUploading {
+  cursor: wait;
+  pointer-events: none;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.skeletonProfileAvatar {
+  width: 104px;
+  height: 104px;
+}
+
+.skeletonNickname {
+  width: 160px;
+  height: 30px;
+}
+
+.skeletonEmail {
+  width: 220px;
+  height: 15px;
+}
+
+.skeletonJoinedAt {
+  width: 150px;
+  height: 15px;
+}
+
+.nicknameRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.nickname {
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 26px;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.email,
+.joinedAt {
+  overflow: hidden;
+  color: rgb(255 255 255 / 58%);
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 닉네임 수정 */
+
+.editButton,
+.cancelButton {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 6px;
+  color: rgb(255 255 255 / 70%);
+  background-color: transparent;
+  font-size: 13px;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.editButton {
+  height: 32px;
+  padding: 0 12px;
+  line-height: 1;
+}
+
+.editButton:hover,
+.cancelButton:hover:not(:disabled) {
+  border-color: rgb(255 255 255 / 40%);
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 6%);
+}
+
+.nicknameEdit {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nicknameInput {
+  width: 220px;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 8px;
+  outline: none;
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 6%);
+  caret-color: var(--color-text-white);
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.nicknameInput:focus {
+  border-color: var(--color-accent);
+  background-color: rgb(255 255 255 / 8%);
+}
+
+.editActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.saveButton {
+  padding: 7px 14px;
+  border-radius: 6px;
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  font-size: 13px;
+  font-weight: 700;
+  transition: background-color 0.2s ease;
+}
+
+.saveButton:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+}
+
+.saveButton:disabled,
+.cancelButton:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.editButton:focus-visible,
+.saveButton:focus-visible,
+.cancelButton:focus-visible,
+.nicknameInput:focus-visible,
+.profileAvatar:focus-visible {
+  outline: 2px solid var(--color-text-white);
+  outline-offset: 3px;
+}
+
+/* 프로필 내부 종목별 배지 */
+
+.profileBadges {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr));
+  gap: 14px;
+  width: min(100%, 650px);
+}
+
+.profileBadge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 88px;
+  padding: 16px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 8px;
+  background-color: rgb(255 255 255 / 4%);
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.profileBadge:hover {
+  border-color: rgb(255 255 255 / 18%);
+  background-color: rgb(255 255 255 / 7%);
+  transform: translateY(-2px);
+}
+
+.profileBadgeIcon {
+  --badge-color: var(--color-accent);
+  --badge-border: rgb(227 27 54 / 32%);
+  --badge-bg: rgb(227 27 54 / 10%);
+
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--badge-border);
+  border-radius: 50%;
+  color: var(--badge-color);
+  background:
+    radial-gradient(circle at 35% 28%, rgb(255 255 255 / 16%), transparent 36%),
+    var(--badge-bg);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 5%);
+}
+
+.profileBadgeIcon[data-tier="beginner"] {
+  --badge-color: #7dd3fc;
+  --badge-border: rgb(125 211 252 / 34%);
+  --badge-bg: rgb(125 211 252 / 10%);
+}
+
+.profileBadgeIcon[data-tier="god"] {
+  --badge-color: #facc15;
+  --badge-border: rgb(250 204 21 / 38%);
+  --badge-bg: rgb(250 204 21 / 12%);
+}
+
+.profileBadgeIcon[data-tier="expert"] {
+  --badge-color: #fb7185;
+  --badge-border: rgb(251 113 133 / 36%);
+  --badge-bg: rgb(251 113 133 / 12%);
+}
+
+.profileBadgeIcon[data-tier="normal"] {
+  --badge-color: #a7f3d0;
+  --badge-border: rgb(167 243 208 / 30%);
+  --badge-bg: rgb(167 243 208 / 9%);
+}
+
+.profileBadgeIcon[data-tier="poor"] {
+  --badge-color: #c4b5fd;
+  --badge-border: rgb(196 181 253 / 32%);
+  --badge-bg: rgb(196 181 253 / 10%);
+}
+
+.profileBadgeIcon[data-tier="worst"] {
+  --badge-color: #fca5a5;
+  --badge-border: rgb(252 165 165 / 34%);
+  --badge-bg: rgb(252 165 165 / 10%);
+}
+
+.profileBadgeIcon > svg {
+  width: 24px;
+  height: 24px;
+}
+
+.profileBadgeTierIcon {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--badge-border);
+  border-radius: 50%;
+  color: var(--badge-color);
+  background-color: var(--color-surface-card);
+}
+
+.profileBadgeTierIcon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.profileBadge > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.profileBadgeSport {
+  color: rgb(255 255 255 / 45%);
+  font-family: var(--font-display);
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+}
+
+.profileBadgeTitle {
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileBadgeAccuracy {
+  overflow: hidden;
+  color: rgb(255 255 255 / 48%);
+  font-size: 12px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skeletonBadgeIcon {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+}
+
+.skeletonBadgeInfo {
+  width: 100%;
+}
+
+.skeletonBadgeSport {
+  width: 58px;
+  height: 11px;
+}
+
+.skeletonBadgeTitle {
+  width: 84%;
+  height: 15px;
+}
+
+.skeletonBadgeText {
+  width: 100%;
+  height: 12px;
+}
+
+/* 공통 섹션 */
+
+.statisticsSection,
+.favoriteTeamsSection,
+.historySection {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sectionDescription {
+  color: rgb(255 255 255 / 55%);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* 예측 통계 */
+
+.statisticsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.statisticCard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 150px;
+  padding: 26px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 8px;
+  background-color: var(--color-surface-card);
+}
+
+.statisticLabel {
+  color: rgb(255 255 255 / 52%);
+  font-family: var(--font-display);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.statisticValue {
+  margin-top: auto;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 1;
+}
+
+.statisticUnit {
+  margin-left: 6px;
+  color: rgb(255 255 255 / 60%);
+  font-family: var(--font-korean);
+  font-size: 15px;
+}
+
+.skeletonSectionTitle {
+  width: 220px;
+  height: 30px;
+}
+
+.skeletonSectionDescription {
+  width: min(100%, 420px);
+  height: 15px;
+}
+
+.skeletonStatLabel {
+  width: 104px;
+  height: 14px;
+}
+
+.skeletonStatValue {
+  width: 90px;
+  height: 40px;
+  margin-top: auto;
+}
+
+/* 관심 팀 */
+
+.favoriteTeamsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.favoriteTeamCard {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  min-height: 132px;
+  padding: 22px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 8px;
+  color: inherit;
+  background-color: var(--color-surface-card);
+  text-align: left;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.favoriteTeamCard:hover {
+  border-color: rgb(255 255 255 / 18%);
+  transform: translateY(-2px);
+}
+
+.favoriteTeamCard:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+.favoriteTeamLogoBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 86px;
+  height: 86px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  background-color: rgb(255 255 255 / 5%);
+}
+
+.favoriteTeamLogo {
+  max-width: 62px;
+  max-height: 62px;
+  object-fit: contain;
+}
+
+.favoriteTeamLogoFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 10%);
+  font-family: var(--font-korean);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.favoriteTeamInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.favoriteTeamLeague {
+  color: var(--color-accent);
+  font-family: var(--font-korean);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.favoriteTeamName {
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 18px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.favoriteTeamTone {
+  display: -webkit-box;
+  overflow: hidden;
+  color: rgb(255 255 255 / 52%);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.skeletonFavoriteLogoBox {
+  width: 86px;
+  height: 86px;
+}
+
+.skeletonFavoriteLeague {
+  width: 118px;
+  height: 12px;
+}
+
+.skeletonFavoriteName {
+  width: 76%;
+  height: 18px;
+}
+
+.skeletonFavoriteTone {
+  width: 100%;
+  height: 13px;
+}
+
+.skeletonFavoriteToneShort {
+  width: 72%;
+  height: 13px;
+}
+
+.sectionHeaderWithNavigation {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.sectionNavigation {
+  flex-shrink: 0;
+}
+
+.skeletonSectionNavigation {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+}
+
+.skeletonPageCount {
+  width: 34px;
+  height: 11px;
+}
+
+.skeletonNavigationButton {
+  width: 38px;
+  height: 38px;
+}
+
+/* 예측 기록 */
+
+.historyList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.historyCard {
+  display: flex;
+  min-width: 0;
+  min-height: 238px;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 8px;
+  color: inherit;
+  background-color: var(--color-surface-card);
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.historyCard:hover {
+  border-color: rgb(255 255 255 / 18%);
+  transform: translateY(-2px);
+}
+
+.historyCard:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+.profileBadge.skeletonStaticCard:hover,
+.favoriteTeamCard.skeletonStaticCard:hover,
+.historyCard.skeletonStaticCard:hover {
+  border-color: rgb(255 255 255 / 8%);
+  transform: none;
+}
+
+.profileBadge.skeletonStaticCard:hover {
+  background-color: rgb(255 255 255 / 4%);
+}
+
+.historyMeta,
+.historyDate,
+.historyTeams {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.historyMeta span {
+  overflow: hidden;
+  color: rgb(255 255 255 / 52%);
+  font-family: var(--font-display);
+  font-size: 12px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.historyResult {
+  flex-shrink: 0;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 14%);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.historyResult[data-result="correct"] {
+  background-color: var(--color-primary-light);
+}
+
+.historyResult[data-result="incorrect"] {
+  background-color: var(--color-prediction-away);
+}
+
+.historyResult[data-result="void"] {
+  background-color: rgb(245 158 11 / 92%);
+}
+
+.historyResult[data-result="cancelled"] {
+  background-color: rgb(100 116 139 / 92%);
+}
+
+.historyResult[data-result="pending"] {
+  background-color: var(--color-accent);
+}
+
+.historyDate strong {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.historyDate span {
+  color: rgb(255 255 255 / 58%);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.historyTeams {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.historyTeam {
+  overflow: hidden;
+  color: rgb(255 255 255 / 62%);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.historyTeam:last-child {
+  text-align: right;
+}
+
+.historyPick {
+  color: var(--color-text-white);
+}
+
+.historyScore {
+  min-width: 48px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
+}
+
+.historyPrediction {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.historyPredictionLabels {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgb(255 255 255 / 62%);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.historyPredictionLabels span {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 5px;
+}
+
+.historyPredictionLabels span:first-child {
+  justify-content: flex-start;
+}
+
+.historyPredictionLabels span:last-child {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.historyPredictionLabels strong {
+  flex-shrink: 0;
+  color: var(--color-text-white);
+  font-weight: 900;
+}
+
+.historyPredictionBar {
+  display: flex;
+  width: 100%;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background-color: var(--color-prediction-track);
+}
+
+.historyHomePredictionBar,
+.historyAwayPredictionBar {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.historyHomePredictionBar {
+  background-color: var(--color-prediction-home);
+}
+
+.historyAwayPredictionBar {
+  background-color: var(--color-prediction-away);
+}
+
+.historyFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: auto;
+}
+
+.historySelectedTeam {
+  min-width: 0;
+  color: rgb(255 255 255 / 52%);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.historyChangeButton {
+  --button-min-height: 36px;
+  --button-padding-x: 14px;
+  --button-font-size: 12px;
+
+  flex-shrink: 0;
+}
+
+.skeletonHistoryMeta {
+  width: 150px;
+  height: 12px;
+}
+
+.skeletonHistoryResult {
+  width: 62px;
+  height: 21px;
+}
+
+.skeletonHistoryDate {
+  width: 86px;
+  height: 28px;
+}
+
+.skeletonHistoryTime {
+  width: 52px;
+  height: 13px;
+}
+
+.skeletonHistoryTeam {
+  width: 82%;
+  height: 15px;
+}
+
+.skeletonHistoryScore {
+  width: 48px;
+  height: 16px;
+}
+
+.skeletonHistoryPick {
+  width: 160px;
+  height: 13px;
+}
+
+.skeletonHistoryButton {
+  width: 82px;
+  height: 36px;
+  border-radius: 5px;
+}
+
+.skeletonPredictionLabel {
+  width: 36%;
+  height: 11px;
+}
+
+.skeletonPredictionBar {
+  height: 7px;
+}
+
+/* 작은 데스크톱 */
+
+@media (max-width: 1180px) {
+  .profileSection {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .profileBadges {
+    width: 100%;
+  }
+}
+
+/* 태블릿 */
+
+@media (max-width: 1000px) {
+  .statisticsGrid,
+  .favoriteTeamsGrid,
+  .historyList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 모바일 */
+
+@media (max-width: 700px) {
+  .inner {
+    gap: 48px;
+  }
+
+  .profileSection {
+    gap: 28px;
+    padding: 26px 22px;
+  }
+
+  .profileMain {
+    align-items: flex-start;
+    gap: 18px;
+    width: 100%;
+  }
+
+  .profileAvatar {
+    width: 76px;
+    height: 76px;
+    font-size: 30px;
+  }
+
+  .skeletonProfileAvatar {
+    width: 76px;
+    height: 76px;
+  }
+
+  .profileAvatarOverlay {
+    font-size: 11px;
+  }
+
+  .profileInfo {
+    max-width: calc(100% - 94px);
+  }
+
+  .nicknameRow {
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .nickname {
+    font-size: 21px;
+  }
+
+  .email,
+  .joinedAt {
+    font-size: 13px;
+  }
+
+  .nicknameInput {
+    width: min(100%, 200px);
+  }
+
+  .profileBadges {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .profileBadge {
+    min-height: 80px;
+    padding: 15px;
+  }
+
+  .profileBadgeIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .profileBadgeTitle {
+    font-size: 14px;
+  }
+
+  .sectionTitle {
+    font-size: 25px;
+  }
+
+  .sectionHeaderWithNavigation {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .sectionNavigation {
+    align-self: flex-end;
+  }
+
+  .skeletonSectionNavigation {
+    align-self: flex-end;
+  }
+
+  .statisticsGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .favoriteTeamsGrid,
+  .historyList {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .favoriteTeamCard {
+    grid-template-columns: 74px minmax(0, 1fr);
+    min-height: 118px;
+    padding: 18px;
+  }
+
+  .favoriteTeamLogoBox {
+    width: 74px;
+    height: 74px;
+  }
+
+  .skeletonFavoriteLogoBox {
+    width: 74px;
+    height: 74px;
+  }
+
+  .favoriteTeamLogo {
+    max-width: 54px;
+    max-height: 54px;
+  }
+
+  .statisticCard {
+    min-height: 125px;
+    padding: 22px;
+  }
+
+  .statisticValue {
+    font-size: 34px;
+  }
+
+  .historyCard {
+    min-height: 230px;
+    padding: 20px;
+  }
+
+  .historyDate strong {
+    font-size: 24px;
+  }
+
+  .historyFooter {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .historyChangeButton {
+    width: 100%;
+  }
+
+  .skeletonPageTitle {
+    width: 180px;
+    height: 44px;
+  }
+
+  .skeletonSectionTitle {
+    width: 190px;
+    height: 25px;
+  }
+}

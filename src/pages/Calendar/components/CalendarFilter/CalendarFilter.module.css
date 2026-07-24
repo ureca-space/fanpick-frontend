@@ -1,0 +1,157 @@
+.teamFilterSection {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 8px;
+  background-color: var(--color-surface-card);
+}
+
+.sectionHeadingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.sectionHeading {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.sectionSubtext {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.teamFilterChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.teamFilterSkeleton {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.teamFilterSkeletonChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  min-width: 92px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background-color: rgb(255 255 255 / 4%);
+}
+
+.teamFilterSkeletonLogo {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.teamFilterSkeletonLabel {
+  width: 52px;
+  height: 10px;
+}
+
+.teamFilterChip,
+.teamFilterChipActive {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.16s ease;
+}
+
+.teamFilterChip {
+  color: rgb(255 255 255 / 72%);
+  background-color: rgb(255 255 255 / 4%);
+}
+
+.teamFilterChipActive {
+  color: var(--color-text-white);
+  border-color: rgb(255 255 255 / 30%);
+  background-color: var(--color-surface-muted);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 8%);
+}
+
+.teamFilterChipLogo {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.teamFilterChipLabel {
+  line-height: 1;
+}
+
+.teamFilterEmpty {
+  margin: 0;
+  color: rgb(255 255 255 / 66%);
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .teamFilterSection {
+    padding: 12px 12px 13px;
+  }
+
+  .sectionHeading {
+    font-size: 12px;
+  }
+
+  .teamFilterChip,
+  .teamFilterChipActive {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+
+  .teamFilterEmpty {
+    font-size: 12px;
+  }
+
+  .sectionHeadingRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+}
+
+@media (max-width: 520px) {
+  .teamFilterSection {
+    padding: 10px 10px 11px;
+  }
+
+  .teamFilterChip,
+  .teamFilterChipActive {
+    padding: 7px 10px;
+    font-size: 10px;
+  }
+
+  .teamFilterChipLogo {
+    width: 14px;
+    height: 14px;
+  }
+
+  .teamFilterEmpty {
+    font-size: 11px;
+  }
+
+  .teamFilterChipLabel {
+    display: none;
+  }
+}

@@ -1,0 +1,200 @@
+.schedulePage {
+  min-height: 100vh;
+  padding: var(--section-padding) 0;
+  color: var(--color-text-white);
+  background-color: var(--color-surface-dark);
+}
+
+/* 페이지 제목 */
+.pageHeader {
+  max-width: 720px;
+}
+
+.eyebrow {
+  margin-bottom: 16px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 1.4px;
+}
+
+.title {
+  position: relative;
+  width: fit-content;
+  padding-bottom: 18px;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: var(--font-size-section-title);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.title::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: var(--color-accent);
+  content: "";
+}
+
+.description {
+  max-width: 650px;
+  margin-top: 24px;
+  color: rgb(255 255 255 / 55%);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+/* 필터 / 검색 */
+.controlArea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  margin-top: 48px;
+}
+
+.filterArea {
+  flex: 1;
+  min-width: 0;
+}
+
+.searchArea {
+  flex: 0 0 420px;
+  width: 420px;
+}
+
+/* 주간 일정 */
+.schedulePanel {
+  margin-top: 48px;
+}
+
+/* 선택 날짜 경기 목록 */
+.resultHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 64px;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+}
+
+.resultDate {
+  margin-bottom: 10px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.resultTitle {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.matchCount {
+  flex-shrink: 0;
+  color: rgb(255 255 255 / 45%);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.matchList {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 52px 28px;
+}
+
+@media (max-width: 1100px) {
+  .controlArea {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .searchArea {
+    flex-basis: auto;
+    width: min(100%, 420px);
+  }
+
+  .matchList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .description {
+    font-size: 15px;
+  }
+
+  .controlArea {
+    margin-top: 36px;
+  }
+
+  .schedulePanel {
+    margin-top: 36px;
+  }
+
+  .matchList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .controlArea {
+    gap: 20px;
+  }
+
+  .searchArea {
+    width: 100%;
+  }
+
+  .resultHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 48px;
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+  }
+
+  .resultTitle {
+    font-size: 20px;
+  }
+
+  .matchCount {
+    align-self: flex-end;
+    font-size: 10px;
+  }
+
+  .matchList {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .matchList::-webkit-scrollbar {
+    display: none;
+  }
+
+  .matchList > * {
+    flex: 0 0 calc(100% - 40px);
+    scroll-snap-align: start;
+  }
+}
