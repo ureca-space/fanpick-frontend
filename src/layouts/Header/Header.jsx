@@ -11,6 +11,7 @@ const menuList = [
   {
     label: "TEAMS",
     path: "/teams",
+    activePaths: ["/team-record"],
   },
   {
     label: "MATCH SCHEDULE",
@@ -149,6 +150,11 @@ const Header = () => {
   const getNavLinkClass = ({ isActive }) =>
     `${styles.navLink} ${isActive ? styles.active : ""}`;
 
+  const getMenuLinkClass = (menu, isActive) =>
+    getNavLinkClass({
+      isActive: isActive || menu.activePaths?.includes(location.pathname),
+    });
+
   const renderAuthMenu = (isMobile = false) => {
     if (isAuthLoading) return null;
 
@@ -230,7 +236,7 @@ const Header = () => {
             <NavLink
               key={menu.path}
               to={menu.path}
-              className={getNavLinkClass}
+              className={({ isActive }) => getMenuLinkClass(menu, isActive)}
               onClick={(event) => handleMenuLinkClick(event, menu)}
             >
               {menu.label}
@@ -271,7 +277,7 @@ const Header = () => {
             <NavLink
               key={menu.path}
               to={menu.path}
-              className={getNavLinkClass}
+              className={({ isActive }) => getMenuLinkClass(menu, isActive)}
               onClick={(event) => handleMenuLinkClick(event, menu)}
               tabIndex={isMenuOpen ? 0 : -1}
             >

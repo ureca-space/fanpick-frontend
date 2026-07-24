@@ -1,0 +1,47 @@
+name: Sync Record Data
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "30 0 * * *"
+    - cron: "15 */3 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-record-data
+  cancel-in-progress: false
+
+jobs:
+  sync-records:
+    name: Sync team and player records to Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync record data
+        run: |
+          node scripts/sync-kbo-standings.mjs
+          node scripts/sync-kleague-standings.mjs
+          node scripts/sync-lck-standings.mjs
+          node scripts/sync-kbo-records.mjs
+          node scripts/sync-kleague-records.mjs
+          node scripts/sync-lck-records.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVER_KEY: ${{ secrets.SUPABASE_SERVER_KEY }}
+          PANDASCORE_API_KEY: ${{ secrets.PANDASCORE_API_KEY }}

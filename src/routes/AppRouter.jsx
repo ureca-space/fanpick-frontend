@@ -6,6 +6,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import ScrollToTop from "./ScrollToTop";
 
 const HomePage = lazy(() => import("../pages/Home/HomePage"));
+const TeamRecordPage = lazy(() => import("../pages/TeamRecord/TeamRecordPage"));
 const TeamsPage = lazy(() => import("../pages/Teams/TeamsPage"));
 const TeamDetailPage = lazy(() => import("../pages/Teams/TeamDetailPage"));
 const MatchSchedulePage = lazy(
@@ -53,6 +54,7 @@ const AppRouter = () => {
             <Route path="/teams" element={<TeamsPage />} />
             <Route path="/teams/:teamId" element={<TeamDetailPage />} />
             <Route path="/players" element={<Navigate to="/teams" replace />} />
+            <Route path="/team-record" element={<TeamRecordPage />} />
             <Route path="/matches" element={<MatchSchedulePage />} />
             <Route path="/prediction" element={<PredictionPage />} />
             <Route path="/community" element={<CommunityPage />} />
