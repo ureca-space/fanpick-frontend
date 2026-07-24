@@ -1,0 +1,271 @@
+.page {
+  min-height: 100vh;
+  padding: var(--section-padding) 0;
+  color: var(--color-text-white);
+  background-color: var(--color-surface-dark);
+}
+
+.hero {
+  max-width: 760px;
+}
+
+.eyebrow {
+  margin-bottom: 16px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+}
+
+.title {
+  position: relative;
+  width: fit-content;
+  padding-bottom: 18px;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: var(--font-size-section-title);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.title::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: var(--color-accent);
+  content: "";
+}
+
+.subtitle {
+  max-width: 690px;
+  margin-top: 24px;
+  color: rgb(255 255 255 / 58%);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.controlSection {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 18px 42px;
+  margin-top: 32px;
+  padding: 18px 0 8px;
+}
+
+.controlBlock {
+  display: grid;
+  gap: 10px;
+}
+
+.teamFilterBlock {
+  flex-basis: 100%;
+}
+
+.searchBlock {
+  flex: 0 0 420px;
+  width: 420px;
+  margin-left: auto;
+}
+
+.controlLabel {
+  color: rgb(255 255 255 / 56%);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+.section {
+  margin-top: 36px;
+  padding: 26px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 8px;
+  background-color: var(--color-surface-card);
+  box-shadow: 0 22px 60px rgb(0 0 0 / 18%);
+}
+
+.sectionTopBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.sectionBadge {
+  display: inline-flex;
+  padding: 6px 10px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 999px;
+  color: rgb(255 255 255 / 72%);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--color-text-white);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.sectionCount {
+  margin: 0;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.nameCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.teamCell {
+  width: 100%;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.teamCell > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.logo,
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgb(255 255 255 / 8%);
+  flex-shrink: 0;
+}
+
+.fallbackImage {
+  filter: grayscale(1) saturate(0.15) brightness(1.12);
+  opacity: 0.9;
+}
+
+.nameCell strong {
+  display: block;
+  color: var(--color-text-white);
+  font-size: 14px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nameCell span {
+  display: block;
+  margin-top: 4px;
+  color: rgb(255 255 255 / 58%);
+  font-size: 12px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rankBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--color-primary-dark);
+  color: var(--color-text-white);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tagPill {
+  padding: 5px 10px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 999px;
+  color: rgb(255 255 255 / 72%);
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.link {
+  color: var(--color-text-white);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.link:hover {
+  color: var(--color-accent);
+}
+
+@media (max-width: 720px) {
+  .controlSection {
+    gap: 16px 28px;
+  }
+
+  .searchBlock {
+    flex-basis: 100%;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .section {
+    margin-top: 28px;
+    padding: 18px;
+  }
+
+  .sectionTopBar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sectionHeader {
+    align-items: flex-start;
+  }
+
+  .teamCell {
+    gap: 8px;
+  }
+
+  .teamCell .logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .teamCell strong {
+    font-size: 13px;
+  }
+
+  .teamCell span {
+    display: none;
+  }
+}
