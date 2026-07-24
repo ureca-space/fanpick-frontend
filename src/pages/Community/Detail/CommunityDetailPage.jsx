@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Button from "../../../components/Button/Button";
 import EmptyState from "../../../components/EmptyState/EmptyState";
@@ -16,7 +16,9 @@ import {
   increaseCommunityPostView,
   updateCommunityComment,
 } from "../../../services/communityApi";
+import { subscribeToCommunityChanges } from "../../../services/communityRealtime";
 import { formatRelativeTime } from "../../../utils/formatRelativeTime";
+import useRelativeTimeClock from "../../../hooks/useRelativeTimeClock";
 import { getPredictionBadgeMeta } from "../../../utils/predictionBadge";
 import CommunitySidebars from "../components/CommunitySidebars/CommunitySidebars";
 import { CATEGORIES } from "../communityConstants";
@@ -31,7 +33,6 @@ const CATEGORY_SPORT = {
   baseball: "baseball",
   soccer: "soccer",
 };
-const INITIAL_TIME = Date.now();
 
 const PredictionBadge = ({
   userId,
@@ -58,7 +59,7 @@ const PredictionBadge = ({
 const formatCommentTime = (date, updatedAt, currentTime) => {
   const formatted = formatRelativeTime(updatedAt || date, currentTime);
 
-  return updatedAt !== date ? `${formatted} · 수정됨` : formatted;
+  return updatedAt && updatedAt !== date ? `${formatted} · 수정됨` : formatted;
 };
 
 const normalizePost = (post) => ({
@@ -169,6 +170,7 @@ const CommunityDetailPage = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const userId = user?.id;
   const [comment, setComment] = useState("");
   const [post, setPost] = useState(null);
   const [previousPost, setPreviousPost] = useState(null);
@@ -183,18 +185,12 @@ const CommunityDetailPage = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [editedContent, setEditedContent] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [currentTime, setCurrentTime] = useState(INITIAL_TIME);
+  const currentTime = useRelativeTimeClock();
   const increasedPostIdRef = useRef(null);
 
   const currentAvatarUrl = user?.user_metadata?.avatar_url || "";
 
-  useEffect(() => {
-    const timer = window.setInterval(() => setCurrentTime(Date.now()), 60000);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
+  const loadDetail = useCallback(async ({ showLoading = true } = {}) => {
     const shouldIncreaseView =
       increasedPostIdRef.current !== String(postId);
 
@@ -202,47 +198,48 @@ const CommunityDetailPage = () => {
       increasedPostIdRef.current = String(postId);
     }
 
-    const loadDetail = async () => {
-      try {
+    try {
+      if (showLoading) {
         setIsLoading(true);
-        setErrorMessage("");
-        const [postData, postList, commentRows] = await Promise.all([
-          fetchCommunityPost(postId),
-          fetchCommunityPosts(),
-          fetchCommunityComments(postId),
-        ]);
-        const normalizedPosts = postList.map(normalizePost);
-        const currentIndex = normalizedPosts.findIndex(
-          (item) => String(item.id) === String(postId),
+      }
+
+      setErrorMessage("");
+      const [postData, postList, commentRows] = await Promise.all([
+        fetchCommunityPost(postId),
+        fetchCommunityPosts(),
+        fetchCommunityComments(postId),
+      ]);
+      const normalizedPosts = postList.map(normalizePost);
+      const currentIndex = normalizedPosts.findIndex(
+        (item) => String(item.id) === String(postId),
+      );
+
+      const normalizedPost = normalizePost(postData);
+
+      setPost(normalizedPost);
+      setPreviousPost(normalizedPosts[currentIndex - 1] ?? null);
+      setNextPost(normalizedPosts[currentIndex + 1] ?? null);
+      setPopularPosts(
+        [...normalizedPosts].sort((a, b) => b.views - a.views).slice(0, 10),
+      );
+      setComments(normalizeComments(commentRows));
+
+      try {
+        const authorIds = [
+          postData.user_id,
+          userId,
+          ...commentRows.map((item) => item.user_id),
+        ];
+        setSportStats(
+          await fetchCommunityPredictionStats(authorIds),
         );
+      } catch (badgeError) {
+        console.error("커뮤니티 배지 조회 오류:", badgeError);
+        setSportStats([]);
+      }
 
-        const normalizedPost = normalizePost(postData);
-
-        setPost(normalizedPost);
-        setPreviousPost(normalizedPosts[currentIndex - 1] ?? null);
-        setNextPost(normalizedPosts[currentIndex + 1] ?? null);
-        setPopularPosts(
-          [...normalizedPosts].sort((a, b) => b.views - a.views).slice(0, 10),
-        );
-        setComments(normalizeComments(commentRows));
-
+      if (shouldIncreaseView) {
         try {
-          const authorIds = [
-            postData.user_id,
-            user?.id,
-            ...commentRows.map((item) => item.user_id),
-          ];
-          setSportStats(
-            await fetchCommunityPredictionStats(authorIds),
-          );
-        } catch (badgeError) {
-          console.error("커뮤니티 배지 조회 오류:", badgeError);
-          setSportStats([]);
-        }
-
-        try {
-          if (!shouldIncreaseView) return;
-
           const increasedViewCount = await increaseCommunityPostView(postId);
           setPost((currentPost) => ({
             ...currentPost,
@@ -251,16 +248,36 @@ const CommunityDetailPage = () => {
         } catch (viewError) {
           console.error("게시글 조회수 증가 오류:", viewError);
         }
-      } catch (error) {
-        console.error("커뮤니티 상세 조회 오류:", error);
-        setErrorMessage("게시글을 불러오지 못했습니다.");
-      } finally {
+      }
+    } catch (error) {
+      console.error("커뮤니티 상세 조회 오류:", error);
+      setErrorMessage("게시글을 불러오지 못했습니다.");
+    } finally {
+      if (showLoading) {
         setIsLoading(false);
       }
-    };
+    }
+  }, [postId, userId]);
 
-    loadDetail();
-  }, [postId, user?.id]);
+  useEffect(() => {
+    const timerId = window.setTimeout(() => {
+      loadDetail();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [loadDetail]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToCommunityChanges({
+      channelName: `community-detail-${postId}`,
+      postId,
+      onChange: () => loadDetail({ showLoading: false }),
+    });
+
+    return unsubscribe;
+  }, [loadDetail, postId]);
 
   const submitComment = async (event) => {
     event.preventDefault();
@@ -494,7 +511,7 @@ const CommunityDetailPage = () => {
                     <small>
                       {formatRelativeTime(post.createdAt, currentTime)}
                     </small>
-                    {post.user_id === user?.id && (
+                    {post.user_id === userId && (
                       <span className={styles.postActions}>
                         <Link to={`/community/${post.id}/edit`}>수정</Link>
                         <button type="button" onClick={handleDeletePost}>
@@ -600,7 +617,7 @@ const CommunityDetailPage = () => {
                             {replyingTo === item.id ? "취소" : "답글 쓰기"}
                           </button>
                         )}
-                        {item.userId === user?.id && (
+                        {item.userId === userId && (
                           <>
                             <button
                               type="button"
@@ -703,7 +720,7 @@ const CommunityDetailPage = () => {
                                   currentTime,
                                 )}
                               </small>
-                              {replyItem.userId === user?.id && (
+                              {replyItem.userId === userId && (
                                 <>
                                   <button
                                     type="button"

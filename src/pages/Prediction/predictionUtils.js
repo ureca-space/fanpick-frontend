@@ -25,5 +25,6 @@ export const RESULT_STYLES = {
   pending: "waiting",
   correct: "correct",
   incorrect: "incorrect",
-  void: "finished",
+  cancelled: "cancelled",
+  void: "void",
 };

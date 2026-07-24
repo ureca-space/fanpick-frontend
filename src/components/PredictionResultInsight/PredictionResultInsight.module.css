@@ -64,7 +64,27 @@
   background-color: var(--color-prediction-away);
 }
 
-.myPick[data-result="void"] b,
+.myPick[data-result="void"] {
+  border-color: rgb(245 158 11 / 48%);
+  background-color: rgb(245 158 11 / 13%);
+}
+
+.myPick[data-result="void"] b {
+  background-color: rgb(245 158 11 / 92%);
+}
+
+.myPick[data-result="cancelled"],
+.myPick[data-result="postponed"] {
+  border-color: rgb(148 163 184 / 48%);
+  border-style: dashed;
+  background-color: rgb(148 163 184 / 12%);
+}
+
+.myPick[data-result="cancelled"] b,
+.myPick[data-result="postponed"] b {
+  background-color: rgb(100 116 139 / 92%);
+}
+
 .myPick[data-result="pending"] b {
   background-color: var(--color-surface-muted);
 }

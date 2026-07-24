@@ -40,9 +40,7 @@
   padding: 34px;
   border: 1px solid rgb(255 255 255 / 10%);
   border-radius: 8px;
-  background:
-    linear-gradient(135deg, rgb(227 27 54 / 18%), transparent 36%),
-    var(--color-surface-card);
+  background-color: var(--color-surface-card);
 }
 
 .logoPanel {
@@ -328,6 +326,12 @@
   gap: 16px;
 }
 
+.resultMatchGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
 .matchCard {
   display: flex;
   flex-direction: column;
@@ -526,56 +530,6 @@
   background-color: var(--color-accent);
 }
 
-.teamResultBadge {
-  padding: 4px 8px;
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-radius: 999px;
-  color: rgb(255 255 255 / 72%);
-  font-size: 11px;
-  font-weight: 900;
-  line-height: 1;
-}
-
-.teamResultBadge[data-result="win"] {
-  border-color: transparent;
-  color: var(--color-text-white);
-  background-color: var(--color-accent);
-}
-
-.teamResultBadge[data-result="loss"] {
-  color: rgb(255 255 255 / 58%);
-  background-color: rgb(255 255 255 / 6%);
-}
-
-.teamResultBadge[data-result="draw"] {
-  color: var(--color-text-white);
-  background-color: rgb(255 255 255 / 12%);
-}
-
-.predictionResultSummary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 12px;
-  border: 1px solid rgb(255 255 255 / 9%);
-  border-radius: 8px;
-  background-color: rgb(255 255 255 / 5%);
-}
-
-.predictionResultSummary span {
-  color: rgb(255 255 255 / 64%);
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.predictionResultSummary strong {
-  flex-shrink: 0;
-  color: var(--color-text-white);
-  font-size: 12px;
-  font-weight: 900;
-}
-
 .standingSummary {
   display: flex;
   align-items: baseline;
@@ -612,74 +566,6 @@
   font-size: 12px;
   font-style: normal;
   font-weight: 800;
-}
-
-.standingTableWrapper {
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.standingTableWrapper::-webkit-scrollbar {
-  display: none;
-}
-
-.standingTable {
-  width: 100%;
-  min-width: 780px;
-  border-collapse: collapse;
-  color: var(--color-text-white);
-}
-
-.standingTable th,
-.standingTable td {
-  padding: 14px 12px;
-  border-bottom: 1px solid rgb(255 255 255 / 8%);
-  font-size: 13px;
-  text-align: center;
-}
-
-.standingTable th {
-  color: rgb(255 255 255 / 48%);
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.standingTable td {
-  color: rgb(255 255 255 / 72%);
-  font-weight: 800;
-}
-
-.standingTable tr[data-active="true"] {
-  background-color: rgb(227 27 54 / 11%);
-}
-
-.standingTable tr[data-active="true"] td {
-  color: var(--color-text-white);
-}
-
-.standingTable th:nth-child(2),
-.standingTable td:nth-child(2) {
-  text-align: left;
-}
-
-.standingTeam {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.standingLogo {
-  width: 34px;
-  height: 34px;
-  flex-shrink: 0;
-  object-fit: contain;
-}
-
-.standingTeam span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .standingSkeleton {
@@ -827,6 +713,10 @@
   .matchGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .resultMatchGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 760px) {
@@ -887,6 +777,10 @@
   .matchCard {
     flex: 0 0 clamp(260px, 84vw, 320px);
     scroll-snap-align: start;
+  }
+
+  .resultMatchGrid {
+    grid-template-columns: 1fr;
   }
 
   .memberGrid {

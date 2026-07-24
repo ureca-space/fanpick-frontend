@@ -22,6 +22,7 @@ import {
   canChangePredictionByBeginAt,
   createMatchBeginAt,
 } from "../../utils/predictionDeadline";
+import { normalizeMatchTimingStatus } from "../../utils/matchStatus";
 import { createPredictionLocation } from "../../utils/predictionPath";
 import MyPredictionCard, {
   MyPredictionCardSkeleton,
@@ -43,6 +44,7 @@ const FILTERS = [
 const PREDICTION_SPORTS = FILTERS.filter((filter) => filter.id !== "all").map(
   (filter) => filter.id,
 );
+const CLOSED_MATCH_STATUSES = new Set(["cancelled", "postponed"]);
 
 // - MatchSchedulePage의 팀 코드와 동일한 KBO/LCK 팀 정보
 const KBO_TEAMS = {
@@ -212,7 +214,18 @@ const parseScore = (score) => {
 const normalizeSupabaseMatch = (match) => {
   const sport = match.sport;
   const time = match.match_time?.slice(0, 5) ?? "--:--";
-  const { homeScore, awayScore } = parseScore(match.score);
+  const timingStatus = normalizeMatchTimingStatus({
+    matchDate: match.match_date,
+    matchTime: time,
+    score: match.score,
+    status: match.status,
+  });
+  const { homeScore, awayScore } = parseScore(timingStatus.score);
+  const normalizedMatch = {
+    ...match,
+    score: timingStatus.score,
+    status: timingStatus.status,
+  };
 
   return {
     id: `match-${match.id}`,
@@ -227,15 +240,17 @@ const normalizeSupabaseMatch = (match) => {
       sport === "esports" ? "LOL" : sport === "soccer" ? "SOCCER" : "BASEBALL",
     league: match.league,
     time,
-    status: match.status,
-    score: match.score,
+    status: timingStatus.status,
+    score: timingStatus.score,
     participants: 0,
     homeRate: 50,
     homeTeam: getTeamInfo(match.home_team_code, sport),
     awayTeam: getTeamInfo(match.away_team_code, sport),
     homeScore,
     awayScore,
-    isFinished: match.status === "finished" || hasResolvedPredictionScore(match),
+    isFinished:
+      timingStatus.status === "finished" ||
+      hasResolvedPredictionScore(normalizedMatch),
   };
 };
 
@@ -587,6 +602,7 @@ const PredictionPage = () => {
       const matchBeginTime = new Date(match.beginAt).getTime();
 
       if (
+        CLOSED_MATCH_STATUSES.has(match.status) ||
         savingMatchId === match.id ||
         !Number.isFinite(matchBeginTime) ||
         Date.now() >= matchBeginTime
@@ -794,12 +810,18 @@ const PredictionPage = () => {
             (visibleTab === "today" || predictions[match.id])
           );
         })
-        .map((match) => ({
-          ...match,
-          // - DB가 scheduled여도 경기 시작 시각이 지나면 예측 마감
-          isFinished:
-            match.isFinished || currentTime >= new Date(match.beginAt).getTime(),
-        }));
+        .map((match) => {
+          const isClosedByStatus = CLOSED_MATCH_STATUSES.has(match.status);
+
+          return {
+            ...match,
+            // - DB가 scheduled여도 경기 시작 시각이 지나면 예측 마감
+            isFinished:
+              match.isFinished ||
+              (!isClosedByStatus &&
+                currentTime >= new Date(match.beginAt).getTime()),
+          };
+        });
     },
     [
       matches,

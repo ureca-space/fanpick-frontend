@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import CommunityNotifications from "../../components/CommunityNotifications/CommunityNotifications";
 import FanPickDialog from "../../components/FanPickDialog/FanPickDialog";
 import { LOGOUT_REDIRECT_STORAGE_KEY } from "../../constants/authFlow";
 import useAuth from "../../contexts/useAuth";
@@ -30,7 +31,7 @@ const menuList = [
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isLoggedIn, isAuthLoading } = useAuth();
+  const { user, isLoggedIn, isAuthLoading } = useAuth();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -156,6 +157,13 @@ const Header = () => {
     if (isLoggedIn) {
       return (
         <>
+          <CommunityNotifications
+            className={isMobile ? styles.mobileNotifications : ""}
+            onNavigate={closeMenu}
+            tabIndex={tabIndex}
+            userId={user?.id}
+          />
+
           <NavLink
             to="/mypage"
             className={getNavLinkClass}

@@ -1,4 +1,8 @@
 import { supabase } from "../lib/supabase";
+import {
+  createMatchDateTime,
+  normalizeMatchTimingStatus,
+} from "../utils/matchStatus";
 
 const getMatchStatsId = (match) => String(match.databaseId ?? match.id);
 const normalizeMatchIds = (matchIds) =>
@@ -29,19 +33,32 @@ const createMatchTimeValue = (match) => {
     return null;
   }
 
-  const [year, month, day] = String(match.match_date).split("-").map(Number);
-  const [hourText, minuteText] = String(match.match_time ?? "00:00").split(":");
-  const hour = Number(hourText);
-  const minute = Number(minuteText);
-  const matchTime = new Date(
-    year,
-    month - 1,
-    day,
-    Number.isFinite(hour) ? hour : 0,
-    Number.isFinite(minute) ? minute : 0,
-  ).getTime();
+  return createMatchDateTime(match.match_date, match.match_time ?? "00:00");
+};
 
-  return Number.isFinite(matchTime) ? matchTime : null;
+const normalizePredictionMatchTiming = (prediction) => {
+  const match = prediction.matches;
+
+  if (!match) {
+    return prediction;
+  }
+
+  const matchTime = match.match_time?.slice(0, 5) ?? "00:00";
+  const timingStatus = normalizeMatchTimingStatus({
+    matchDate: match.match_date,
+    matchTime,
+    score: match.score,
+    status: match.status,
+  });
+
+  return {
+    ...prediction,
+    matches: {
+      ...match,
+      score: timingStatus.score,
+      status: timingStatus.status,
+    },
+  };
 };
 
 export const hasResolvedPredictionScore = (match) => {
@@ -175,7 +192,7 @@ export const fetchMyPredictions = async (userId) => {
   const { data, error } = await createMyPredictionsQuery(userId);
 
   if (!error) {
-    return data ?? [];
+    return (data ?? []).map(normalizePredictionMatchTiming);
   }
 
   const shouldRetryWithoutCreatedAt =
@@ -192,7 +209,7 @@ export const fetchMyPredictions = async (userId) => {
 
   if (fallbackError) throw fallbackError;
 
-  return fallbackData ?? [];
+  return (fallbackData ?? []).map(normalizePredictionMatchTiming);
 };
 
 export const fetchMyPredictionSelections = async (userId, matchIds = []) => {

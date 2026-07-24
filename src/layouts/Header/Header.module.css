@@ -247,6 +247,7 @@
   .mobileMenuOpen {
     max-height: 480px;
     padding: 20px 20px 24px;
+    overflow: visible;
     border-top-color: var(--color-border);
     opacity: 1;
     visibility: visible;
@@ -283,6 +284,10 @@
     margin-top: 12px;
     padding-top: 18px;
     border-top: 1px solid rgb(229 231 235 / 20%);
+  }
+
+  .mobileNotifications {
+    margin-right: 4px;
   }
 
   .mobileAuthMenu .navLink,

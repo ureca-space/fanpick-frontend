@@ -1,0 +1,79 @@
+.dayCell {
+  position: relative;
+  min-height: 182px;
+  padding: 14px 12px 12px;
+  border-right: 1px solid rgb(255 255 255 / 10%);
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  background-color: var(--color-primary);
+  overflow: visible;
+  transition: background-color 0.2s ease;
+}
+
+.dayCellOutside {
+  color: rgb(255 255 255 / 26%);
+  background-color: var(--color-surface-dark);
+}
+
+.dayCellPast {
+  background-color: var(--color-primary-dark);
+}
+
+.dayCellUpcoming {
+  background-color: var(--color-primary-light);
+}
+
+.dayNumber {
+  margin-bottom: 12px;
+  color: var(--color-text-white);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.dayCellOutside .dayNumber {
+  color: rgb(255 255 255 / 28%);
+}
+
+.matchList {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 1100px) {
+  .dayCell {
+    min-height: 170px;
+    padding: 12px 10px 10px;
+  }
+}
+
+@media (max-width: 900px) {
+  .dayCell {
+    min-height: 150px;
+  }
+}
+
+@media (max-width: 720px) {
+  .dayCell {
+    min-height: 136px;
+    padding: 10px 8px 8px;
+  }
+
+  .dayNumber {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 520px) {
+  .dayCell {
+    min-height: 128px;
+    padding: 9px 6px 7px;
+  }
+
+  .dayNumber {
+    font-size: 13px;
+  }
+}
+
+
