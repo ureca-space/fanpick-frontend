@@ -1,7 +1,7 @@
 import CalendarItemCard from "./CalendarItemCard";
 import css from "./CalendarCell/CalendarCell.module.css";
 
-const CalendarCell = ({ day, matches = [] }) => {
+const CalendarCell = ({ day, matches = [], onMatchClick }) => {
   const cellClassName = [
     css.dayCell,
     !day.isCurrentMonth ? css.dayCellOutside : "",
@@ -17,7 +17,11 @@ const CalendarCell = ({ day, matches = [] }) => {
 
       <div className={css.matchList}>
         {matches.map((match) => (
-          <CalendarItemCard key={match.id} match={match} />
+          <CalendarItemCard
+            key={match.id}
+            match={match}
+            onClick={onMatchClick}
+          />
         ))}
       </div>
     </div>

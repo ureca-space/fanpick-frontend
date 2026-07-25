@@ -36,15 +36,13 @@ const formatTooltipDate = (date) => {
   return month && day ? `${month}.${day}` : "날짜 미정";
 };
 
-const CalendarItemCard = ({ match }) => {
+const CalendarItemCard = ({ match, onClick }) => {
   const homeName = match.homeTeam?.shortName || match.homeTeam?.name || "-";
   const awayName = match.awayTeam?.shortName || match.awayTeam?.name || "-";
   const homeFullName = match.homeTeam?.name || homeName;
   const awayFullName = match.awayTeam?.name || awayName;
   const matchLabel = `${homeFullName} vs ${awayFullName}`;
-  const leagueLabel = [match.sportLabel, match.league]
-    .filter(Boolean)
-    .join(" · ");
+  const leagueLabel = [match.sportLabel, match.league].filter(Boolean).join(" · ");
   const scheduleLabel = [
     formatTooltipDate(match.date),
     match.time || "시간 미정",
@@ -64,11 +62,12 @@ const CalendarItemCard = ({ match }) => {
     .join("\n");
 
   return (
-    <article
+    <button
       className={css.calendarItemCard}
+      type="button"
       aria-label={`${matchLabel} 경기`}
       title={tooltipTitle}
-      tabIndex={0}
+      onClick={() => onClick?.(match)}
     >
       <span className={css.matchTooltip} role="tooltip">
         <strong className={css.tooltipTitle}>{matchLabel}</strong>
@@ -93,7 +92,7 @@ const CalendarItemCard = ({ match }) => {
           <TeamBadge team={match.awayTeam} />
         </div>
       </div>
-    </article>
+    </button>
   );
 };
 

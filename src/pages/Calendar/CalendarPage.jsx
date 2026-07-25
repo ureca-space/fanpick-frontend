@@ -13,6 +13,7 @@ import { getTeamsByIds, TEAM_BY_ID } from "../Teams/data/teams";
 import CalendarFilter from "./components/CalendarFilter/CalendarFilter";
 import CalendarGrid from "./components/CalendarGrid.jsx";
 import CalendarHeader from "./components/CalendarHeader.jsx";
+import MatchAlarmModal from "./components/MatchAlarmModal/MatchAlarmModal";
 import { fetchCalendarSchedule } from "./api/getSportSchedule";
 import styles from "./CalendarPage.module.css";
 
@@ -128,6 +129,7 @@ const CalendarPage = () => {
     userId: "",
     teamIds: [],
   });
+  const [selectedAlarmMatch, setSelectedAlarmMatch] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -345,6 +347,14 @@ const CalendarPage = () => {
     });
   };
 
+  const handleOpenAlarmModal = (match) => {
+    setSelectedAlarmMatch(match);
+  };
+
+  const handleCloseAlarmModal = () => {
+    setSelectedAlarmMatch(null);
+  };
+
   return (
     <>
       <SubNav
@@ -421,10 +431,21 @@ const CalendarPage = () => {
               </div>
             </section>
           ) : (
-            <CalendarGrid year={year} month={month} matchByDate={matchByDate} />
+            <CalendarGrid
+              year={year}
+              month={month}
+              matchByDate={matchByDate}
+              onMatchClick={handleOpenAlarmModal}
+            />
           )}
         </div>
       </main>
+
+      <MatchAlarmModal
+        match={selectedAlarmMatch}
+        isOpen={Boolean(selectedAlarmMatch)}
+        onClose={handleCloseAlarmModal}
+      />
     </>
   );
 };
