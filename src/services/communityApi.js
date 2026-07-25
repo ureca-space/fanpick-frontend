@@ -191,7 +191,7 @@ export const deleteCommunityComment = async (commentId) => {
 };
 
 export const increaseCommunityPostView = async (postId) => {
-  const { data, error } = await supabase.rpc("increment_community_post_view", {
+  const { data, error } = await supabase.rpc("record_community_post_view", {
     target_post_id: Number(postId),
   });
 

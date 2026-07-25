@@ -100,6 +100,25 @@
   line-height: 1;
 }
 
+.metaDivider {
+  color: rgb(255 255 255 / 28%);
+  font-size: 11px;
+}
+
+.viewCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: rgb(255 255 255 / 48%);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.viewCount svg {
+  width: 13px;
+  height: 13px;
+}
+
 .postActions {
   display: flex;
   align-items: center;

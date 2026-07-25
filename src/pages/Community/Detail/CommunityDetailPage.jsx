@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { FiEye } from "react-icons/fi";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Button from "../../../components/Button/Button";
 import EmptyState from "../../../components/EmptyState/EmptyState";
@@ -524,6 +525,16 @@ const CommunityDetailPage = () => {
                     <small>
                       {formatRelativeTime(post.createdAt, currentTime)}
                     </small>
+                    <span className={styles.metaDivider} aria-hidden="true">
+                      ·
+                    </span>
+                    <span
+                      className={styles.viewCount}
+                      aria-label={`조회수 ${post.views}`}
+                    >
+                      <FiEye aria-hidden="true" />
+                      {post.views}
+                    </span>
                     {post.user_id === userId && (
                       <span className={styles.postActions}>
                         <Link to={`/community/${post.id}/edit`}>수정</Link>
