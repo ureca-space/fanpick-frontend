@@ -1,14 +1,50 @@
 import { supabase } from "../lib/supabase";
 
+// 게시글·댓글에 저장된 user_id로 최신 공개 프로필을 연결
+const attachLatestProfiles = async (rows = []) => {
+  const userIds = [...new Set(rows.map((row) => row.user_id).filter(Boolean))];
+
+  if (userIds.length === 0) return rows;
+
+  const { data: profiles, error } = await supabase
+    .from("profiles")
+    .select("user_id, nickname, avatar_url")
+    .in("user_id", userIds);
+
+  // 프로필 조회가 실패해도 게시글과 댓글은 기존 작성자 정보로 표시
+  if (error) {
+    console.error("커뮤니티 프로필 조회 오류:", error);
+    return rows;
+  }
+
+  const profileByUserId = new Map(
+    (profiles ?? []).map((profile) => [profile.user_id, profile]),
+  );
+
+  return rows.map((row) => {
+    const profile = profileByUserId.get(row.user_id);
+
+    if (!profile) return row;
+
+    return {
+      ...row,
+      author_name: profile.nickname || row.author_name,
+      author_avatar_url: profile.avatar_url,
+    };
+  });
+};
+
 export const fetchCommunityPosts = async () => {
-  const [{ data: posts, error: postsError }, { data: comments, error: commentsError }] =
-    await Promise.all([
-      supabase
-        .from("community_posts")
-        .select("*")
-        .order("created_at", { ascending: false }),
-      supabase.from("community_comments").select("post_id"),
-    ]);
+  const [
+    { data: posts, error: postsError },
+    { data: comments, error: commentsError },
+  ] = await Promise.all([
+    supabase
+      .from("community_posts")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    supabase.from("community_comments").select("post_id"),
+  ]);
 
   if (postsError) throw postsError;
   if (commentsError) throw commentsError;
@@ -17,10 +53,12 @@ export const fetchCommunityPosts = async () => {
     counts[comment.post_id] = (counts[comment.post_id] ?? 0) + 1;
     return counts;
   }, {});
-  return (posts ?? []).map((post) => ({
+  const postsWithCommentCount = (posts ?? []).map((post) => ({
     ...post,
     commentCount: commentCounts[post.id] ?? 0,
   }));
+
+  return attachLatestProfiles(postsWithCommentCount);
 };
 
 export const fetchMyCommunityComments = async (userId) => {
@@ -45,10 +83,17 @@ export const fetchCommunityPost = async (postId) => {
     .single();
 
   if (error) throw error;
-  return data;
+
+  const [post] = await attachLatestProfiles([data]);
+  return post;
 };
 
-export const createCommunityPost = async ({ user, category, title, content }) => {
+export const createCommunityPost = async ({
+  user,
+  category,
+  title,
+  content,
+}) => {
   const { data, error } = await supabase
     .from("community_posts")
     .insert({
@@ -66,7 +111,10 @@ export const createCommunityPost = async ({ user, category, title, content }) =>
   return data;
 };
 
-export const updateCommunityPost = async (postId, { category, title, content }) => {
+export const updateCommunityPost = async (
+  postId,
+  { category, title, content },
+) => {
   const { error } = await supabase
     .from("community_posts")
     .update({
@@ -97,7 +145,8 @@ export const fetchCommunityComments = async (postId) => {
     .order("created_at", { ascending: true });
 
   if (error) throw error;
-  return data ?? [];
+
+  return attachLatestProfiles(data ?? []);
 };
 
 export const createCommunityComment = async ({
@@ -157,12 +206,9 @@ export const fetchCommunityPredictionStats = async (userIds) => {
 
   if (targetUserIds.length === 0) return [];
 
-  const { data, error } = await supabase.rpc(
-    "get_community_prediction_stats",
-    {
-      target_user_ids: targetUserIds,
-    },
-  );
+  const { data, error } = await supabase.rpc("get_community_prediction_stats", {
+    target_user_ids: targetUserIds,
+  });
 
   if (error) throw error;
 
