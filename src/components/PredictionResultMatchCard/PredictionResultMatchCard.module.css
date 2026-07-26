@@ -24,6 +24,11 @@
   border-color: rgb(56 189 248 / 30%);
 }
 
+.matchCard[data-focus-result="resultPending"] {
+  border-color: var(--color-status-neutral-border);
+  border-style: dashed;
+}
+
 .matchCard[data-focus-result="cancelled"],
 .matchCard[data-focus-result="postponed"] {
   border-color: rgb(148 163 184 / 26%);
@@ -76,6 +81,10 @@
 
 .focusResultBadge[data-result="live"] {
   background-color: var(--color-status-info);
+}
+
+.focusResultBadge[data-result="resultPending"] {
+  background-color: var(--color-status-neutral);
 }
 
 .focusResultBadge[data-result="cancelled"],

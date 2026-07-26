@@ -70,6 +70,10 @@
   background-color: var(--color-status-info);
 }
 
+.matchHeading span.resultPending {
+  background-color: var(--color-status-neutral);
+}
+
 .matchHeading span.cancelled {
   background-color: var(--color-status-neutral);
 }

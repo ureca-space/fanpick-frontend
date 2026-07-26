@@ -20,10 +20,17 @@ const LIVE_WINDOW_HOURS_BY_SPORT = {
   esports: 4,
   soccer: 3,
 };
+const FINISHED_PROTECTION_MINUTES_BY_SPORT = {
+  baseball: 180,
+  esports: 90,
+  soccer: 110,
+};
 const DEFAULT_LIVE_WINDOW_HOURS = 4;
+const DEFAULT_FINISHED_PROTECTION_MINUTES = 120;
 const DEFAULT_MATCH_TIME = "23:59";
 
 const normalizeTeamCode = (teamCode) => String(teamCode ?? "").trim().toUpperCase();
+const normalizeSport = (sport) => String(sport ?? "").trim().toLowerCase();
 const normalizeStatus = (status) => String(status ?? "").trim().toLowerCase();
 const isLiveMatchStatus = (status) =>
   LIVE_MATCH_STATUSES.has(normalizeStatus(status));
@@ -31,11 +38,20 @@ const isFinishedMatchStatus = (status) =>
   FINISHED_MATCH_STATUSES.has(normalizeStatus(status));
 
 const getLiveWindowMs = (sport) => {
-  const normalizedSport = String(sport ?? "").trim().toLowerCase();
+  const normalizedSport = normalizeSport(sport);
   const hours =
     LIVE_WINDOW_HOURS_BY_SPORT[normalizedSport] ?? DEFAULT_LIVE_WINDOW_HOURS;
 
   return hours * 60 * 60 * 1000;
+};
+
+const getFinishedProtectionMs = (sport) => {
+  const normalizedSport = normalizeSport(sport);
+  const minutes =
+    FINISHED_PROTECTION_MINUTES_BY_SPORT[normalizedSport] ??
+    DEFAULT_FINISHED_PROTECTION_MINUTES;
+
+  return minutes * 60 * 1000;
 };
 
 const createMatchDateTime = (dateKey, timeValue) => {
@@ -65,6 +81,20 @@ const parseScore = (score) => {
   };
 };
 
+const isLikelyUnsettledFinishedScore = (match) => {
+  const { awayScore, homeScore } = parseScore(match?.score);
+
+  if (awayScore === null || homeScore === null) {
+    return true;
+  }
+
+  return (
+    normalizeSport(match?.sport) === "baseball" &&
+    awayScore === 0 &&
+    homeScore === 0
+  );
+};
+
 const hasResolvedScore = (match) => {
   const { awayScore, homeScore } = parseScore(match?.score);
 
@@ -82,9 +112,17 @@ const hasResolvedScore = (match) => {
 
   const matchDateTime = createMatchDateTime(match?.match_date, match?.match_time);
 
+  if (
+    matchDateTime !== null &&
+    Date.now() < matchDateTime + getLiveWindowMs(match?.sport) &&
+    isLikelyUnsettledFinishedScore(match)
+  ) {
+    return false;
+  }
+
   return (
     matchDateTime === null ||
-    Date.now() >= matchDateTime + getLiveWindowMs(match?.sport)
+    Date.now() >= matchDateTime + getFinishedProtectionMs(match?.sport)
   );
 };
 

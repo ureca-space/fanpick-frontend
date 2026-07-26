@@ -15,6 +15,7 @@ export const SPORT_ICONS = {
 export const RESULT_LABELS = {
   pending: "예측진행중",
   live: "경기중",
+  resultPending: "결과 확인중",
   correct: "예측성공",
   incorrect: "예측실패",
   cancelled: "경기취소",
@@ -25,6 +26,7 @@ export const RESULT_LABELS = {
 export const RESULT_STYLES = {
   pending: "waiting",
   live: "live",
+  resultPending: "resultPending",
   correct: "correct",
   incorrect: "incorrect",
   cancelled: "cancelled",

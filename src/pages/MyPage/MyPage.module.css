@@ -913,6 +913,10 @@
   background-color: var(--color-status-info);
 }
 
+.historyResult[data-result="resultPending"] {
+  background-color: var(--color-status-neutral);
+}
+
 .historyDate strong {
   color: var(--color-text-white);
   font-family: var(--font-display);

@@ -89,6 +89,16 @@
   background-color: var(--color-surface-muted);
 }
 
+.myPick[data-result="resultPending"] {
+  border-color: var(--color-status-neutral-border-strong);
+  border-style: dashed;
+  background-color: var(--color-status-neutral-soft);
+}
+
+.myPick[data-result="resultPending"] b {
+  background-color: var(--color-status-neutral);
+}
+
 .myPick[data-result="live"] {
   border-color: rgb(56 189 248 / 48%);
   background-color: var(--color-status-info-soft);
