@@ -165,12 +165,90 @@
 }
 
 .articleContent {
+  display: flex;
+  flex-direction: column;
   min-height: 360px;
   padding: 36px 42px;
   border-bottom: 1px solid rgb(255 255 255 / 10%);
   line-height: 1.8;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+.postReactionArea {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-top: 28px;
+}
+
+.reactionButtons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.reactionOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 72px;
+}
+
+.reactionButtons button {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 9px;
+  border: 2px solid rgb(255 255 255 / 18%);
+  border-radius: 999px;
+  color: rgb(255 255 255 / 52%);
+  background: transparent;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.reactionButtons .supportButton.activeReaction {
+  border-color: var(--color-prediction-home);
+  color: var(--color-text-white);
+  background: var(--color-prediction-home);
+  box-shadow: 0 3px 10px rgb(97 118 255 / 24%);
+}
+
+.reactionButtons .opposeButton.activeReaction {
+  border-color: var(--color-prediction-away);
+  color: var(--color-text-white);
+  background: var(--color-prediction-away);
+  box-shadow: 0 3px 10px rgb(223 93 118 / 24%);
+}
+
+.supportButton.activeReaction + .reactionCount {
+  color: var(--color-prediction-home);
+}
+
+.opposeButton.activeReaction + .reactionCount {
+  color: var(--color-prediction-away);
+}
+
+.reactionButtons button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.reactionButtons svg {
+  width: 13px;
+  height: 13px;
+}
+
+.reactionCount {
+  width: 3ch;
+  color: rgb(255 255 255 / 55%);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
 }
 
 .commentSection {
@@ -277,6 +355,19 @@
 
 .commentMeta button:hover {
   color: var(--color-text-white);
+}
+
+.commentMeta .reactionButtons button {
+  padding: 5px 9px;
+  color: rgb(255 255 255 / 52%);
+}
+
+.commentMeta .reactionButtons .activeReaction {
+  color: var(--color-text-white);
+}
+
+.commentList .reactionCount {
+  font-size: 11px;
 }
 
 .editArea {

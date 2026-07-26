@@ -50,6 +50,7 @@ const CommunityTableSkeleton = () => (
       <Skeleton.Line className={styles.skeletonHeaderMeta} />
       <Skeleton.Line className={styles.skeletonHeaderMeta} />
       <Skeleton.Line className={styles.skeletonHeaderMeta} />
+      <Skeleton.Line className={styles.skeletonHeaderMeta} />
     </div>
 
     {Array.from({ length: PAGE_SIZE }, (_, index) => (
@@ -57,6 +58,7 @@ const CommunityTableSkeleton = () => (
         <Skeleton.Line className={styles.skeletonPostTitle} />
         <Skeleton.Line className={styles.skeletonPostAuthor} />
         <Skeleton.Line className={styles.skeletonPostDate} />
+        <Skeleton.Line className={styles.skeletonPostViews} />
         <Skeleton.Line className={styles.skeletonPostViews} />
       </div>
     ))}
@@ -168,11 +170,17 @@ const CommunityPage = () => {
       nextPosts = posts.filter((post) => post.category === category);
     }
 
-    return nextPosts.sort((a, b) =>
-      sortBy === "popular"
-        ? b.view_count - a.view_count
-        : new Date(b.created_at) - new Date(a.created_at),
-    );
+    return nextPosts.sort((a, b) => {
+      if (sortBy === "popular") {
+        return b.view_count - a.view_count;
+      }
+
+      if (sortBy === "support") {
+        return b.supportCount - a.supportCount;
+      }
+
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
   }, [category, myComments, posts, sortBy, userId]);
 
   const popularPosts = useMemo(
@@ -281,6 +289,13 @@ const CommunityPage = () => {
                   >
                     인기순
                   </button>
+                  <button
+                    type="button"
+                    className={sortBy === "support" ? styles.activeSort : ""}
+                    onClick={() => changeSort("support")}
+                  >
+                    응원순
+                  </button>
                 </div>
               </div>
 
@@ -327,6 +342,7 @@ const CommunityPage = () => {
                       </span>
                       <span>작성일</span>
                       {category !== "my-comments" && <span>조회수</span>}
+                      {category !== "my-comments" && <span>응원</span>}
                     </div>
                     {visiblePosts.map((post) => (
                       <Link
@@ -371,6 +387,9 @@ const CommunityPage = () => {
                         </span>
                         {!post.isMyComment && (
                           <span>{post.view_count.toLocaleString()}</span>
+                        )}
+                        {!post.isMyComment && (
+                          <span>{post.supportCount.toLocaleString()}</span>
                         )}
                       </Link>
                     ))}
