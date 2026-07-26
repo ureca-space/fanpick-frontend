@@ -79,12 +79,10 @@ export const resolvePredictionResult = (prediction) => {
     return "live";
   }
 
-  if (SETTLED_PREDICTION_RESULTS.has(storedResult)) {
-    return storedResult;
-  }
-
   if (!hasResolvedPredictionScore(match)) {
-    return "pending";
+    return !match && SETTLED_PREDICTION_RESULTS.has(storedResult)
+      ? storedResult
+      : "pending";
   }
 
   const { awayScore, homeScore } = parsePredictionScore(match?.score);
