@@ -27,6 +27,7 @@ const DIALOG_CONTENT = {
 const MainLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const isHomePage = location.pathname === "/";
 
   const dialogType = location.state?.authDialog;
   const dialogContent = DIALOG_CONTENT[dialogType];
@@ -47,7 +48,9 @@ const MainLayout = () => {
     <div className={styles.layout}>
       <Header />
 
-      <main className={styles.content}>
+      <main
+        className={`${styles.content} ${isHomePage ? styles.homeContent : ""}`}
+      >
         <Outlet />
       </main>
 

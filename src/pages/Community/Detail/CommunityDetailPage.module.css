@@ -648,4 +648,47 @@
   .articleContent {
     min-height: 260px;
   }
+
+  .commentMeta {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .commentMeta .reactionButtons {
+    flex-shrink: 0;
+    gap: 8px;
+    margin-left: 0;
+  }
+
+  .commentMeta .reactionOption {
+    min-width: auto;
+    gap: 5px;
+  }
+
+  .commentMeta .reactionButtons button {
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+  }
+
+  .commentMeta .reactionButtons button span {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .commentMeta .reactionButtons svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .commentList .reactionCount {
+    width: auto;
+    min-width: 1ch;
+  }
 }
