@@ -612,6 +612,23 @@ const MyPage = () => {
         throw error;
       }
 
+      // 커뮤니티에서도 최신 닉네임을 표시하도록 공개 프로필을 함께 수정
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            user_id: userInfo.id,
+            nickname: trimmedNickname,
+            avatar_url: userInfo.avatarUrl || null,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id" },
+        );
+
+      if (profileError) {
+        throw profileError;
+      }
+
       setUserInfo((prev) => ({
         ...prev,
         nickname: trimmedNickname,
@@ -708,6 +725,23 @@ const MyPage = () => {
 
       if (updateError) {
         throw updateError;
+      }
+
+      // 커뮤니티에서도 최신 프로필 사진을 표시하도록 공개 프로필을 함께 수정
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            user_id: user.id,
+            nickname: userInfo.nickname,
+            avatar_url: avatarUrl,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id" },
+        );
+
+      if (profileError) {
+        throw profileError;
       }
 
       setUserInfo((prev) => ({

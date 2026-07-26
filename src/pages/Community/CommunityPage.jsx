@@ -31,6 +31,8 @@ const CATEGORY_LABELS = Object.fromEntries(
 );
 const formatAuthorName = (name = "") =>
   name.length > 4 ? `${name.slice(0, 3)}...` : name;
+const formatPostTitle = (title = "") =>
+  title.length > 34 ? `${title.slice(0, 34)}...` : title;
 
 const getVisiblePageNumbers = (currentPage, pageCount) => {
   const visibleCount = Math.min(MAX_VISIBLE_PAGE_COUNT, pageCount);
@@ -50,6 +52,7 @@ const CommunityTableSkeleton = () => (
       <Skeleton.Line className={styles.skeletonHeaderMeta} />
       <Skeleton.Line className={styles.skeletonHeaderMeta} />
       <Skeleton.Line className={styles.skeletonHeaderMeta} />
+      <Skeleton.Line className={styles.skeletonHeaderMeta} />
     </div>
 
     {Array.from({ length: PAGE_SIZE }, (_, index) => (
@@ -57,6 +60,7 @@ const CommunityTableSkeleton = () => (
         <Skeleton.Line className={styles.skeletonPostTitle} />
         <Skeleton.Line className={styles.skeletonPostAuthor} />
         <Skeleton.Line className={styles.skeletonPostDate} />
+        <Skeleton.Line className={styles.skeletonPostViews} />
         <Skeleton.Line className={styles.skeletonPostViews} />
       </div>
     ))}
@@ -76,15 +80,17 @@ const CommunityPage = () => {
   const userId = user?.id;
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedFilter = searchParams.get("filter");
+  const requestedPage = Number(searchParams.get("page"));
   const category = BOARD_FILTERS.some(
     (item) => item.id === requestedFilter,
   )
     ? requestedFilter
     : "all";
+  const currentPage =
+    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const [posts, setPosts] = useState([]);
   const [myComments, setMyComments] = useState([]);
   const [sortBy, setSortBy] = useState("latest");
-  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const currentTime = useRelativeTimeClock();
@@ -166,11 +172,17 @@ const CommunityPage = () => {
       nextPosts = posts.filter((post) => post.category === category);
     }
 
-    return nextPosts.sort((a, b) =>
-      sortBy === "popular"
-        ? b.view_count - a.view_count
-        : new Date(b.created_at) - new Date(a.created_at),
-    );
+    return nextPosts.sort((a, b) => {
+      if (sortBy === "popular") {
+        return b.view_count - a.view_count;
+      }
+
+      if (sortBy === "support") {
+        return b.supportCount - a.supportCount;
+      }
+
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
   }, [category, myComments, posts, sortBy, userId]);
 
   const popularPosts = useMemo(
@@ -188,17 +200,26 @@ const CommunityPage = () => {
   const isLastPage = activePage === pageCount;
 
   const changeCategory = (nextCategory) => {
-    setCurrentPage(1);
     setSearchParams(nextCategory === "all" ? {} : { filter: nextCategory });
   };
 
   const changeSort = (nextSort) => {
     setSortBy(nextSort);
-    setCurrentPage(1);
+    const nextSearchParams = new URLSearchParams(searchParams);
+    nextSearchParams.delete("page");
+    setSearchParams(nextSearchParams);
   };
 
   const changePage = (pageNumber) => {
-    setCurrentPage(pageNumber);
+    const nextSearchParams = new URLSearchParams(searchParams);
+
+    if (pageNumber === 1) {
+      nextSearchParams.delete("page");
+    } else {
+      nextSearchParams.set("page", String(pageNumber));
+    }
+
+    setSearchParams(nextSearchParams);
     window.requestAnimationFrame(() => {
       if (!contentStartRef.current) return;
 
@@ -246,6 +267,9 @@ const CommunityPage = () => {
             <CommunityPopularPanel
               className={styles.desktopPopularPanel}
               isLoading={isLoading}
+              linkState={{
+                communityListSearch: searchParams.toString(),
+              }}
               popularPosts={popularPosts}
             />
 
@@ -266,6 +290,13 @@ const CommunityPage = () => {
                     onClick={() => changeSort("popular")}
                   >
                     인기순
+                  </button>
+                  <button
+                    type="button"
+                    className={sortBy === "support" ? styles.activeSort : ""}
+                    onClick={() => changeSort("support")}
+                  >
+                    응원순
                   </button>
                 </div>
               </div>
@@ -313,10 +344,14 @@ const CommunityPage = () => {
                       </span>
                       <span>작성일</span>
                       {category !== "my-comments" && <span>조회수</span>}
+                      {category !== "my-comments" && <span>응원</span>}
                     </div>
                     {visiblePosts.map((post) => (
                       <Link
                         to={`/community/${post.destinationId ?? post.id}`}
+                        state={{
+                          communityListSearch: searchParams.toString(),
+                        }}
                         className={[
                           styles.postRow,
                           post.isMyComment ? styles.threeColumnRow : "",
@@ -341,7 +376,7 @@ const CommunityPage = () => {
                               </small>
                             )}
                             <span className={styles.postTitleText}>
-                              {post.title}
+                              {formatPostTitle(post.title)}
                             </span>
                             <b>({post.commentCount})</b>
                           </span>
@@ -356,6 +391,9 @@ const CommunityPage = () => {
                         </span>
                         {!post.isMyComment && (
                           <span>{post.view_count.toLocaleString()}</span>
+                        )}
+                        {!post.isMyComment && (
+                          <span>{post.supportCount.toLocaleString()}</span>
                         )}
                       </Link>
                     ))}

@@ -13,6 +13,7 @@ const CommunitySidebars = ({
   activeFilter,
   isPopularLoading = false,
   onFilterChange,
+  popularLinkState,
   popularPosts,
 }) => (
   <>
@@ -22,6 +23,7 @@ const CommunitySidebars = ({
     />
     <CommunityPopularPanel
       isLoading={isPopularLoading}
+      linkState={popularLinkState}
       popularPosts={popularPosts}
     />
   </>
@@ -118,6 +120,7 @@ export const CommunityCategoryPanel = ({
 export const CommunityPopularPanel = ({
   className = "",
   isLoading = false,
+  linkState,
   popularPosts = [],
 }) => (
   <aside className={[styles.popularPanel, className].filter(Boolean).join(" ")}>
@@ -131,8 +134,12 @@ export const CommunityPopularPanel = ({
           ))
         : popularPosts.map((post) => (
             <li key={post.id}>
-              <Link to={`/community/${post.id}`}>
-                <span>{post.title}</span>
+              <Link to={`/community/${post.id}`} state={linkState}>
+                <span>
+                  {post.title.length > 16
+                    ? `${post.title.slice(0, 16)}...`
+                    : post.title}
+                </span>
                 <b>({Number(post.commentCount ?? 0).toLocaleString()})</b>
               </Link>
             </li>
