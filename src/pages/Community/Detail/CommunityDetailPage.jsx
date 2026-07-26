@@ -262,6 +262,7 @@ const CommunityDetailPage = () => {
   const [nextPost, setNextPost] = useState(null);
   const [popularPosts, setPopularPosts] = useState([]);
   const [comments, setComments] = useState([]);
+  const [commentSort, setCommentSort] = useState("created");
   const [postReaction, setPostReaction] = useState(EMPTY_REACTION);
   const [commentReactions, setCommentReactions] = useState({});
   const [pendingReactionKey, setPendingReactionKey] = useState("");
@@ -285,6 +286,20 @@ const CommunityDetailPage = () => {
   const communityListState = communityListSearch
     ? { communityListSearch }
     : undefined;
+
+  const sortedComments = [...comments].sort((a, b) => {
+    if (commentSort === "support") {
+      const supportDifference =
+        (commentReactions[b.id]?.likeCount ?? 0) -
+        (commentReactions[a.id]?.likeCount ?? 0);
+
+      if (supportDifference !== 0) {
+        return supportDifference;
+      }
+    }
+
+    return new Date(a.createdAt) - new Date(b.createdAt);
+  });
 
   const loadDetail = useCallback(async ({ showLoading = true } = {}) => {
     const shouldIncreaseView =
@@ -727,7 +742,29 @@ const CommunityDetailPage = () => {
             </div>
 
             <section className={styles.commentSection}>
-              <h2>댓글 {comments.length}</h2>
+              <div className={styles.commentHeader}>
+                <h2>댓글 {comments.length}</h2>
+                <div className={styles.commentSort}>
+                  <button
+                    type="button"
+                    className={
+                      commentSort === "created" ? styles.activeSort : ""
+                    }
+                    onClick={() => setCommentSort("created")}
+                  >
+                    등록순
+                  </button>
+                  <button
+                    type="button"
+                    className={
+                      commentSort === "support" ? styles.activeSort : ""
+                    }
+                    onClick={() => setCommentSort("support")}
+                  >
+                    응원순
+                  </button>
+                </div>
+              </div>
 
               <form className={styles.commentForm} onSubmit={submitComment}>
                 <ProfileAvatar
@@ -753,7 +790,7 @@ const CommunityDetailPage = () => {
               </form>
 
               <ul className={styles.commentList}>
-                {comments.map((item) => (
+                {sortedComments.map((item) => (
                   <li key={item.id}>
                     {!item.isDeleted && (
                       <ProfileAvatar
