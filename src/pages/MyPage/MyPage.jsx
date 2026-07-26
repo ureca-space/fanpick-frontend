@@ -11,6 +11,7 @@ import {
   fetchFavoriteTeamIds,
   getFavoriteTeamIds,
 } from "../../services/favoriteTeams.js";
+import { subscribeToMatchChanges } from "../../services/matchRealtime.js";
 import {
   createSettledPredictionSummary,
   fetchMatchPredictionStats,
@@ -49,6 +50,8 @@ const ALLOWED_IMAGE_TYPES = {
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
 const FAVORITE_TEAMS_PAGE_SIZE = 6;
 const PICK_HISTORY_PAGE_SIZE = 4;
+const PREDICTION_REFRESH_DEBOUNCE_MS = 500;
+const PREDICTION_REFRESH_INTERVAL_MS = 60_000;
 const PREDICTION_SPORTS = ["soccer", "baseball", "esports"];
 const PREDICTION_BADGE_CONTEXTS = ["overall", ...PREDICTION_SPORTS];
 const SPORT_LABELS = {
@@ -568,6 +571,90 @@ const MyPage = () => {
       );
       window.removeEventListener("storage", syncFavoriteTeams);
       window.removeEventListener("focus", refreshFavoriteTeams);
+    };
+  }, [userInfo.id]);
+
+  useEffect(() => {
+    if (!userInfo.id) {
+      return undefined;
+    }
+
+    let isMounted = true;
+    let refreshTimerId = null;
+
+    const refreshPredictionData = async () => {
+      try {
+        const [nextPredictionRecords, nextPredictionStats] = await Promise.all([
+          fetchMyPredictions(userInfo.id),
+          fetchMatchPredictionStats(),
+        ]);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setPredictionRecords(nextPredictionRecords);
+        setMatchPredictionStats(nextPredictionStats);
+        setPredictionError("");
+      } catch (error) {
+        console.error("예측 기록 자동 갱신 오류:", error);
+
+        if (isMounted) {
+          setPredictionError("승부예측 정보를 불러오지 못했습니다.");
+        }
+      }
+    };
+
+    const schedulePredictionRefresh = () => {
+      if (refreshTimerId) {
+        globalThis.clearTimeout(refreshTimerId);
+      }
+
+      refreshTimerId = globalThis.setTimeout(
+        refreshPredictionData,
+        PREDICTION_REFRESH_DEBOUNCE_MS,
+      );
+    };
+
+    const unsubscribeMatches = subscribeToMatchChanges({
+      channelName: `my-page-matches-${userInfo.id}`,
+      onChange: schedulePredictionRefresh,
+      debounceMs: PREDICTION_REFRESH_DEBOUNCE_MS,
+    });
+    const predictionChannel = supabase
+      .channel(`my-page-predictions-${userInfo.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "predictions",
+          filter: `user_id=eq.${userInfo.id}`,
+        },
+        schedulePredictionRefresh,
+      )
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR") {
+          console.error("마이페이지 예측 실시간 구독 연결에 실패했습니다.");
+        }
+      });
+    const intervalId = globalThis.setInterval(
+      schedulePredictionRefresh,
+      PREDICTION_REFRESH_INTERVAL_MS,
+    );
+
+    window.addEventListener("focus", schedulePredictionRefresh);
+
+    return () => {
+      isMounted = false;
+      unsubscribeMatches();
+      supabase.removeChannel(predictionChannel);
+      globalThis.clearInterval(intervalId);
+      window.removeEventListener("focus", schedulePredictionRefresh);
+
+      if (refreshTimerId) {
+        globalThis.clearTimeout(refreshTimerId);
+      }
     };
   }, [userInfo.id]);
 
