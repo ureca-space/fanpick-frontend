@@ -1,9 +1,9 @@
 .tableShell {
   overflow-x: auto;
-  border: 1px solid rgb(255 255 255 / 8%);
+  border: 1px solid var(--color-white-08);
   border-radius: 8px;
   background: var(--color-primary);
-  box-shadow: 0 24px 60px rgb(0 0 0 / 26%);
+  box-shadow: 0 24px 60px var(--color-black-26);
 }
 
 .table {
@@ -15,36 +15,36 @@
 
 .headerCell {
   padding: 16px 14px 14px;
-  color: rgb(255 255 255 / 78%);
+  color: var(--color-white-78);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
-  border-bottom: 1px solid rgb(255 255 255 / 10%);
-  background: rgb(255 255 255 / 2%);
+  border-bottom: 1px solid var(--color-white-10);
+  background: var(--color-white-02);
 }
 
 .bodyCell {
   padding: 14px;
-  color: rgb(255 255 255 / 88%);
+  color: var(--color-white-88);
   font-size: 14px;
   line-height: 1.35;
-  border-bottom: 1px solid rgb(255 255 255 / 6%);
+  border-bottom: 1px solid var(--color-white-06);
   white-space: nowrap;
   vertical-align: middle;
 }
 
 .row:nth-child(odd) .bodyCell {
-  background: rgb(255 255 255 / 2%);
+  background: var(--color-white-02);
 }
 
 .row:nth-child(even) .bodyCell {
-  background: rgb(255 255 255 / 4%);
+  background: var(--color-white-04);
 }
 
 .row:hover .bodyCell {
-  background: rgb(227 27 54 / 8%);
+  background: var(--color-accent-08);
 }
 
 .alignCenter {

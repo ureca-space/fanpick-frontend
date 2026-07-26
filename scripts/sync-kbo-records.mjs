@@ -1,6 +1,7 @@
 import {
   cleanText,
   createSupabaseAdminClient,
+  extractHtmlTables,
   fetchTextWithRetry,
   toNumber,
   toNullableNumber,
@@ -33,6 +34,10 @@ const KBO_HITTER_DETAIL_URL =
   "https://www.koreabaseball.com/Record/Player/HitterBasic/Basic2.aspx";
 const KBO_PITCHER_BASIC_URL =
   "https://www.koreabaseball.com/Record/Player/PitcherBasic/Basic1.aspx";
+const KBO_TEAM_HITTER_BASIC_URL =
+  "https://www.koreabaseball.com/Record/Team/Hitter/Basic1.aspx";
+const KBO_TEAM_PITCHER_BASIC_URL =
+  "https://www.koreabaseball.com/Record/Team/Pitcher/Basic1.aspx";
 const KBO_PLAYER_IMAGE_BASE_URL =
   "https://6ptotvmi5753.edge.naverncp.com/KBO_IMAGE/person/middle";
 
@@ -115,6 +120,60 @@ const fetchKboTableRows = async (url) => {
   });
 
   return extractKboTableRows(html);
+};
+
+const fetchKboTeamTableRows = async (url, requiredHeaders) => {
+  const html = await fetchTextWithRetry(url, {
+    headers: {
+      Accept: "text/html",
+      "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
+      "User-Agent": "Mozilla/5.0",
+    },
+  });
+  const tables = extractHtmlTables(html);
+  const teamTable = tables.find(
+    (table) =>
+      table.some((row) =>
+        requiredHeaders.every((header) => row.includes(header)),
+      ) &&
+      table.some((row) => /^\d+$/.test(row[0] ?? "")),
+  );
+
+  if (!teamTable) {
+    throw new Error(`${url}에서 KBO 팀 기록 표를 찾지 못했습니다.`);
+  }
+
+  return teamTable.filter((cells) => /^\d+$/.test(cells[0] ?? ""));
+};
+
+const fetchOfficialBaseballTeamStats = async () => {
+  const [hitterRows, pitcherRows] = await Promise.all([
+    fetchKboTeamTableRows(KBO_TEAM_HITTER_BASIC_URL, ["팀명", "R", "HR"]),
+    fetchKboTeamTableRows(KBO_TEAM_PITCHER_BASIC_URL, ["팀명", "ERA", "R"]),
+  ]);
+  const statsByTeamCode = new Map();
+
+  hitterRows.forEach((cells) => {
+    const teamCode = getKboTeamCode(cells[1]);
+
+    statsByTeamCode.set(teamCode, {
+      ...(statsByTeamCode.get(teamCode) || {}),
+      homeRuns: toNumber(cells[10]),
+      runs: toNumber(cells[6]),
+    });
+  });
+
+  pitcherRows.forEach((cells) => {
+    const teamCode = getKboTeamCode(cells[1]);
+
+    statsByTeamCode.set(teamCode, {
+      ...(statsByTeamCode.get(teamCode) || {}),
+      era: toNullableNumber(cells[2]),
+      runsAllowed: toNumber(cells[15]),
+    });
+  });
+
+  return statsByTeamCode;
 };
 
 const createBaseballPlayerBase = ({ cells, playerId, season }) => {
@@ -251,9 +310,10 @@ const resolveBaseballPlayerRows = async (season) => {
   };
 };
 
-const mapStandingRowsToBaseballTeamRows = (rows) =>
+const mapStandingRowsToBaseballTeamRows = (rows, teamStatsByCode = new Map()) =>
   rows.map((row) => {
     const team = getTeamInfo(row.team_code || row.team_name, "baseball");
+    const officialTeamStats = teamStatsByCode.get(row.team_code) || {};
 
     return {
       draws: row.draws,
@@ -263,8 +323,8 @@ const mapStandingRowsToBaseballTeamRows = (rows) =>
       logoUrl: team.logo,
       losses: row.losses,
       rank: row.rank,
-      runs: row.score_for,
-      runsAllowed: row.score_against,
+      runs: officialTeamStats.runs ?? row.score_for,
+      runsAllowed: officialTeamStats.runsAllowed ?? row.score_against,
       scoreDiff: row.score_diff,
       sourceUpdatedAt: row.updated_at,
       streak: row.streak,
@@ -272,6 +332,8 @@ const mapStandingRowsToBaseballTeamRows = (rows) =>
       teamId: row.team_id || row.team_code,
       teamName: team.name || row.team_name,
       teamShortName: team.shortName || row.team_code || row.team_name,
+      homeRuns: officialTeamStats.homeRuns,
+      era: officialTeamStats.era,
       winRate: row.win_rate,
       wins: row.wins,
     };
@@ -285,9 +347,13 @@ const main = async () => {
     season,
     supabase,
   });
+  const officialTeamStats =
+    latestStandingRows.length > 0
+      ? await fetchOfficialBaseballTeamStats()
+      : new Map();
   const teamRows =
     latestStandingRows.length > 0
-      ? mapStandingRowsToBaseballTeamRows(latestStandingRows)
+      ? mapStandingRowsToBaseballTeamRows(latestStandingRows, officialTeamStats)
       : [...BASEBALL_TEAM_RECORDS, ...BASEBALL_TEAM_RECORDS_EXTRA];
 
   const teamRecords = normalizeTeamRecords({

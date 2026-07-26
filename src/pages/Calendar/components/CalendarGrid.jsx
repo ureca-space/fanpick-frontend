@@ -30,7 +30,7 @@ const getCalendarDays = ({ year, month, todayKey }) => {
   });
 };
 
-const CalendarGrid = ({ year, month, matchByDate }) => {
+const CalendarGrid = ({ year, month, matchByDate, selectedDate, onSelectDate }) => {
   const todayKey = formatDate(new Date());
   const days = getCalendarDays({ year, month, todayKey });
 
@@ -49,7 +49,9 @@ const CalendarGrid = ({ year, month, matchByDate }) => {
           <CalendarCell
             key={day.date}
             day={day}
+            isSelected={day.date === selectedDate}
             matches={matchByDate[day.date] || []}
+            onSelectDate={onSelectDate}
           />
         ))}
       </div>

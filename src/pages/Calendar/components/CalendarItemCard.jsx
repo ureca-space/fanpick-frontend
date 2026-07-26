@@ -36,7 +36,14 @@ const formatTooltipDate = (date) => {
   return month && day ? `${month}.${day}` : "날짜 미정";
 };
 
-const CalendarItemCard = ({ match }) => {
+const getScoreText = (match) => {
+  const hasScore =
+    Number.isFinite(match.homeScore) && Number.isFinite(match.awayScore);
+
+  return hasScore ? `${match.homeScore} : ${match.awayScore}` : "VS";
+};
+
+const CalendarItemCard = ({ match, variant = "cell" }) => {
   const homeName = match.homeTeam?.shortName || match.homeTeam?.name || "-";
   const awayName = match.awayTeam?.shortName || match.awayTeam?.name || "-";
   const homeFullName = match.homeTeam?.name || homeName;
@@ -62,6 +69,38 @@ const CalendarItemCard = ({ match }) => {
   ]
     .filter(Boolean)
     .join("\n");
+
+  if (variant === "agenda") {
+    return (
+      <article className={css.agendaItemCard} aria-label={`${matchLabel} 경기`}>
+        <div className={css.agendaHeader}>
+          <span className={css.agendaMeta}>{leagueLabel}</span>
+          {statusLabel ? (
+            <span className={css.agendaStatus}>{statusLabel}</span>
+          ) : null}
+        </div>
+
+        <div className={css.agendaBody}>
+          <div className={css.agendaTeam}>
+            <TeamBadge team={match.homeTeam} />
+            <strong className={css.agendaTeamName}>{homeName}</strong>
+          </div>
+
+          <div className={css.agendaCenter}>
+            <span className={css.agendaTime}>{match.time || "시간 미정"}</span>
+            <strong className={css.agendaScore}>{getScoreText(match)}</strong>
+          </div>
+
+          <div className={`${css.agendaTeam} ${css.agendaTeamAway}`}>
+            <strong className={css.agendaTeamName}>{awayName}</strong>
+            <TeamBadge team={match.awayTeam} />
+          </div>
+        </div>
+
+        <p className={css.agendaVenue}>{match.venue || "장소 미정"}</p>
+      </article>
+    );
+  }
 
   return (
     <article

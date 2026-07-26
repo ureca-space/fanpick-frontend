@@ -8,7 +8,7 @@ const COMMUNITY_SUB_NAV_ITEMS = [
   },
   {
     id: "standings",
-    label: "순위",
+    label: "팀 순위",
     to: "/community/standings",
   },
   {
@@ -20,6 +20,11 @@ const COMMUNITY_SUB_NAV_ITEMS = [
     id: "prediction-results",
     label: "승부 예측 결과",
     to: "/community/prediction-results",
+  },
+  {
+    id: "ranking",
+    label: "랭킹",
+    to: "/community/ranking",
   },
 ];
 

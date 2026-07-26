@@ -2,7 +2,7 @@
   position: relative;
   display: block;
   overflow: hidden;
-  background-color: rgb(255 255 255 / 8%);
+  background-color: var(--color-white-08);
 }
 
 .skeleton::after {
@@ -11,7 +11,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(255 255 255 / 10%),
+    var(--color-white-10),
     transparent
   );
   content: "";

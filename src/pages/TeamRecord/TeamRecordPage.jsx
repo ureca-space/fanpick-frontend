@@ -46,6 +46,8 @@ const SOCCER_LEAGUE_TABS = [
 ];
 
 const LCK_TEAM_IDS = new Set(LOL_TEAM_RECORDS.map((team) => team.teamId));
+const BASEBALL_KEY_PLAYER_LIMIT_BY_KIND = 20;
+const SOCCER_KEY_PLAYER_LIMIT = 30;
 
 const getRecordLeagueId = (sport, soccerLeague) => {
   if (sport === "baseball") {
@@ -89,6 +91,9 @@ const matchesQuery = (query, fields = []) => {
 };
 
 const FALLBACK_IMAGE_URL = "/fanpick_logo.svg";
+const EMPTY_IMAGE_SOURCES = [];
+const KLEAGUE_PLAYER_IMAGE_BASE_URL =
+  "https://d2tfp74nsbbrkr.cloudfront.net/v1/player";
 
 const BROKEN_IMAGE_URLS = new Set([
   "https://sports-phinf.pstatic.net/player/kfootball/default/20190178.png",
@@ -108,22 +113,60 @@ const isValidImageUrl = (url) =>
 
 const getImageUrl = (...urls) => urls.find(isValidImageUrl) || FALLBACK_IMAGE_URL;
 
-const getSoccerTeamCode = (teamId) => {
-  const normalizedTeamId = String(teamId ?? "").trim().toUpperCase();
+const getSoccerTeamCode = (value) => {
+  const normalizedValue = String(value ?? "").trim().toUpperCase();
 
-  if (!normalizedTeamId) {
+  if (!normalizedValue) {
     return "";
   }
 
-  return normalizedTeamId.startsWith("K")
-    ? normalizedTeamId
-    : `K${normalizedTeamId.padStart(2, "0")}`;
+  if (/^K\d+$/.test(normalizedValue)) {
+    return normalizedValue.replace(/^K(\d)$/, "K0$1");
+  }
+
+  if (/^\d+$/.test(normalizedValue)) {
+    return `K${normalizedValue.padStart(2, "0")}`;
+  }
+
+  return "";
+};
+
+const getSoccerTeamInfo = (row) => {
+  const candidates = [
+    row.teamCode,
+    row.teamId,
+    row.teamShortName,
+    row.teamName,
+  ].filter(Boolean);
+
+  return (
+    candidates
+      .flatMap((candidate) => {
+        const teamCode = getSoccerTeamCode(candidate);
+
+        return teamCode ? [teamCode, candidate] : [candidate];
+      })
+      .map((candidate) => getTeamInfo(candidate, "soccer"))
+      .find((teamInfo) => teamInfo.logo) ?? {}
+  );
 };
 
 const getSoccerTeamLogoUrl = (row) => {
-  const teamInfo = getTeamInfo(getSoccerTeamCode(row.teamId), "soccer");
+  const teamInfo = getSoccerTeamInfo(row);
 
   return getImageUrl(teamInfo.logo, row.logoUrl, row.teamImageUrl, row.imageUrl);
+};
+
+const getSoccerPlayerOfficialImageUrl = (row) => {
+  const teamCode = getSoccerTeamCode(row.teamCode ?? row.teamId);
+  const playerId = String(row.playerId ?? "").trim();
+  const season = String(row.season ?? "2026").trim() || "2026";
+
+  if (!teamCode || !playerId) {
+    return "";
+  }
+
+  return `${KLEAGUE_PLAYER_IMAGE_BASE_URL}/${season}/${teamCode}/player_${playerId}.png`;
 };
 
 const uniqueBy = (rows = [], getKey) => {
@@ -146,12 +189,18 @@ const TeamRecordImage = ({
   className,
   alt = "",
   fallbackSrc = FALLBACK_IMAGE_URL,
+  fallbackSources = EMPTY_IMAGE_SOURCES,
 }) => {
-  const [failedSrc, setFailedSrc] = useState("");
-  const resolvedSrc = src || fallbackSrc;
-  const isFallback =
-    !src || resolvedSrc === fallbackSrc || failedSrc === resolvedSrc;
-  const imageSrc = isFallback ? fallbackSrc : resolvedSrc;
+  const sources = useMemo(
+    () => [
+      ...new Set([src, ...fallbackSources, fallbackSrc].filter(isValidImageUrl)),
+    ],
+    [fallbackSrc, fallbackSources, src],
+  );
+  const [failedSources, setFailedSources] = useState(() => new Set());
+  const imageSrc =
+    sources.find((source) => !failedSources.has(source)) || fallbackSrc;
+  const isFallback = imageSrc === fallbackSrc;
 
   return (
     <img
@@ -162,9 +211,15 @@ const TeamRecordImage = ({
       alt={alt}
       aria-hidden="true"
       onError={() => {
-        if (imageSrc !== fallbackSrc) {
-          setFailedSrc(resolvedSrc);
-        }
+        setFailedSources((currentFailedSources) => {
+          if (currentFailedSources.has(imageSrc)) {
+            return currentFailedSources;
+          }
+
+          const nextFailedSources = new Set(currentFailedSources);
+          nextFailedSources.add(imageSrc);
+          return nextFailedSources;
+        });
       }}
     />
   );
@@ -227,6 +282,45 @@ const buildBaseballPlayerRows = () =>
     kind: index < BASEBALL_HITTER_RECORDS.length ? "HITTER" : "PITCHER",
   }));
 
+const sortByRank = (rows = []) =>
+  [...rows].sort((a, b) => {
+    const aRank = Number(a.rank ?? a.ranking);
+    const bRank = Number(b.rank ?? b.ranking);
+
+    if (Number.isFinite(aRank) && Number.isFinite(bRank)) {
+      return aRank - bRank;
+    }
+
+    if (Number.isFinite(aRank)) {
+      return -1;
+    }
+
+    if (Number.isFinite(bRank)) {
+      return 1;
+    }
+
+    return 0;
+  });
+
+const limitBaseballKeyPlayers = (rows = []) => {
+  const hitterRows = sortByRank(rows.filter((row) => row.kind === "HITTER")).slice(
+    0,
+    BASEBALL_KEY_PLAYER_LIMIT_BY_KIND,
+  );
+  const pitcherRows = sortByRank(rows.filter((row) => row.kind === "PITCHER")).slice(
+    0,
+    BASEBALL_KEY_PLAYER_LIMIT_BY_KIND,
+  );
+  const otherRows = sortByRank(
+    rows.filter((row) => row.kind !== "HITTER" && row.kind !== "PITCHER"),
+  ).slice(0, BASEBALL_KEY_PLAYER_LIMIT_BY_KIND);
+
+  return [...hitterRows, ...pitcherRows, ...otherRows];
+};
+
+const limitSoccerKeyPlayers = (rows = []) =>
+  sortByRank(rows).slice(0, SOCCER_KEY_PLAYER_LIMIT);
+
 const buildSoccerTeamRows = (leagueKey) =>
   (leagueKey === "k2" ? SOCCER_TEAM_RECORDS_K2 : SOCCER_TEAM_RECORDS_K1).map((row, index) => ({
     ...row,
@@ -237,11 +331,80 @@ const buildSoccerTeamRows = (leagueKey) =>
 const buildSoccerPlayerRows = (leagueKey) =>
   uniqueBy(leagueKey === "k2" ? SOCCER_PLAYER_RECORDS_K2 : SOCCER_PLAYER_RECORDS_K1, (row) =>
     row.playerId ? `${row.teamId}:${row.playerId}` : `${row.teamId}:${row.playerName}`,
-  ).map((row, index) => ({
-    ...row,
-    rank: row.rank ?? row.ranking ?? index + 1,
-    imageUrl: getImageUrl(row.imageUrl, row.playerImageUrl, row.image),
-  }));
+  ).map((row, index) => {
+    const officialImageUrl = getSoccerPlayerOfficialImageUrl(row);
+
+    return {
+      ...row,
+      officialImageUrl,
+      rank: row.rank ?? row.ranking ?? index + 1,
+      imageUrl: getImageUrl(officialImageUrl, row.imageUrl, row.playerImageUrl, row.image),
+      fallbackImageUrl: getImageUrl(row.imageUrl, row.playerImageUrl, row.image),
+    };
+  });
+
+const createSoccerPlayerFallbackImageMap = (rows = []) => {
+  const imageMap = new Map();
+
+  rows.forEach((row) => {
+    const imageUrl = getImageUrl(row.imageUrl, row.playerImageUrl, row.image);
+    const keys = [
+      row.playerId ? `${row.teamId}:${row.playerId}` : "",
+      row.playerName ? `${row.teamId}:${normalizeText(row.playerName)}` : "",
+      row.playerName
+        ? `${normalizeText(row.teamName)}:${normalizeText(row.playerName)}`
+        : "",
+      row.playerName ? normalizeText(row.playerName) : "",
+    ].filter(Boolean);
+
+    keys.forEach((key) => {
+      if (!imageMap.has(key)) {
+        imageMap.set(key, imageUrl);
+      }
+    });
+  });
+
+  return imageMap;
+};
+
+const SOCCER_PLAYER_FALLBACK_IMAGE_MAP = createSoccerPlayerFallbackImageMap([
+  ...SOCCER_PLAYER_RECORDS_K1,
+  ...SOCCER_PLAYER_RECORDS_K2,
+]);
+
+const getSoccerPlayerFallbackImageUrl = (row) => {
+  const keys = [
+    row.playerId ? `${row.teamId}:${row.playerId}` : "",
+    row.playerId ? `${row.teamCode}:${row.playerId}` : "",
+    row.playerName ? `${row.teamId}:${normalizeText(row.playerName)}` : "",
+    row.playerName ? `${row.teamCode}:${normalizeText(row.playerName)}` : "",
+    row.playerName
+      ? `${normalizeText(row.teamName)}:${normalizeText(row.playerName)}`
+      : "",
+    row.playerName ? normalizeText(row.playerName) : "",
+  ].filter(Boolean);
+
+  return keys.map((key) => SOCCER_PLAYER_FALLBACK_IMAGE_MAP.get(key)).find(Boolean);
+};
+
+const mergeSoccerPlayerFallbackImages = (rows = []) =>
+  rows.map((row) => {
+    const officialImageUrl = getSoccerPlayerOfficialImageUrl(row);
+    const fallbackImageUrl = getSoccerPlayerFallbackImageUrl(row);
+
+    return {
+      ...row,
+      officialImageUrl,
+      fallbackImageUrl,
+      imageUrl: getImageUrl(
+        officialImageUrl,
+        row.imageUrl,
+        row.playerImageUrl,
+        row.image,
+        fallbackImageUrl,
+      ),
+    };
+  });
 
 const getSearchFields = (row, sport, view) => {
   if (view === "team") {
@@ -287,10 +450,6 @@ const esportsTeamColumns = [
   { key: "kills", label: "Kills", align: "Center" },
   { key: "deaths", label: "Deaths", align: "Center" },
   { key: "assists", label: "Assists", align: "Center" },
-  { key: "firstKillRate", label: "1st Kill", align: "Center", render: (row) => formatPercent(row.firstKillRate) },
-  { key: "firstTowerRate", label: "1st Tower", align: "Center", render: (row) => formatPercent(row.firstTowerRate) },
-  { key: "firstBaronRate", label: "1st Baron", align: "Center", render: (row) => formatPercent(row.firstBaronRate) },
-  { key: "orderPoint", label: "Point", align: "Center" },
 ];
 
 const esportsPlayerColumns = [
@@ -358,7 +517,7 @@ const baseballTeamColumns = [
   { key: "runsAllowed", label: "RA", align: "Center" },
   { key: "homeRuns", label: "HR", align: "Center" },
   { key: "era", label: "ERA", align: "Center", render: (row) => formatDecimal(row.era, 2) },
-  { key: "lastFive", label: "Last 5", align: "Center" },
+  { key: "lastFive", label: "Last 10", align: "Center" },
 ];
 
 const baseballPlayerColumns = [
@@ -459,7 +618,15 @@ const soccerPlayerColumns = [
     label: "Player",
     render: (row) => (
       <div className={styles.nameCell}>
-        <TeamRecordImage className={styles.avatar} src={row.imageUrl} />
+        <TeamRecordImage
+          className={styles.avatar}
+          src={row.imageUrl}
+          fallbackSources={[
+            row.playerImageUrl,
+            row.image,
+            row.fallbackImageUrl,
+          ]}
+        />
         <div>
           <strong>{row.playerName}</strong>
           <span>{row.position}</span>
@@ -525,6 +692,21 @@ const TeamRecordPage = () => {
     const remoteRows = remoteRowsByKey[recordDatasetKey];
 
     if (Array.isArray(remoteRows) && remoteRows.length > 0) {
+      if (activeSport === "soccer" && activeView === "team") {
+        return remoteRows.map((row) => ({
+          ...row,
+          logoUrl: getSoccerTeamLogoUrl(row),
+        }));
+      }
+
+      if (activeSport === "soccer" && activeView === "player") {
+        return limitSoccerKeyPlayers(mergeSoccerPlayerFallbackImages(remoteRows));
+      }
+
+      if (activeSport === "baseball" && activeView === "player") {
+        return limitBaseballKeyPlayers(remoteRows);
+      }
+
       return remoteRows;
     }
 
@@ -537,7 +719,7 @@ const TeamRecordPage = () => {
         return [...BASEBALL_TEAM_RECORDS, ...BASEBALL_TEAM_RECORDS_EXTRA];
       }
 
-      return [
+      return limitBaseballKeyPlayers([
         ...buildBaseballPlayerRows(),
         ...BASEBALL_HITTER_RECORDS_EXTRA.map((row, index) => ({
           ...row,
@@ -549,14 +731,14 @@ const TeamRecordPage = () => {
           rank: BASEBALL_HITTER_RECORDS.length + BASEBALL_HITTER_RECORDS_EXTRA.length + index + 1,
           kind: "PITCHER",
         })),
-      ];
+      ]);
     }
 
     if (activeView === "team") {
       return buildSoccerTeamRows(activeSoccerLeague);
     }
 
-    return buildSoccerPlayerRows(activeSoccerLeague);
+    return limitSoccerKeyPlayers(buildSoccerPlayerRows(activeSoccerLeague));
   }, [activeSport, activeView, activeSoccerLeague, recordDatasetKey, remoteRowsByKey]);
 
   const teamTabs = useMemo(
@@ -613,6 +795,7 @@ const TeamRecordPage = () => {
     baseball: "BASEBALL",
     soccer: activeSoccerLeague === "k2" ? "SOCCER / K LEAGUE 2" : "SOCCER / K LEAGUE 1",
   }[activeSport];
+  const isKeyPlayerView = activeView === "player" && activeSport !== "esports";
 
   const handleSportChange = (nextSport) => {
     setActiveSport(nextSport);
@@ -706,12 +889,22 @@ const TeamRecordPage = () => {
               ) : null}
             </div>
             <div className={styles.sectionHeader}>
-              <div>
+              <div className={styles.sectionTitleGroup}>
                 <h2 className={styles.sectionTitle}>{sectionTitle}</h2>
+                {isKeyPlayerView ? (
+                  <p className={styles.sectionDescription}>
+                    기록 상위 주요 선수만 표시합니다.
+                  </p>
+                ) : null}
               </div>
-              <p className={styles.sectionCount}>
-                {visibleRows.length.toLocaleString("en-US")} ROWS
-              </p>
+              <div className={styles.sectionMeta}>
+                {isKeyPlayerView ? (
+                  <span className={styles.keyPlayerBadge}>주요 선수</span>
+                ) : null}
+                <p className={styles.sectionCount}>
+                  {visibleRows.length.toLocaleString("en-US")} ROWS
+                </p>
+              </div>
             </div>
 
             <RecordTable
