@@ -381,6 +381,7 @@ const normalizeSupabaseMatch = (match) => {
     matchDate: match.match_date,
     matchTime: time,
     score: match.score,
+    sport: match.sport,
     status: match.status,
   });
 

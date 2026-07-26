@@ -13,6 +13,7 @@ import { getTeamsByIds, TEAM_BY_ID } from "../Teams/data/teams";
 import CalendarFilter from "./components/CalendarFilter/CalendarFilter";
 import CalendarGrid from "./components/CalendarGrid.jsx";
 import CalendarHeader from "./components/CalendarHeader.jsx";
+import CalendarItemCard from "./components/CalendarItemCard";
 import { fetchCalendarSchedule } from "./api/getSportSchedule";
 import styles from "./CalendarPage.module.css";
 
@@ -38,6 +39,20 @@ const getMonthRange = (date) => {
   ).padStart(2, "0")}-${String(lastDay.getDate()).padStart(2, "0")}`;
 
   return { fromDate, toDate };
+};
+
+const formatDateKey = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const formatSelectedDateLabel = (dateKey) => {
+  const [year, month, day] = String(dateKey ?? "").split("-");
+
+  return year && month && day ? `${year}.${month}.${day}` : "날짜 미정";
 };
 
 const normalizeTeamValue = (value) =>
@@ -123,6 +138,9 @@ const CalendarPage = () => {
   const [selectedSport, setSelectedSport] = useState("my");
   const [selectedTeamCode, setSelectedTeamCode] = useState("all");
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
+  const [selectedDate, setSelectedDate] = useState(() =>
+    formatDateKey(new Date()),
+  );
   const [matches, setMatches] = useState([]);
   const [favoriteTeamState, setFavoriteTeamState] = useState({
     userId: "",
@@ -317,17 +335,22 @@ const CalendarPage = () => {
     () => groupMatchesByDate(visibleMatches),
     [visibleMatches],
   );
+  const selectedDateMatches = matchByDate[selectedDate] || [];
 
   const handlePrevMonth = () => {
-    setCurrentMonth(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1),
-    );
+    setCurrentMonth((prev) => {
+      const nextMonth = new Date(prev.getFullYear(), prev.getMonth() - 1, 1);
+      setSelectedDate(formatDateKey(nextMonth));
+      return nextMonth;
+    });
   };
 
   const handleNextMonth = () => {
-    setCurrentMonth(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1),
-    );
+    setCurrentMonth((prev) => {
+      const nextMonth = new Date(prev.getFullYear(), prev.getMonth() + 1, 1);
+      setSelectedDate(formatDateKey(nextMonth));
+      return nextMonth;
+    });
   };
 
   const handleSportChange = (sport) => {
@@ -421,8 +444,46 @@ const CalendarPage = () => {
               </div>
             </section>
           ) : (
-            <CalendarGrid year={year} month={month} matchByDate={matchByDate} />
+            <CalendarGrid
+              year={year}
+              month={month}
+              matchByDate={matchByDate}
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+            />
           )}
+
+          {!combinedLoading ? (
+            <section className={styles.mobileSelectedDay}>
+              <div className={styles.mobileSelectedDayHeader}>
+                <div>
+                  <span className={styles.mobileSelectedDate}>
+                    {formatSelectedDateLabel(selectedDate)}
+                  </span>
+                  <h2 className={styles.mobileSelectedTitle}>MATCHES</h2>
+                </div>
+                <span className={styles.mobileSelectedCount}>
+                  {selectedDateMatches.length} MATCHES
+                </span>
+              </div>
+
+              {selectedDateMatches.length > 0 ? (
+                <div className={styles.mobileSelectedList}>
+                  {selectedDateMatches.map((match) => (
+                    <CalendarItemCard
+                      key={match.id}
+                      match={match}
+                      variant="agenda"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className={styles.mobileSelectedEmpty}>
+                  선택한 날짜의 경기가 없습니다.
+                </p>
+              )}
+            </section>
+          ) : null}
         </div>
       </main>
     </>

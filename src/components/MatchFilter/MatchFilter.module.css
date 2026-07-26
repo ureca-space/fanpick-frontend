@@ -1,7 +1,7 @@
 .filters {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: var(--match-filter-gap, 18px);
   overflow-x: auto;
   padding-bottom: 8px;
   font-family: var(--font-display);
@@ -13,17 +13,21 @@
 }
 
 .filterButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  min-width: 108px;
-  height: 48px;
-  padding: 0 24px;
-  border: 1px solid rgb(255 255 255 / 16%);
+  min-width: var(--match-filter-min-width, 108px);
+  height: var(--match-filter-height, 48px);
+  padding: 0 var(--match-filter-x-padding, 24px);
+  border: 1px solid var(--color-white-16);
   border-radius: 8px;
   color: var(--color-text-white);
-  background-color: rgb(255 255 255 / 4%);
+  background-color: var(--color-white-04);
   font-family: inherit;
-  font-size: 16px;
+  font-size: var(--match-filter-font-size, 16px);
   font-weight: 700;
+  line-height: 1;
   cursor: pointer;
   transition:
     border-color 0.2s ease,
@@ -31,8 +35,8 @@
 }
 
 .filterButton:hover {
-  border-color: rgb(255 255 255 / 28%);
-  background-color: rgb(255 255 255 / 7%);
+  border-color: var(--color-white-28);
+  background-color: var(--color-white-07);
 }
 
 .filterButton.active {
@@ -47,13 +51,13 @@
 
 @media (max-width: 700px) {
   .filters {
-    gap: 12px;
+    gap: var(--match-filter-mobile-gap, 12px);
   }
 
   .filterButton {
-    min-width: 72px;
-    height: 42px;
-    padding: 0 18px;
-    font-size: 14px;
+    min-width: var(--match-filter-mobile-min-width, 72px);
+    height: var(--match-filter-mobile-height, 42px);
+    padding: 0 var(--match-filter-mobile-x-padding, 18px);
+    font-size: var(--match-filter-mobile-font-size, 14px);
   }
 }

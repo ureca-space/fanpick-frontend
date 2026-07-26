@@ -4,6 +4,8 @@
   justify-content: space-between;
   gap: 16px;
   width: min(100%, var(--content-width));
+  max-width: 100%;
+  min-width: 0;
   margin: 0 auto 20px;
   padding: 0 2px;
 }
@@ -26,16 +28,16 @@
   height: 48px;
   padding: 0;
   flex: 0 0 auto;
-  border: 1px solid rgb(255 255 255 / 18%);
+  border: 1px solid var(--color-white-18);
   border-radius: 999px;
   color: var(--color-text-white);
-  background-color: rgb(255 255 255 / 3%);
+  background-color: var(--color-white-03);
   line-height: 1;
 }
 
 .navButton:hover {
-  border-color: rgb(255 255 255 / 40%);
-  background-color: rgb(255 255 255 / 7%);
+  border-color: var(--color-white-40);
+  background-color: var(--color-white-07);
   transform: translateY(-1px);
 }
 

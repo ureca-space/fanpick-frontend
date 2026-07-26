@@ -42,7 +42,7 @@
 .subtitle {
   max-width: 690px;
   margin-top: 24px;
-  color: rgb(255 255 255 / 58%);
+  color: var(--color-white-58);
   font-size: 16px;
   line-height: 1.8;
 }
@@ -72,7 +72,7 @@
 }
 
 .controlLabel {
-  color: rgb(255 255 255 / 56%);
+  color: var(--color-white-56);
   font-family: var(--font-display);
   font-size: 12px;
   letter-spacing: 0.12em;
@@ -81,10 +81,10 @@
 .section {
   margin-top: 36px;
   padding: 26px;
-  border: 1px solid rgb(255 255 255 / 8%);
+  border: 1px solid var(--color-white-08);
   border-radius: 8px;
   background-color: var(--color-surface-card);
-  box-shadow: 0 22px 60px rgb(0 0 0 / 18%);
+  box-shadow: 0 22px 60px var(--color-black-18);
 }
 
 .sectionTopBar {
@@ -98,9 +98,9 @@
 .sectionBadge {
   display: inline-flex;
   padding: 6px 10px;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid var(--color-white-10);
   border-radius: 999px;
-  color: rgb(255 255 255 / 72%);
+  color: var(--color-white-72);
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 800;
@@ -123,6 +123,39 @@
   font-weight: 900;
 }
 
+.sectionTitleGroup {
+  display: grid;
+  gap: 8px;
+}
+
+.sectionDescription {
+  margin: 0;
+  color: var(--color-white-58);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.sectionMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.keyPlayerBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--color-white-12);
+  border-radius: 999px;
+  background-color: var(--color-white-06);
+  color: var(--color-text-white);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .sectionCount {
   margin: 0;
   color: var(--color-accent);
@@ -140,14 +173,18 @@
 }
 
 .teamCell {
-  width: 100%;
-  justify-content: space-between;
-  gap: 10px;
+  width: auto;
+  justify-content: flex-start;
+  gap: 12px;
 }
 
 .teamCell > div {
   min-width: 0;
-  flex: 1;
+  flex: 0 1 auto;
+}
+
+.teamCell .logo {
+  order: -1;
 }
 
 .logo,
@@ -156,7 +193,7 @@
   height: 44px;
   border-radius: 50%;
   object-fit: cover;
-  background: rgb(255 255 255 / 8%);
+  background: var(--color-white-08);
   flex-shrink: 0;
 }
 
@@ -178,7 +215,7 @@
 .nameCell span {
   display: block;
   margin-top: 4px;
-  color: rgb(255 255 255 / 58%);
+  color: var(--color-white-58);
   font-size: 12px;
   line-height: 1.4;
   overflow: hidden;
@@ -198,22 +235,6 @@
   color: var(--color-text-white);
   font-size: 13px;
   font-weight: 800;
-}
-
-.tagList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.tagPill {
-  padding: 5px 10px;
-  border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: 999px;
-  color: rgb(255 255 255 / 72%);
-  font-size: 12px;
-  line-height: 1;
-  white-space: nowrap;
 }
 
 .link {
@@ -250,6 +271,10 @@
 
   .sectionHeader {
     align-items: flex-start;
+  }
+
+  .sectionMeta {
+    margin-left: 0;
   }
 
   .teamCell {

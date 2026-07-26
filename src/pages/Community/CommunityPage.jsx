@@ -340,7 +340,9 @@ const CommunityPage = () => {
                                 {CATEGORY_LABELS[post.category]}
                               </small>
                             )}
-                            {post.title}
+                            <span className={styles.postTitleText}>
+                              {post.title}
+                            </span>
                             <b>({post.commentCount})</b>
                           </span>
                         )}
