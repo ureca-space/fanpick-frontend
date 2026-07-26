@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FiEye } from "react-icons/fi";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import Button from "../../../components/Button/Button";
 import EmptyState from "../../../components/EmptyState/EmptyState";
 import FanPickDialog from "../../../components/FanPickDialog/FanPickDialog";
@@ -182,6 +187,7 @@ const CommunityDetailSkeleton = () => (
 
 const CommunityDetailPage = () => {
   const { postId } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.id;
@@ -203,6 +209,13 @@ const CommunityDetailPage = () => {
   const increasedPostIdRef = useRef(null);
 
   const currentAvatarUrl = user?.user_metadata?.avatar_url || "";
+  const communityListSearch = location.state?.communityListSearch;
+  const communityListPath = communityListSearch
+    ? `/community?${communityListSearch}`
+    : "/community";
+  const communityListState = communityListSearch
+    ? { communityListSearch }
+    : undefined;
 
   const loadDetail = useCallback(async ({ showLoading = true } = {}) => {
     const shouldIncreaseView =
@@ -471,11 +484,14 @@ const CommunityDetailPage = () => {
   return (
     <section className={styles.page}>
       <div className={`container ${styles.layout}`}>
-        <CommunitySidebars popularPosts={popularPosts} />
+        <CommunitySidebars
+          popularLinkState={communityListState}
+          popularPosts={popularPosts}
+        />
 
         <main className={styles.mainArea}>
           <div className={styles.pageControls}>
-            <Button size="sm" to="/community" variant="secondary">
+            <Button size="sm" to={communityListPath} variant="secondary">
               목록
             </Button>
 
@@ -484,6 +500,7 @@ const CommunityDetailPage = () => {
                 <Button
                   size="sm"
                   to={`/community/${previousPost.id}`}
+                  state={communityListState}
                   variant="secondary"
                 >
                   이전글
@@ -493,6 +510,7 @@ const CommunityDetailPage = () => {
                 <Button
                   size="sm"
                   to={`/community/${nextPost.id}`}
+                  state={communityListState}
                   variant="secondary"
                 >
                   다음글

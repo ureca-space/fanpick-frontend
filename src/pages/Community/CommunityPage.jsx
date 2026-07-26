@@ -76,15 +76,17 @@ const CommunityPage = () => {
   const userId = user?.id;
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedFilter = searchParams.get("filter");
+  const requestedPage = Number(searchParams.get("page"));
   const category = BOARD_FILTERS.some(
     (item) => item.id === requestedFilter,
   )
     ? requestedFilter
     : "all";
+  const currentPage =
+    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const [posts, setPosts] = useState([]);
   const [myComments, setMyComments] = useState([]);
   const [sortBy, setSortBy] = useState("latest");
-  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const currentTime = useRelativeTimeClock();
@@ -188,17 +190,26 @@ const CommunityPage = () => {
   const isLastPage = activePage === pageCount;
 
   const changeCategory = (nextCategory) => {
-    setCurrentPage(1);
     setSearchParams(nextCategory === "all" ? {} : { filter: nextCategory });
   };
 
   const changeSort = (nextSort) => {
     setSortBy(nextSort);
-    setCurrentPage(1);
+    const nextSearchParams = new URLSearchParams(searchParams);
+    nextSearchParams.delete("page");
+    setSearchParams(nextSearchParams);
   };
 
   const changePage = (pageNumber) => {
-    setCurrentPage(pageNumber);
+    const nextSearchParams = new URLSearchParams(searchParams);
+
+    if (pageNumber === 1) {
+      nextSearchParams.delete("page");
+    } else {
+      nextSearchParams.set("page", String(pageNumber));
+    }
+
+    setSearchParams(nextSearchParams);
     window.requestAnimationFrame(() => {
       if (!contentStartRef.current) return;
 
@@ -246,6 +257,9 @@ const CommunityPage = () => {
             <CommunityPopularPanel
               className={styles.desktopPopularPanel}
               isLoading={isLoading}
+              linkState={{
+                communityListSearch: searchParams.toString(),
+              }}
               popularPosts={popularPosts}
             />
 
@@ -317,6 +331,9 @@ const CommunityPage = () => {
                     {visiblePosts.map((post) => (
                       <Link
                         to={`/community/${post.destinationId ?? post.id}`}
+                        state={{
+                          communityListSearch: searchParams.toString(),
+                        }}
                         className={[
                           styles.postRow,
                           post.isMyComment ? styles.threeColumnRow : "",
