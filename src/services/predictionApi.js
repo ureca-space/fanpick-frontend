@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabase";
 import {
   isLiveMatchStatus,
+  isResultPendingMatchStatus,
   normalizeMatchTimingStatus,
 } from "../utils/matchStatus";
 
@@ -77,6 +78,10 @@ export const resolvePredictionResult = (prediction) => {
 
   if (isLiveMatchStatus(match?.status)) {
     return "live";
+  }
+
+  if (isResultPendingMatchStatus(match?.status)) {
+    return "resultPending";
   }
 
   if (!hasResolvedPredictionScore(match)) {

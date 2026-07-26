@@ -25,6 +25,7 @@ import {
 } from "../../utils/predictionDeadline";
 import {
   isLiveMatchStatus,
+  isResultPendingMatchStatus,
   normalizeMatchTimingStatus,
 } from "../../utils/matchStatus";
 import { createPredictionLocation } from "../../utils/predictionPath";
@@ -816,12 +817,15 @@ const PredictionPage = () => {
           );
         })
         .map((match) => {
-          const isClosedByStatus = CLOSED_MATCH_STATUSES.has(match.status);
+          const isResultPending = isResultPendingMatchStatus(match.status);
+          const isClosedByStatus =
+            CLOSED_MATCH_STATUSES.has(match.status) || isResultPending;
           const hasStarted =
             currentTime >= new Date(match.beginAt).getTime();
           const isLive =
-            isLiveMatchStatus(match.status) ||
-            (!isClosedByStatus && !match.isFinished && hasStarted);
+            !isResultPending &&
+            (isLiveMatchStatus(match.status) ||
+              (!isClosedByStatus && !match.isFinished && hasStarted));
 
           return {
             ...match,

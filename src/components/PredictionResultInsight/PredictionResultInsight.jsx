@@ -1,4 +1,7 @@
-import { isLiveMatchStatus } from "../../utils/matchStatus";
+import {
+  isLiveMatchStatus,
+  isResultPendingMatchStatus,
+} from "../../utils/matchStatus";
 import styles from "./PredictionResultInsight.module.css";
 
 const normalizeTeamCode = (teamCode) => teamCode?.trim().toUpperCase() ?? "";
@@ -42,6 +45,10 @@ const getWinnerSide = (match) => {
     return "live";
   }
 
+  if (isResultPendingMatchStatus(match?.status)) {
+    return "resultPending";
+  }
+
   const { awayScore, homeScore } = parseScore(match.score);
 
   if (awayScore === null || homeScore === null) {
@@ -82,7 +89,8 @@ const getMyPredictionResult = (match, winnerSide) => {
   if (
     winnerSide === "cancelled" ||
     winnerSide === "postponed" ||
-    winnerSide === "live"
+    winnerSide === "live" ||
+    winnerSide === "resultPending"
   ) {
     return winnerSide;
   }
@@ -110,6 +118,7 @@ const RESULT_LABELS = {
   incorrect: "예측 실패",
   pending: "정산 대기",
   live: "경기중",
+  resultPending: "결과 확인중",
   cancelled: "경기 취소",
   postponed: "경기 연기",
   void: "무승부 무효",
@@ -163,9 +172,11 @@ const PredictionResultInsight = ({ className = "", match }) => {
               ? "경기연기"
               : winnerSide === "live"
                 ? "경기중"
-              : winnerSide === "draw"
-                ? "무승부"
-                : getTeamName(winnerTeam)}
+                : winnerSide === "resultPending"
+                  ? "결과 확인중"
+                  : winnerSide === "draw"
+                    ? "무승부"
+                    : getTeamName(winnerTeam)}
         </strong>
         <b>
           {winnerSide === "cancelled"
@@ -174,9 +185,11 @@ const PredictionResultInsight = ({ className = "", match }) => {
               ? "연기"
               : winnerSide === "live"
                 ? "진행"
-              : winnerSide === "draw"
-                ? "무효"
-                : "승리"}
+                : winnerSide === "resultPending"
+                  ? "확인중"
+                  : winnerSide === "draw"
+                    ? "무효"
+                    : "승리"}
         </b>
       </div>
 

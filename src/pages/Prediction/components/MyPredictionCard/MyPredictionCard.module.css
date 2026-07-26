@@ -272,12 +272,27 @@
   background-color: var(--color-status-info);
 }
 
+.scoreBoard.resultPending .myPick {
+  border-color: var(--color-status-neutral-border-strong);
+  border-style: dashed;
+  background-color: var(--color-status-neutral-soft);
+  box-shadow: inset 0 0 0 1px var(--color-status-neutral-border-inner);
+}
+
+.scoreBoard.resultPending .myPickBadge {
+  background-color: var(--color-status-neutral);
+}
+
 .matchHeading span.waiting {
   background-color: var(--color-accent);
 }
 
 .matchHeading span.live {
   background-color: var(--color-status-info);
+}
+
+.matchHeading span.resultPending {
+  background-color: var(--color-status-neutral);
 }
 
 .matchHeading span.correct {

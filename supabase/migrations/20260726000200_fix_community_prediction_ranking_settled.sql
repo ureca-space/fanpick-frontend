@@ -38,12 +38,12 @@ as $$
         )
       end as match_starts_at,
       case
-        when lower(coalesce(m.sport, '')) = 'baseball' then interval '6 hours'
-        when lower(coalesce(m.sport, '')) = 'soccer' then interval '3 hours'
+        when lower(coalesce(m.sport, '')) = 'baseball' then interval '180 minutes'
+        when lower(coalesce(m.sport, '')) = 'soccer' then interval '110 minutes'
         when lower(coalesce(m.sport, '')) in ('esports', 'lol', 'lck')
-          then interval '4 hours'
-        else interval '4 hours'
-      end as live_window
+          then interval '90 minutes'
+        else interval '120 minutes'
+      end as finished_protection_window
     from public.predictions p
     left join public.matches m
       on m.id = p.match_id
@@ -54,7 +54,10 @@ as $$
       user_id,
       case
         when status_key in ('finished', 'complete', 'completed', 'ended', 'final')
-          and (match_starts_at is null or now() >= match_starts_at + live_window)
+          and (
+            match_starts_at is null
+            or now() >= match_starts_at + finished_protection_window
+          )
           and score ~ '^[0-9]+:[0-9]+$'
           and split_part(score, ':', 1)::integer
             <> split_part(score, ':', 2)::integer
@@ -71,7 +74,10 @@ as $$
               else 'incorrect'
             end
         when status_key in ('finished', 'complete', 'completed', 'ended', 'final')
-          and (match_starts_at is null or now() >= match_starts_at + live_window)
+          and (
+            match_starts_at is null
+            or now() >= match_starts_at + finished_protection_window
+          )
           and result in ('correct', 'incorrect')
           then result
         else null

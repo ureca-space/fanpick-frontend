@@ -55,6 +55,7 @@ const TEAM_DETAIL_NAV_ITEMS = [
 ];
 const MATCH_STATUS_LABELS = {
   live: "LIVE",
+  result_pending: "확인중",
   finished: "종료",
   cancelled: "취소",
   postponed: "연기",

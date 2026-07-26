@@ -1,6 +1,9 @@
 import { forwardRef } from "react";
 import Skeleton from "../../../../components/Skeleton/Skeleton";
-import { isLiveMatchStatus } from "../../../../utils/matchStatus";
+import {
+  isLiveMatchStatus,
+  isResultPendingMatchStatus,
+} from "../../../../utils/matchStatus";
 import { SPORT_ICONS } from "../../predictionUtils";
 import TeamMark from "../TeamMark/TeamMark";
 import styles from "./TodayMatchCard.module.css";
@@ -30,7 +33,9 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
   const hasSelection = Boolean(selection);
   const closedStatusLabel = CLOSED_STATUS_LABELS[match.status] ?? "";
   const isLive = isLiveMatchStatus(match.status);
-  const isClosed = isLive || match.isFinished || Boolean(closedStatusLabel);
+  const isResultPending = isResultPendingMatchStatus(match.status);
+  const isClosed =
+    isLive || isResultPending || match.isFinished || Boolean(closedStatusLabel);
   const canChangeSelection =
     hasSelection && canChangePrediction && !isClosed;
   const isHomeSelected = selection === "home";
@@ -46,11 +51,19 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
     (hasSelection && !canChangeSelection);
   const headingStatusLabel =
     closedStatusLabel ||
-    (isLive ? "경기중" : match.isFinished ? "경기종료" : "경기예정");
+    (isLive
+      ? "경기중"
+      : isResultPending
+        ? "결과 확인중"
+        : match.isFinished
+          ? "경기종료"
+          : "경기예정");
   const statusLabel = closedStatusLabel
     ? closedStatusLabel
     : isLive
       ? "경기중"
+    : isResultPending
+      ? "결과 확인중"
     : match.isFinished
       ? selection
         ? "경기종료"
@@ -87,6 +100,8 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
               ? styles.cancelled
               : isLive
                 ? styles.live
+                : isResultPending
+                  ? styles.resultPending
                 : isClosed
                   ? styles.finished
                   : ""
