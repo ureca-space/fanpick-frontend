@@ -1,33 +1,33 @@
 const KLEAGUE_LOGO_BY_CODE = {
-  K01: "https://sports-phinf.pstatic.net/team/kleague/default/01.png?type=f92_88",
-  K02: "https://sports-phinf.pstatic.net/team/kleague/default/02.png?type=f92_88",
-  K03: "https://sports-phinf.pstatic.net/team/kleague/default/03.png?type=f92_88",
-  K04: "https://sports-phinf.pstatic.net/team/kleague/default/04.png?type=f92_88",
-  K05: "https://sports-phinf.pstatic.net/team/kleague/default/05.png?type=f92_88",
-  K06: "https://sports-phinf.pstatic.net/team/kleague/default/06.png?type=f92_88",
-  K07: "https://sports-phinf.pstatic.net/team/kleague/default/07.png?type=f92_88",
-  K08: "https://sports-phinf.pstatic.net/team/kleague/default/08.png?type=f92_88",
-  K09: "https://sports-phinf.pstatic.net/team/kleague/default/09.png?type=f92_88",
-  K10: "https://sports-phinf.pstatic.net/team/kleague/default/10.png?type=f92_88",
-  K17: "https://sports-phinf.pstatic.net/team/kleague/default/17.png?type=f92_88",
-  K18: "https://sports-phinf.pstatic.net/team/kleague/default/18.png?type=f92_88",
-  K20: "https://sports-phinf.pstatic.net/team/kleague/default/20.png?type=f92_88",
-  K21: "https://sports-phinf.pstatic.net/team/kleague/default/21.png?type=f92_88",
-  K22: "https://sports-phinf.pstatic.net/team/kleague/default/22.png?type=f92_88",
-  K26: "https://sports-phinf.pstatic.net/team/kleague/default/26.png?type=f92_88",
-  K27: "https://sports-phinf.pstatic.net/team/kleague/default/27.png?type=f92_88",
-  K29: "https://sports-phinf.pstatic.net/team/kleague/default/29.png?type=f92_88",
-  K31: "https://sports-phinf.pstatic.net/team/kleague2/default/31.png?type=f92_88",
-  K32: "https://sports-phinf.pstatic.net/team/kleague2/default/32.png?type=f92_88",
-  K34: "https://sports-phinf.pstatic.net/team/kleague2/default/34.png?type=f92_88",
-  K35: "https://sports-phinf.pstatic.net/team/kleague/default/35.png?type=f92_88",
-  K36: "https://sports-phinf.pstatic.net/team/kleague2/default/36.png?type=f92_88",
-  K37: "https://sports-phinf.pstatic.net/team/kleague2/default/37.png?type=f92_88",
-  K38: "https://sports-phinf.pstatic.net/team/kleague2/default/38.png?type=f92_88",
-  K39: "https://sports-phinf.pstatic.net/team/kleague2/default/39.png?type=f92_88",
-  K40: "https://sports-phinf.pstatic.net/team/kleague2/default/40.png?type=f92_88",
-  K41: "https://sports-phinf.pstatic.net/team/kleague2/default/41.png?type=f92_88",
-  K42: "https://sports-phinf.pstatic.net/team/kleague2/default/42.png?type=f92_88",
+  K01: "https://www.kleague.com/assets/images/emblem/emblem_K01.png",
+  K02: "https://www.kleague.com/assets/images/emblem/emblem_K02.png",
+  K03: "https://www.kleague.com/assets/images/emblem/emblem_K03.png",
+  K04: "https://www.kleague.com/assets/images/emblem/emblem_K04.png",
+  K05: "https://www.kleague.com/assets/images/emblem/emblem_K05.png",
+  K06: "https://www.kleague.com/assets/images/emblem/emblem_K06.png",
+  K07: "https://www.kleague.com/assets/images/emblem/emblem_K07.png",
+  K08: "https://www.kleague.com/assets/images/emblem/emblem_K08.png",
+  K09: "https://www.kleague.com/assets/images/emblem/emblem_K09.png",
+  K10: "https://www.kleague.com/assets/images/emblem/emblem_K10.png",
+  K17: "https://www.kleague.com/assets/images/emblem/emblem_K17.png",
+  K18: "https://www.kleague.com/assets/images/emblem/emblem_K18.png",
+  K20: "https://www.kleague.com/assets/images/emblem/emblem_K20.png",
+  K21: "https://www.kleague.com/assets/images/emblem/emblem_K21.png",
+  K22: "https://www.kleague.com/assets/images/emblem/emblem_K22.png",
+  K26: "https://www.kleague.com/assets/images/emblem/emblem_K26.png",
+  K27: "https://www.kleague.com/assets/images/emblem/emblem_K27.png",
+  K29: "https://www.kleague.com/assets/images/emblem/emblem_K29.png",
+  K31: "https://www.kleague.com/assets/images/emblem/emblem_K31.png",
+  K32: "https://www.kleague.com/assets/images/emblem/emblem_K32.png",
+  K34: "https://www.kleague.com/assets/images/emblem/emblem_K34.png",
+  K35: "https://www.kleague.com/assets/images/emblem/emblem_K35.png",
+  K36: "https://www.kleague.com/assets/images/emblem/emblem_K36.png",
+  K37: "https://www.kleague.com/assets/images/emblem/emblem_K37.png",
+  K38: "https://www.kleague.com/assets/images/emblem/emblem_K38.png",
+  K39: "https://www.kleague.com/assets/images/emblem/emblem_K39.png",
+  K40: "https://www.kleague.com/assets/images/emblem/emblem_K40.png",
+  K41: "https://www.kleague.com/assets/images/emblem/emblem_K41.png",
+  K42: "https://www.kleague.com/assets/images/emblem/emblem_K42.png",
 };
 
 const createKLeagueTeam = (code, name, shortName) => ({
@@ -234,11 +234,17 @@ const LCK_TEAM_LOOKUP = buildTeamLookup(LCK_TEAM_INFO);
 export const getTeamInfo = (teamCode, sport) => {
   const directCode = String(teamCode ?? "").trim().toUpperCase();
   const normalizedCode = normalizeTeamLookupKey(teamCode);
+  const kLeagueCode =
+    sport === "soccer" && /^\d+$/.test(directCode)
+      ? `K${directCode.padStart(2, "0")}`
+      : "";
 
   const teamInfo =
     sport === "esports"
       ? LCK_TEAM_INFO[directCode] ?? LCK_TEAM_LOOKUP.get(normalizedCode)
-      : TEAM_INFO[directCode] ?? TEAM_LOOKUP.get(normalizedCode);
+      : TEAM_INFO[directCode] ??
+        TEAM_INFO[kLeagueCode] ??
+        TEAM_LOOKUP.get(normalizedCode);
 
   return (
     teamInfo ?? {

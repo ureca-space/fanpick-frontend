@@ -1,6 +1,6 @@
 .weekDateSelector {
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 9%);
+  border: 1px solid var(--color-white-09);
   border-radius: 12px;
   background-color: #202332;
 }
@@ -12,7 +12,7 @@
   justify-content: center;
   min-height: 78px;
   padding: 14px 24px;
-  border-bottom: 1px solid rgb(255 255 255 / 8%);
+  border-bottom: 1px solid var(--color-white-08);
 }
 
 .weekController {
@@ -28,7 +28,7 @@
   flex-shrink: 0;
   width: 42px;
   height: 42px;
-  border: 1px solid rgb(255 255 255 / 14%);
+  border: 1px solid var(--color-white-14);
   border-radius: 50%;
   color: var(--color-text-white);
   background-color: transparent;
@@ -39,8 +39,8 @@
 }
 
 .arrowButton:hover {
-  border-color: rgb(255 255 255 / 40%);
-  background-color: rgb(255 255 255 / 7%);
+  border-color: var(--color-white-40);
+  background-color: var(--color-white-07);
 }
 
 .arrowButton:focus-visible,
@@ -66,9 +66,9 @@
   gap: 8px;
   height: 42px;
   padding: 0 16px;
-  border: 1px solid rgb(255 255 255 / 18%);
+  border: 1px solid var(--color-white-18);
   border-radius: 6px;
-  color: rgb(255 255 255 / 80%);
+  color: var(--color-white-80);
   background-color: transparent;
   font-size: 13px;
   font-weight: 700;
@@ -106,8 +106,8 @@
   flex-direction: column;
   justify-content: center;
   min-height: 116px;
-  border-right: 1px solid rgb(255 255 255 / 7%);
-  color: rgb(255 255 255 / 48%);
+  border-right: 1px solid var(--color-white-07);
+  color: var(--color-white-48);
   background-color: transparent;
   transition:
     color 0.2s ease,
@@ -120,7 +120,7 @@
 
 .dateButton:hover {
   color: var(--color-text-white);
-  background-color: rgb(255 255 255 / 4%);
+  background-color: var(--color-white-04);
 }
 
 .dateButton.active {

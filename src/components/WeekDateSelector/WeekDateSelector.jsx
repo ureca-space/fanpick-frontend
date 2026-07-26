@@ -1,7 +1,15 @@
+import { useEffect, useRef } from "react";
 import { FiCalendar, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import styles from "./WeekDateSelector.module.css";
 
 const padNumber = (number) => String(number).padStart(2, "0");
+
+const formatDateKey = (date) =>
+  [
+    date.getFullYear(),
+    padNumber(date.getMonth() + 1),
+    padNumber(date.getDate()),
+  ].join("-");
 
 const formatDateRange = (dates) => {
   if (dates.length === 0) {
@@ -28,9 +36,31 @@ const WeekDateSelector = ({
   onSelectDate = () => {},
   selectedDate,
 }) => {
+  const dateScrollerRef = useRef(null);
+  const dateButtonRefs = useRef(new Map());
   const classNames = [styles.weekDateSelector, className]
     .filter(Boolean)
     .join(" ");
+  const activeDateKey = selectedDate || formatDateKey(new Date());
+
+  useEffect(() => {
+    const scroller = dateScrollerRef.current;
+    const activeButton = dateButtonRefs.current.get(activeDateKey);
+    const isMobile = window.matchMedia("(max-width: 700px)").matches;
+
+    if (!scroller || !activeButton || !isMobile) {
+      return undefined;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      scroller.scrollTo({
+        left: activeButton.offsetLeft,
+        behavior: "auto",
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [activeDateKey, dates]);
 
   return (
     <div className={classNames}>
@@ -69,15 +99,23 @@ const WeekDateSelector = ({
         </button>
       </div>
 
-      <div className={styles.dateScroller}>
+      <div className={styles.dateScroller} ref={dateScrollerRef}>
         <div className={styles.dateList}>
           {dates.map(({ date, dateKey, dayLabel }) => {
-            const isSelected = selectedDate === dateKey;
+            const isSelected = activeDateKey === dateKey;
             const hasItem = hasItemOnDate(dateKey);
 
             return (
               <button
                 key={dateKey}
+                ref={(node) => {
+                  if (node) {
+                    dateButtonRefs.current.set(dateKey, node);
+                    return;
+                  }
+
+                  dateButtonRefs.current.delete(dateKey);
+                }}
                 className={`${styles.dateButton} ${
                   isSelected ? styles.active : ""
                 }`}

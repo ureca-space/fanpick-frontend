@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import EmptyState from "../../components/EmptyState/EmptyState";
 import FanPickDialog from "../../components/FanPickDialog/FanPickDialog";
 import MatchFilter from "../../components/MatchFilter/MatchFilter";
+import PredictionBadgeIcon from "../../components/PredictionBadgeIcon/PredictionBadgeIcon";
 import SearchInput from "../../components/SearchInput/SearchInput";
 import SubNav from "../../components/SubNav/SubNav";
 import WeekDateSelector from "../../components/WeekDateSelector/WeekDateSelector";
@@ -22,7 +23,10 @@ import {
   canChangePredictionByBeginAt,
   createMatchBeginAt,
 } from "../../utils/predictionDeadline";
-import { normalizeMatchTimingStatus } from "../../utils/matchStatus";
+import {
+  isLiveMatchStatus,
+  normalizeMatchTimingStatus,
+} from "../../utils/matchStatus";
 import { createPredictionLocation } from "../../utils/predictionPath";
 import MyPredictionCard, {
   MyPredictionCardSkeleton,
@@ -218,6 +222,7 @@ const normalizeSupabaseMatch = (match) => {
     matchDate: match.match_date,
     matchTime: time,
     score: match.score,
+    sport,
     status: match.status,
   });
   const { homeScore, awayScore } = parseScore(timingStatus.score);
@@ -812,14 +817,19 @@ const PredictionPage = () => {
         })
         .map((match) => {
           const isClosedByStatus = CLOSED_MATCH_STATUSES.has(match.status);
+          const hasStarted =
+            currentTime >= new Date(match.beginAt).getTime();
+          const isLive =
+            isLiveMatchStatus(match.status) ||
+            (!isClosedByStatus && !match.isFinished && hasStarted);
 
           return {
             ...match,
+            status: isLive ? "live" : match.status,
             // - DB가 scheduled여도 경기 시작 시각이 지나면 예측 마감
             isFinished:
               match.isFinished ||
-              (!isClosedByStatus &&
-                currentTime >= new Date(match.beginAt).getTime()),
+              (!isClosedByStatus && hasStarted),
           };
         });
     },
@@ -1006,21 +1016,9 @@ const PredictionPage = () => {
           {visibleTab === "mine" && (
             <aside className={styles.summary}>
               {displayedBadges.map((badge) => {
-                const SportIcon = badge.SportIcon;
-                const TierIcon = badge.TierIcon;
-
                 return (
                   <div className={styles.badgeItem} key={badge.sport}>
-                    <span
-                      className={styles.summaryIcon}
-                      data-tier={badge.tier}
-                      aria-hidden="true"
-                    >
-                      <SportIcon />
-                      <span className={styles.summaryTierIcon}>
-                        <TierIcon />
-                      </span>
-                    </span>
+                    <PredictionBadgeIcon badge={badge} size="sm" />
                     <strong>{badge.name}</strong>
                     <p>
                       나의 예측 <b>{badge.totalCount}회</b>

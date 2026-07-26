@@ -14,7 +14,7 @@
 .editor {
   width: min(100%, 760px);
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid var(--color-white-10);
   border-radius: 8px;
   background: var(--color-surface-card);
 }
@@ -45,8 +45,8 @@
   right: 14px;
   width: 8px;
   height: 8px;
-  border-right: 2px solid rgb(255 255 255 / 65%);
-  border-bottom: 2px solid rgb(255 255 255 / 65%);
+  border-right: 2px solid var(--color-white-65);
+  border-bottom: 2px solid var(--color-white-65);
   transform: translateY(-70%) rotate(45deg);
   pointer-events: none;
   content: "";
@@ -60,9 +60,9 @@
   width: 100%;
   height: 38px;
   padding: 0 36px 0 14px;
-  border: 1px solid rgb(255 255 255 / 18%);
+  border: 1px solid var(--color-white-18);
   border-radius: 8px;
-  color: rgb(255 255 255 / 80%);
+  color: var(--color-white-80);
   outline: 0;
   background: var(--color-surface-muted);
   cursor: pointer;
@@ -70,7 +70,7 @@
 }
 
 .selectButton:hover {
-  border-color: rgb(255 255 255 / 55%);
+  border-color: var(--color-white-55);
   background: var(--color-surface-fallback);
 }
 
@@ -90,17 +90,17 @@
   left: 0;
   overflow: hidden;
   padding: 6px;
-  border: 1px solid rgb(255 255 255 / 18%);
+  border: 1px solid var(--color-white-18);
   border-radius: 8px;
   background: var(--color-surface-card);
-  box-shadow: 0 12px 28px rgb(0 0 0 / 28%);
+  box-shadow: 0 12px 28px var(--color-black-28);
 }
 
 .selectMenu button {
   width: 100%;
   padding: 10px 12px;
   border-radius: 6px;
-  color: rgb(255 255 255 / 72%);
+  color: var(--color-white-72);
   background: transparent;
   text-align: left;
 }
@@ -116,7 +116,7 @@
   display: block;
   width: 100%;
   border: 0;
-  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  border-bottom: 1px solid var(--color-white-10);
   border-radius: 0;
   outline: 0;
   color: var(--color-text-white);
@@ -139,12 +139,12 @@
 
 .titleInput::placeholder,
 .contentInput::placeholder {
-  color: rgb(255 255 255 / 55%);
+  color: var(--color-white-55);
 }
 
 .titleInput:focus,
 .contentInput:focus {
-  background: rgb(255 255 255 / 2%);
+  background: var(--color-white-02);
 }
 
 .actions {

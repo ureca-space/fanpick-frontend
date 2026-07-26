@@ -1,8 +1,9 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import Header from "../Header/Header.jsx";
-import Footer from "../Footer/Footer.jsx";
 import FanPickDialog from "../../components/FanPickDialog/FanPickDialog.jsx";
+import AiReportWidget from "../../components/AiReportWidget/AiReportWidget.jsx";
 import TopButton from "../../components/TopButton/TopButton.jsx";
+import Footer from "../Footer/Footer.jsx";
+import Header from "../Header/Header.jsx";
 import styles from "./MainLayout.module.css";
 
 const DIALOG_CONTENT = {
@@ -51,7 +52,9 @@ const MainLayout = () => {
       </main>
 
       <Footer />
+
       <TopButton />
+      <AiReportWidget />
 
       <FanPickDialog
         isOpen={Boolean(dialogContent)}

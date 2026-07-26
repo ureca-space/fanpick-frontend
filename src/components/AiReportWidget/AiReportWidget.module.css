@@ -1,0 +1,995 @@
+.aiButton {
+  position: fixed;
+  right: clamp(20px, 4vw, 60px);
+  bottom: clamp(20px, 4vw, 60px);
+  z-index: 1020;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 72px;
+  height: 72px;
+  padding: 0;
+
+  color: var(--color-text-white);
+  background-color: var(--color-surface-dark);
+  border: 1px solid var(--color-white-14);
+  border-radius: 50%;
+  box-shadow: 0 12px 30px var(--color-black-32);
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.aiButton:hover {
+  border-color: var(--color-white-35);
+  box-shadow: 0 16px 36px var(--color-black-40);
+  transform: translateY(-3px);
+}
+
+.aiButton:active {
+  transform: translateY(0);
+}
+
+.aiButton:focus-visible {
+  outline: 2px solid var(--color-text-white);
+  outline-offset: 4px;
+}
+
+.aiButton.active {
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.logoFrame {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background-color: var(--color-surface-dark);
+  border-radius: 50%;
+}
+
+.buttonLogo {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+
+  object-fit: cover;
+  pointer-events: none;
+  transform: scale(1.3);
+
+  transition: transform 0.25s ease;
+}
+
+.aiButton:hover .buttonLogo {
+  transform: scale(1.38);
+}
+
+.reportBadge {
+  position: absolute;
+  top: -7px;
+  right: -12px;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 58px;
+  height: 23px;
+  padding: 0 8px;
+
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  border: 2px solid var(--color-surface-dark);
+  border-radius: 999px;
+
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.03em;
+
+  pointer-events: none;
+}
+
+.toggleIcon {
+  width: 28px;
+  height: 28px;
+}
+
+.panel {
+  --panel-gap: clamp(20px, 4vw, 60px);
+  --panel-bottom-offset: calc(var(--panel-gap) + 88px);
+
+  position: fixed;
+  right: var(--panel-gap);
+  bottom: var(--panel-bottom-offset);
+  z-index: 1010;
+
+  display: flex;
+  flex-direction: column;
+
+  width: min(440px, calc(100vw - 40px));
+  height: 760px;
+  max-height: calc(100dvh - var(--panel-bottom-offset) - 20px);
+
+  overflow: hidden;
+
+  color: var(--color-text-white);
+  background-color: var(--color-surface-dark);
+  border: 1px solid var(--color-white-12);
+  border-radius: 28px;
+  box-shadow: 0 28px 80px var(--color-black-48);
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(20px) scale(0.97);
+  transform-origin: right bottom;
+
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease,
+    transform 0.25s ease;
+}
+
+.panel.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.panelHeader {
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+
+  padding: 28px;
+
+  background-color: var(--color-surface-card);
+  border-bottom: 1px solid var(--color-white-09);
+}
+
+.headerText {
+  min-width: 0;
+}
+
+.eyebrow {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+.title {
+  margin: 0;
+
+  color: var(--color-text-white);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.filterArea {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+
+  padding: 16px 20px;
+
+  overflow-x: auto;
+
+  background-color: var(--color-surface-dark);
+  border-bottom: 1px solid var(--color-white-09);
+
+  scrollbar-width: none;
+}
+
+.filterArea::-webkit-scrollbar {
+  display: none;
+}
+
+.filterButton {
+  flex-shrink: 0;
+
+  height: 34px;
+  padding: 0 14px;
+
+  color: var(--color-white-50);
+  background-color: transparent;
+  border: 1px solid var(--color-white-14);
+  border-radius: 999px;
+
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.filterButton:hover {
+  color: var(--color-text-white);
+  border-color: var(--color-white-35);
+}
+
+.filterButton.selectedFilter {
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.panelContent {
+  flex: 1;
+  min-height: 0;
+  padding: 24px;
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  scrollbar-color: var(--color-white-55) transparent;
+  scrollbar-width: thin;
+}
+
+.panelContent::-webkit-scrollbar {
+  width: 5px;
+}
+
+.panelContent::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.panelContent::-webkit-scrollbar-thumb {
+  background-color: var(--color-white-45);
+  border-radius: 999px;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 100%;
+  padding: 40px 20px;
+
+  text-align: center;
+}
+
+.logoBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 104px;
+  height: 104px;
+  margin-bottom: 24px;
+
+  overflow: hidden;
+
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-white-10);
+  border-radius: 28px;
+}
+
+.logoBox img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+
+  object-fit: cover;
+  transform: scale(1.2);
+}
+
+.emptyState strong {
+  margin-bottom: 12px;
+
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.emptyState p {
+  margin: 0;
+
+  color: var(--color-white-55);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1005;
+
+  padding: 0;
+
+  background-color: var(--color-black-18);
+  border: 0;
+
+  cursor: default;
+}
+
+.statusMessage,
+.errorMessage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 100%;
+
+  color: var(--color-white-60);
+  font-size: 14px;
+  text-align: center;
+}
+
+.errorMessage {
+  color: var(--color-accent);
+}
+
+.reportList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reportLabel {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+.matchInfo {
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+
+  border-bottom: 1px solid var(--color-white-09);
+}
+
+.matchMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+
+  margin-bottom: 16px;
+
+  color: var(--color-white-50);
+  font-family: var(--font-display);
+  font-size: 9px;
+}
+
+.matchMeta span:not(:last-child)::after {
+  margin-left: 7px;
+
+  color: var(--color-white-20);
+
+  content: "·";
+}
+
+.matchMeta .sportLabel {
+  color: var(--color-accent);
+}
+
+.matchup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.teamCode {
+  overflow: hidden;
+
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 17px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.venue {
+  display: block;
+
+  margin-top: 12px;
+
+  color: var(--color-white-40);
+  font-size: 11px;
+  text-align: center;
+}
+
+.resultCard {
+  padding: 22px;
+
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-white-10);
+  border-radius: 16px;
+}
+
+.resultCard .matchup {
+  margin-top: 4px;
+  padding: 10px 0;
+}
+
+.resultCard .teamCode {
+  font-size: 15px;
+}
+
+.resultCard .score {
+  font-size: 20px;
+}
+
+.resultFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-top: 16px;
+  padding-top: 16px;
+
+  border-top: 1px solid var(--color-white-09);
+}
+
+.resultStatus {
+  min-width: 0;
+
+  color: var(--color-text-white);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.resultFooter .venue {
+  flex-shrink: 0;
+
+  margin-top: 0;
+
+  text-align: right;
+}
+
+.analysisButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  width: 100%;
+  height: 42px;
+  margin-top: 18px;
+  padding: 0 16px;
+
+  color: var(--color-text-white);
+  background-color: transparent;
+  border: 1px solid var(--color-white-22);
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.analysisButton:hover {
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.analysisButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.analysisEmptyState {
+  display: grid;
+  min-height: 100%;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.emptyChatIcon {
+  width: 74px;
+  height: 74px;
+  color: var(--color-white-22);
+}
+
+.analysisEmptyState strong {
+  color: var(--color-text-white);
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.analysisEmptyState p {
+  max-width: 260px;
+  margin: 0;
+  color: var(--color-white-52);
+  font-size: 13px;
+  line-height: 1.7;
+  word-break: keep-all;
+}
+
+.emptyActionButton,
+.newAnalysisButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  height: 42px;
+  padding: 0 18px;
+
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  border: 0;
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.emptyActionButton {
+  margin-top: 18px;
+}
+
+.analysisHome {
+  display: grid;
+  gap: 18px;
+}
+
+.analysisHomeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.analysisHomeHeader h3 {
+  margin: 0;
+  color: var(--color-text-white);
+  font-size: 21px;
+  line-height: 1.3;
+}
+
+.newAnalysisButton {
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 14px;
+  background-color: var(--color-white-08);
+  border: 1px solid var(--color-white-13);
+}
+
+.historyList {
+  display: grid;
+  gap: 12px;
+}
+
+.historyCard {
+  display: grid;
+  gap: 7px;
+  padding: 18px;
+
+  color: inherit;
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-white-10);
+  border-radius: 14px;
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.historyCard:hover {
+  background-color: var(--color-white-06);
+  border-color: var(--color-white-20);
+  transform: translateY(-2px);
+}
+
+.historyMeta {
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 10px;
+  line-height: 1;
+}
+
+.historyCard strong {
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 16px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.historyCard p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: var(--color-white-56);
+  font-size: 13px;
+  line-height: 1.6;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.chatView {
+  display: grid;
+  gap: 20px;
+}
+
+.chatHeader {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--color-white-09);
+}
+
+.chatBackButton {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+
+  color: var(--color-text-white);
+  background-color: var(--color-white-06);
+  border: 1px solid var(--color-white-12);
+  border-radius: 50%;
+
+  cursor: pointer;
+}
+
+.chatBackButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.chatTitleWrap {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.chatTitleWrap strong {
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 18px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chatTitleWrap span {
+  color: var(--color-white-50);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.chatMessages {
+  display: grid;
+  gap: 16px;
+}
+
+.botMessage,
+.userMessage {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.userMessage {
+  justify-content: flex-end;
+}
+
+.promptAction {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.revealAnalysisButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-width: 168px;
+  height: 54px;
+  padding: 0 22px;
+
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  border: 0;
+  border-radius: 18px;
+
+  font-size: 15px;
+  font-weight: 900;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.revealAnalysisButton:hover {
+  background-color: var(--color-accent-hover);
+  transform: translateY(-2px);
+}
+
+.revealAnalysisButton svg {
+  width: 17px;
+  height: 17px;
+}
+
+.messageAvatar {
+  display: grid;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-white-10);
+}
+
+.messageAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.22);
+}
+
+.messageBubble {
+  max-width: calc(100% - 42px);
+  padding: 14px 16px;
+  color: var(--color-white-78);
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-white-10);
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  word-break: keep-all;
+}
+
+.messageBubble p {
+  margin: 0;
+}
+
+.userBubble {
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  font-weight: 800;
+}
+
+.bottomNav {
+  z-index: 2;
+
+  display: grid;
+  flex-shrink: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  min-height: 76px;
+
+  background-color: var(--color-surface-card);
+  border-top: 1px solid var(--color-white-09);
+}
+
+.bottomNavButton {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 10px 16px;
+
+  color: var(--color-white-42);
+  background-color: transparent;
+  border: 0;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.bottomNavButton:hover {
+  color: var(--color-white-78);
+  background-color: var(--color-white-03);
+}
+
+.bottomNavButton::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+
+  width: 0;
+  height: 2px;
+
+  background-color: var(--color-accent);
+
+  content: "";
+  transform: translateX(-50%);
+
+  transition: width 0.2s ease;
+}
+
+.activeBottomNavButton {
+  color: var(--color-text-white);
+  background-color: var(--color-white-03);
+}
+
+.activeBottomNavButton::before {
+  width: 44px;
+}
+
+.bottomNavIcon {
+  width: 23px;
+  height: 23px;
+}
+
+@media (max-width: 768px) {
+  .aiButton {
+    right: 20px;
+    bottom: 20px;
+
+    width: 56px;
+    height: 56px;
+  }
+
+  .buttonLogo {
+    transform: scale(1.3);
+  }
+
+  .aiButton:hover .buttonLogo {
+    transform: scale(1.38);
+  }
+
+  .reportBadge {
+    top: -7px;
+    right: -11px;
+
+    min-width: 51px;
+    height: 21px;
+    padding: 0 7px;
+
+    font-size: 8px;
+  }
+
+  .toggleIcon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .panel {
+    right: 0;
+    bottom: 0;
+
+    width: 100%;
+    height: calc(100dvh - var(--header-height));
+    max-height: none;
+
+    border: 0;
+    border-radius: 0;
+
+    transform: translateY(100%);
+  }
+
+  .panel.open {
+    transform: translateY(0);
+  }
+
+  .panelHeader {
+    padding: 22px 20px 20px;
+  }
+
+  .filterArea {
+    padding: 14px 20px;
+  }
+
+  .panelContent {
+    padding: 20px;
+  }
+
+  .bottomNav {
+    min-height: 68px;
+  }
+
+  .bottomNavButton {
+    gap: 5px;
+
+    padding: 8px 12px;
+
+    font-size: 12px;
+  }
+
+  .bottomNavIcon {
+    width: 21px;
+    height: 21px;
+  }
+
+  .resultCard {
+    padding: 20px;
+  }
+
+  .resultCard .teamCode {
+    font-size: 13px;
+  }
+
+  .resultCard .score {
+    font-size: 18px;
+  }
+
+  .resultFooter {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .backdrop {
+    display: none;
+  }
+}

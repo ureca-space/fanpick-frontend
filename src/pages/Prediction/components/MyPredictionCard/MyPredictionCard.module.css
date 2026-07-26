@@ -1,6 +1,6 @@
 .matchCard {
   padding: 30px 46px 28px;
-  border: 1px solid rgb(255 255 255 / 8%);
+  border: 1px solid var(--color-white-08);
   border-radius: 8px;
   background-color: var(--color-surface-card);
 }
@@ -53,22 +53,22 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid var(--color-white-10);
   border-radius: 8px;
-  background-color: rgb(255 255 255 / 4%);
+  background-color: var(--color-white-04);
 }
 
 .finishedBoard {
-  border-color: rgb(255 255 255 / 12%);
-  background-color: rgb(255 255 255 / 5%);
+  border-color: var(--color-white-12);
+  background-color: var(--color-white-05);
 }
 
 .finishedBoard .scoreTeam {
-  color: rgb(255 255 255 / 56%);
+  color: var(--color-white-56);
 }
 
 .finishedBoard .scoreTeam + .scoreTeam {
-  border-left-color: rgb(255 255 255 / 12%);
+  border-left-color: var(--color-white-12);
 }
 
 .scoreTeam {
@@ -86,7 +86,7 @@
 }
 
 .scoreTeam + .scoreTeam {
-  border-left: 1px solid rgb(255 255 255 / 10%);
+  border-left: 1px solid var(--color-white-10);
 }
 
 .scoreTeam:first-child {
@@ -158,7 +158,7 @@
 .matchCard > small {
   display: block;
   margin-top: 16px;
-  color: rgb(255 255 255 / 54%);
+  color: var(--color-white-54);
   font-size: 11px;
 }
 
@@ -221,8 +221,8 @@
 .scoreTeam.myPick {
   border-color: var(--color-accent);
   color: var(--color-text-white);
-  background-color: rgb(227 27 54 / 16%);
-  box-shadow: inset 0 0 0 1px rgb(227 27 54 / 34%);
+  background-color: var(--color-accent-16);
+  box-shadow: inset 0 0 0 1px var(--color-accent-34);
 }
 
 .scoreTeam.myPick .teamText strong {
@@ -232,7 +232,7 @@
 .scoreBoard.correct .myPick {
   border-color: var(--color-primary-light);
   background-color: var(--color-primary-light);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 16%);
+  box-shadow: inset 0 0 0 1px var(--color-white-16);
 }
 
 .scoreBoard.incorrect .myPick {
@@ -252,18 +252,32 @@
 }
 
 .scoreBoard.cancelled .myPick {
-  border-color: rgb(148 163 184 / 72%);
+  border-color: var(--color-status-neutral-border-strong);
   border-style: dashed;
-  background-color: rgb(148 163 184 / 12%);
-  box-shadow: inset 0 0 0 1px rgb(148 163 184 / 24%);
+  background-color: var(--color-status-neutral-soft);
+  box-shadow: inset 0 0 0 1px var(--color-status-neutral-border-inner);
 }
 
 .scoreBoard.cancelled .myPickBadge {
-  background-color: rgb(100 116 139 / 92%);
+  background-color: var(--color-status-neutral);
+}
+
+.scoreBoard.live .myPick {
+  border-color: rgb(56 189 248 / 72%);
+  background-color: var(--color-status-info-soft);
+  box-shadow: inset 0 0 0 1px rgb(56 189 248 / 28%);
+}
+
+.scoreBoard.live .myPickBadge {
+  background-color: var(--color-status-info);
 }
 
 .matchHeading span.waiting {
   background-color: var(--color-accent);
+}
+
+.matchHeading span.live {
+  background-color: var(--color-status-info);
 }
 
 .matchHeading span.correct {
@@ -271,11 +285,11 @@
 }
 
 .matchHeading span.void {
-  background-color: rgb(245 158 11 / 92%);
+  background-color: var(--color-status-warning);
 }
 
 .matchHeading span.cancelled {
-  background-color: rgb(100 116 139 / 92%);
+  background-color: var(--color-status-neutral);
 }
 
 .matchHeading span.incorrect {
@@ -283,7 +297,7 @@
 }
 
 .matchHeading span.finished {
-  background-color: rgb(255 255 255 / 16%);
+  background-color: var(--color-white-16);
 }
 
 @media (max-width: 700px) {
@@ -341,7 +355,7 @@
   }
 
   .scoreTeam + .scoreTeam {
-    border-top: 1px solid rgb(255 255 255 / 10%);
+    border-top: 1px solid var(--color-white-10);
     border-left: 0;
   }
 

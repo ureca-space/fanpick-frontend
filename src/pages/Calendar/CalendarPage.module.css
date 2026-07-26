@@ -5,11 +5,13 @@
   padding: var(--section-padding) 0 80px;
   color: var(--color-text-white);
   background-color: var(--color-surface-dark);
+  overflow-x: hidden;
 }
 
 .inner {
   display: grid;
   gap: 24px;
+  min-width: 0;
 }
 
 .pageHeader {
@@ -48,7 +50,14 @@
 }
 
 .sportFilters {
+  width: 100%;
   max-width: 640px;
+  min-width: 0;
+  --match-filter-mobile-gap: 10px;
+  --match-filter-mobile-height: 40px;
+  --match-filter-mobile-min-width: 64px;
+  --match-filter-mobile-x-padding: 14px;
+  --match-filter-mobile-font-size: 13px;
 }
 
 .statusMessageError {
@@ -58,9 +67,17 @@
   color: var(--color-accent-strong);
 }
 
+.mobileSelectedDay {
+  display: none;
+}
+
 @media (max-width: 720px) {
   .calendarPage {
     padding-top: 40px;
+  }
+
+  .sportFilters {
+    max-width: 100%;
   }
 
   .statusMessageError {
@@ -70,6 +87,8 @@
 
 .calendarSkeleton {
   width: min(100%, var(--content-width));
+  max-width: 100%;
+  min-width: 0;
   margin: 0 auto;
 }
 
@@ -81,15 +100,15 @@
 
 .skeletonWeekdays {
   margin-top: 30px;
-  border-top: 1px solid rgb(255 255 255 / 14%);
-  border-left: 1px solid rgb(255 255 255 / 14%);
-  background-color: rgb(255 255 255 / 3%);
+  border-top: 1px solid var(--color-white-14);
+  border-left: 1px solid var(--color-white-14);
+  background-color: var(--color-white-03);
 }
 
 .skeletonWeekday {
   padding: 18px 10px;
-  border-right: 1px solid rgb(255 255 255 / 14%);
-  border-bottom: 1px solid rgb(255 255 255 / 14%);
+  border-right: 1px solid var(--color-white-14);
+  border-bottom: 1px solid var(--color-white-14);
   color: var(--color-text-white);
   font-size: 16px;
   font-weight: 700;
@@ -97,15 +116,15 @@
 }
 
 .skeletonDays {
-  border-top: 1px solid rgb(255 255 255 / 12%);
-  border-left: 1px solid rgb(255 255 255 / 12%);
+  border-top: 1px solid var(--color-white-12);
+  border-left: 1px solid var(--color-white-12);
 }
 
 .skeletonDay {
   min-height: 182px;
   padding: 14px 12px 12px;
-  border-right: 1px solid rgb(255 255 255 / 10%);
-  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  border-right: 1px solid var(--color-white-10);
+  border-bottom: 1px solid var(--color-white-10);
   background-color: var(--color-primary);
 }
 
@@ -121,9 +140,9 @@
   gap: 8px;
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid var(--color-white-10);
   border-radius: 8px;
-  background-color: rgb(255 255 255 / 4%);
+  background-color: var(--color-white-04);
 }
 
 .skeletonLogo {
@@ -167,13 +186,12 @@
   }
 
   .skeletonDay {
-    min-height: 136px;
-    padding: 10px 8px 8px;
+    min-height: 86px;
+    padding: 9px 6px 7px;
   }
 
   .skeletonMatch {
-    justify-content: center;
-    padding: 8px;
+    display: none;
   }
 
   .skeletonTeam {
@@ -188,13 +206,70 @@
   }
 
   .skeletonDay {
-    min-height: 128px;
-    padding: 9px 6px 7px;
+    min-height: 76px;
+    padding: 8px 4px 6px;
   }
 }
 
 @media (max-width: 520px) {
   .statusMessageError {
     font-size: 11px;
+  }
+}
+
+@media (max-width: 720px) {
+  .mobileSelectedDay {
+    display: grid;
+    gap: 16px;
+    padding-top: 2px;
+  }
+
+  .mobileSelectedDayHeader {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-white-12);
+  }
+
+  .mobileSelectedDate {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-accent);
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .mobileSelectedTitle {
+    color: var(--color-text-white);
+    font-family: var(--font-display);
+    font-size: 26px;
+    line-height: 1;
+  }
+
+  .mobileSelectedCount {
+    flex: 0 0 auto;
+    color: var(--color-white-70);
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .mobileSelectedList {
+    display: grid;
+    gap: 12px;
+  }
+
+  .mobileSelectedEmpty {
+    margin: 0;
+    padding: 18px;
+    border: 1px solid var(--color-white-10);
+    border-radius: 8px;
+    color: var(--color-white-64);
+    background-color: var(--color-surface-card);
+    font-size: 13px;
   }
 }

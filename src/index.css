@@ -42,9 +42,99 @@
   --color-text-white: #ffffff;
 
   --color-border: #e5e7eb;
+  --color-white-02: rgb(255 255 255 / 2%);
+  --color-white-03: rgb(255 255 255 / 3%);
+  --color-white-04: rgb(255 255 255 / 4%);
+  --color-white-05: rgb(255 255 255 / 5%);
+  --color-white-06: rgb(255 255 255 / 6%);
+  --color-white-07: rgb(255 255 255 / 7%);
+  --color-white-08: rgb(255 255 255 / 8%);
+  --color-white-09: rgb(255 255 255 / 9%);
+  --color-white-10: rgb(255 255 255 / 10%);
+  --color-white-12: rgb(255 255 255 / 12%);
+  --color-white-13: rgb(255 255 255 / 13%);
+  --color-white-14: rgb(255 255 255 / 14%);
+  --color-white-16: rgb(255 255 255 / 16%);
+  --color-white-18: rgb(255 255 255 / 18%);
+  --color-white-20: rgb(255 255 255 / 20%);
+  --color-white-22: rgb(255 255 255 / 22%);
+  --color-white-24: rgb(255 255 255 / 24%);
+  --color-white-26: rgb(255 255 255 / 26%);
+  --color-white-28: rgb(255 255 255 / 28%);
+  --color-white-35: rgb(255 255 255 / 35%);
+  --color-white-40: rgb(255 255 255 / 40%);
+  --color-white-42: rgb(255 255 255 / 42%);
+  --color-white-45: rgb(255 255 255 / 45%);
+  --color-white-46: rgb(255 255 255 / 46%);
+  --color-white-48: rgb(255 255 255 / 48%);
+  --color-white-50: rgb(255 255 255 / 50%);
+  --color-white-52: rgb(255 255 255 / 52%);
+  --color-white-54: rgb(255 255 255 / 54%);
+  --color-white-55: rgb(255 255 255 / 55%);
+  --color-white-56: rgb(255 255 255 / 56%);
+  --color-white-58: rgb(255 255 255 / 58%);
+  --color-white-60: rgb(255 255 255 / 60%);
+  --color-white-62: rgb(255 255 255 / 62%);
+  --color-white-64: rgb(255 255 255 / 64%);
+  --color-white-65: rgb(255 255 255 / 65%);
+  --color-white-66: rgb(255 255 255 / 66%);
+  --color-white-68: rgb(255 255 255 / 68%);
+  --color-white-70: rgb(255 255 255 / 70%);
+  --color-white-72: rgb(255 255 255 / 72%);
+  --color-white-74: rgb(255 255 255 / 74%);
+  --color-white-76: rgb(255 255 255 / 76%);
+  --color-white-78: rgb(255 255 255 / 78%);
+  --color-white-80: rgb(255 255 255 / 80%);
+  --color-white-82: rgb(255 255 255 / 82%);
+  --color-white-88: rgb(255 255 255 / 88%);
+  --color-black-18: rgb(0 0 0 / 18%);
+  --color-black-22: rgb(0 0 0 / 22%);
+  --color-black-26: rgb(0 0 0 / 26%);
+  --color-black-28: rgb(0 0 0 / 28%);
+  --color-black-32: rgb(0 0 0 / 32%);
+  --color-black-40: rgb(0 0 0 / 40%);
+  --color-black-48: rgb(0 0 0 / 48%);
+  --color-accent-08: rgb(227 27 54 / 8%);
+  --color-accent-10: rgb(227 27 54 / 10%);
+  --color-accent-11: rgb(227 27 54 / 11%);
+  --color-accent-13: rgb(227 27 54 / 13%);
+  --color-accent-16: rgb(227 27 54 / 16%);
+  --color-accent-32: rgb(227 27 54 / 32%);
+  --color-accent-34: rgb(227 27 54 / 34%);
+  --color-accent-48: rgb(227 27 54 / 48%);
+  --color-status-info: rgb(14 116 144 / 92%);
+  --color-status-info-soft: rgb(56 189 248 / 12%);
+  --color-status-warning: rgb(245 158 11 / 92%);
+  --color-status-warning-soft: rgb(245 158 11 / 13%);
+  --color-status-neutral: rgb(100 116 139 / 92%);
+  --color-status-neutral-soft: rgb(148 163 184 / 12%);
+  --color-status-neutral-border: rgb(148 163 184 / 22%);
+  --color-status-neutral-border-strong: rgb(148 163 184 / 72%);
+  --color-status-neutral-border-inner: rgb(148 163 184 / 24%);
+  --color-scrollbar-thumb: #c7ccd5;
+  --color-scrollbar-thumb-hover: #aeb5c0;
   --color-prediction-track: #373b4d;
   --color-prediction-home: #6176ff;
   --color-prediction-away: #df5d76;
+  --color-badge-beginner: #7dd3fc;
+  --color-badge-beginner-border: rgb(125 211 252 / 34%);
+  --color-badge-beginner-bg: rgb(125 211 252 / 10%);
+  --color-badge-god: #facc15;
+  --color-badge-god-border: rgb(250 204 21 / 38%);
+  --color-badge-god-border-soft: rgb(250 204 21 / 34%);
+  --color-badge-god-bg: rgb(250 204 21 / 12%);
+  --color-badge-expert: #fb7185;
+  --color-badge-expert-border: rgb(251 113 133 / 36%);
+  --color-badge-expert-bg: rgb(251 113 133 / 12%);
+  --color-badge-normal: #a7f3d0;
+  --color-badge-normal-border: rgb(167 243 208 / 30%);
+  --color-badge-normal-bg: rgb(167 243 208 / 9%);
+  --color-badge-poor: #c4b5fd;
+  --color-badge-poor-border: rgb(196 181 253 / 32%);
+  --color-badge-poor-bg: rgb(196 181 253 / 10%);
+  --color-badge-worst: #fca5a5;
+  --color-badge-worst-border: rgb(252 165 165 / 34%);
+  --color-badge-worst-bg: rgb(252 165 165 / 10%);
 
   --content-width: 1280px;
   --header-height: 88px;
@@ -59,7 +149,7 @@
 
 html {
   scroll-behavior: smooth;
-  scrollbar-color: #c7ccd5 transparent;
+  scrollbar-color: var(--color-scrollbar-thumb) transparent;
   scrollbar-width: thin;
 }
 
@@ -71,7 +161,7 @@ body {
 }
 
 * {
-  scrollbar-color: #c7ccd5 transparent;
+  scrollbar-color: var(--color-scrollbar-thumb) transparent;
   scrollbar-width: thin;
 }
 
@@ -87,12 +177,12 @@ body {
 *::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
   border-radius: 999px;
-  background-color: #c7ccd5;
+  background-color: var(--color-scrollbar-thumb);
   background-clip: content-box;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background-color: #aeb5c0;
+  background-color: var(--color-scrollbar-thumb-hover);
 }
 
 *::-webkit-scrollbar-corner {
