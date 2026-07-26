@@ -1,7 +1,6 @@
 <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">FanPick</title>
   <desc id="desc">FanPick brand monogram logo</desc>
-  <rect width="128" height="128" rx="38" fill="#031426"/>
   <path d="M23 95.5H105" stroke="#E71D3B" stroke-width="8" stroke-linecap="round"/>
   <path d="M31 32H80C89.3888 32 97 39.6112 97 49C97 58.3888 89.3888 66 80 66H53V96H31V32Z" fill="#F8FAFC"/>
   <path d="M53 49H77.5C80.5376 49 83 51.4624 83 54.5C83 57.5376 80.5376 60 77.5 60H53V49Z" fill="#031426"/>

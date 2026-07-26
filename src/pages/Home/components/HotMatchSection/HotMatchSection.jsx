@@ -47,6 +47,17 @@ const formatMatchDate = (dateKey) => {
   return `${month}.${day}`;
 };
 
+const formatHotMatchLeague = (league) => {
+  const leagueText = String(league ?? "").trim();
+  const kLeagueMatch = leagueText.toUpperCase().match(/^K\s*LEAGUE\s*([12])$/);
+
+  if (kLeagueMatch) {
+    return `K리그${kLeagueMatch[1]}`;
+  }
+
+  return leagueText;
+};
+
 const createPredictionStatsByMatchId = (predictionStats) =>
   new Map(
     predictionStats.map((stat) => [
@@ -63,7 +74,7 @@ const normalizeHotMatch = (match, predictionStats) => ({
   id: match.external_id ?? `match-${match.id}`,
   databaseId: match.id,
   sport: match.sport,
-  league: match.league,
+  league: formatHotMatchLeague(match.league),
 
   date: formatMatchDate(match.match_date),
   time: match.match_time?.slice(0, 5) ?? "미정",

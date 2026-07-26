@@ -1188,12 +1188,25 @@
   }
 
   .badgeGuideGrid {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-auto-columns: minmax(280px, 88%);
+    grid-auto-flow: column;
+    grid-template-columns: none;
     gap: 14px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scroll-padding-inline: 0;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .badgeGuideGrid::-webkit-scrollbar {
+    display: none;
   }
 
   .badgeGuideCard {
     padding: 20px;
+    scroll-snap-align: start;
   }
 
   .badgeTierItem {

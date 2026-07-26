@@ -59,21 +59,6 @@ export const createMatchDateTime = (dateKey, timeValue) => {
   return Number.isFinite(timestamp) ? timestamp : null;
 };
 
-const parseMatchScore = (score) => {
-  const [awayScore, homeScore] = String(score ?? "").split(":").map(Number);
-
-  return {
-    awayScore: Number.isFinite(awayScore) ? awayScore : null,
-    homeScore: Number.isFinite(homeScore) ? homeScore : null,
-  };
-};
-
-const isZeroScore = (score) => {
-  const { awayScore, homeScore } = parseMatchScore(score);
-
-  return awayScore === 0 && homeScore === 0;
-};
-
 const getLiveWindowMs = (sport) => {
   const normalizedSport = String(sport ?? "").trim().toLowerCase();
   const hours =
@@ -115,10 +100,10 @@ export const normalizeMatchTimingStatus = (
   const shouldInferLiveStatus =
     isInsideLiveWindow &&
     (isLiveMatchStatus(status) ||
+      isFinishedMatchStatus(status) ||
       !normalizedStatus ||
       normalizedStatus === "pending" ||
-      normalizedStatus === "scheduled" ||
-      (isFinishedMatchStatus(status) && isZeroScore(score)));
+      normalizedStatus === "scheduled");
 
   if (shouldInferLiveStatus) {
     return {

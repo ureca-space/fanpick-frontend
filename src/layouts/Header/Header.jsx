@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import CommunityNotifications from "../../components/CommunityNotifications/CommunityNotifications";
 import FanPickDialog from "../../components/FanPickDialog/FanPickDialog";
@@ -29,18 +29,55 @@ const menuList = [
   },
 ];
 
+const HEADER_SOLID_OFFSET = 72;
+
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isLoggedIn, isAuthLoading } = useAuth();
+  const isHomePage = location.pathname === "/";
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isHomeHeaderSolid, setIsHomeHeaderSolid] = useState(!isHomePage);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loginDialogState, setLoginDialogState] = useState({
     description: "",
     from: null,
     isOpen: false,
   });
+
+  useEffect(() => {
+    if (!isHomePage) return undefined;
+
+    const updateHeaderStyle = () => {
+      const banner = document.querySelector("[data-main-banner]");
+      const headerHeight = Number.parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue(
+          "--header-height",
+        ),
+      );
+      const threshold = banner
+        ? Math.max(
+            0,
+            banner.offsetHeight -
+              (Number.isNaN(headerHeight) ? 0 : headerHeight) -
+              HEADER_SOLID_OFFSET,
+          )
+        : 80;
+
+      setIsHomeHeaderSolid(window.scrollY >= threshold);
+    };
+
+    const animationFrameId = window.requestAnimationFrame(updateHeaderStyle);
+    window.addEventListener("scroll", updateHeaderStyle, { passive: true });
+    window.addEventListener("resize", updateHeaderStyle);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("scroll", updateHeaderStyle);
+      window.removeEventListener("resize", updateHeaderStyle);
+    };
+  }, [isHomePage]);
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -220,7 +257,13 @@ const Header = () => {
   };
 
   return (
-    <header className={styles.header}>
+    <header
+      className={`${styles.header} ${
+        isHomePage && !isHomeHeaderSolid && !isMenuOpen
+          ? styles.transparentHeader
+          : ""
+      }`}
+    >
       <div className={`container ${styles.inner}`}>
         <Link
           to="/"
