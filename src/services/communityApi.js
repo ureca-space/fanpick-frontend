@@ -181,6 +181,19 @@ export const updateCommunityComment = async (commentId, content) => {
   if (error) throw error;
 };
 
+// 부모 댓글은 행을 유지하고 삭제 상태만 변경해 답글 연결을 보존
+export const softDeleteCommunityComment = async (commentId) => {
+  const { error } = await supabase
+    .from("community_comments")
+    .update({
+      is_deleted: true,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", commentId);
+
+  if (error) throw error;
+};
+
 export const deleteCommunityComment = async (commentId) => {
   const { error } = await supabase
     .from("community_comments")

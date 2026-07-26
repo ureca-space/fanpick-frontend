@@ -20,6 +20,7 @@ import {
   fetchCommunityPosts,
   fetchCommunityPredictionStats,
   increaseCommunityPostView,
+  softDeleteCommunityComment,
   updateCommunityComment,
 } from "../../../services/communityApi";
 import { subscribeToCommunityChanges } from "../../../services/communityRealtime";
@@ -96,6 +97,7 @@ const normalizeComments = (rows) => {
     author: row.author_name,
     avatarUrl: row.author_avatar_url,
     content: row.content,
+    isDeleted: Boolean(row.is_deleted),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     replies: [],
@@ -442,10 +444,18 @@ const CommunityDetailPage = () => {
       }
 
       if (deleteTarget.type === "comment") {
-        await deleteCommunityComment(deleteTarget.commentId);
+        await softDeleteCommunityComment(deleteTarget.commentId);
         setComments((currentComments) =>
-          currentComments.filter(
-            (item) => item.id !== deleteTarget.commentId,
+          currentComments.map((item) =>
+            item.id === deleteTarget.commentId
+              ? {
+                  ...item,
+                  author: "",
+                  avatarUrl: "",
+                  content: "",
+                  isDeleted: true,
+                }
+              : item,
           ),
         );
       }
@@ -599,21 +609,29 @@ const CommunityDetailPage = () => {
               <ul className={styles.commentList}>
                 {comments.map((item) => (
                   <li key={item.id}>
-                    <ProfileAvatar
-                      avatarUrl={item.avatarUrl}
-                      className={styles.smallAvatar}
-                      name={item.author}
-                    />
+                    {!item.isDeleted && (
+                      <ProfileAvatar
+                        avatarUrl={item.avatarUrl}
+                        className={styles.smallAvatar}
+                        name={item.author}
+                      />
+                    )}
                     <div className={styles.commentBody}>
-                      <span className={styles.nicknameWithBadge}>
-                        <b>{item.author}</b>
-                        <PredictionBadge
-                          userId={item.userId}
-                          fallbackSport={CATEGORY_SPORT[post.category]}
-                          sportStats={sportStats}
-                        />
-                      </span>
-                      {editingItem === `comment-${item.id}` ? (
+                      {!item.isDeleted && (
+                        <span className={styles.nicknameWithBadge}>
+                          <b>{item.author}</b>
+                          <PredictionBadge
+                            userId={item.userId}
+                            fallbackSport={CATEGORY_SPORT[post.category]}
+                            sportStats={sportStats}
+                          />
+                        </span>
+                      )}
+                      {item.isDeleted ? (
+                        <p className={styles.deletedComment}>
+                          삭제된 댓글입니다.
+                        </p>
+                      ) : editingItem === `comment-${item.id}` ? (
                         <div className={styles.editArea}>
                           <textarea
                             value={editedContent}
@@ -639,48 +657,50 @@ const CommunityDetailPage = () => {
                       ) : (
                         <p>{item.content}</p>
                       )}
-                      <div className={styles.commentMeta}>
-                        <small>
-                          {formatCommentTime(
-                            item.createdAt,
-                            item.updatedAt,
-                            currentTime,
+                      {!item.isDeleted && (
+                        <div className={styles.commentMeta}>
+                          <small>
+                            {formatCommentTime(
+                              item.createdAt,
+                              item.updatedAt,
+                              currentTime,
+                            )}
+                          </small>
+                          {user && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReplyingTo(
+                                  replyingTo === item.id ? null : item.id,
+                                );
+                                setReply("");
+                              }}
+                            >
+                              {replyingTo === item.id ? "취소" : "답글 쓰기"}
+                            </button>
                           )}
-                        </small>
-                        {user && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setReplyingTo(
-                                replyingTo === item.id ? null : item.id,
-                              );
-                              setReply("");
-                            }}
-                          >
-                            {replyingTo === item.id ? "취소" : "답글 쓰기"}
-                          </button>
-                        )}
-                        {item.userId === userId && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                startEdit(`comment-${item.id}`, item.content)
-                              }
-                            >
-                              수정
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => deleteComment(item.id)}
-                            >
-                              삭제
-                            </button>
-                          </>
-                        )}
-                      </div>
+                          {item.userId === userId && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  startEdit(`comment-${item.id}`, item.content)
+                                }
+                              >
+                                수정
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => deleteComment(item.id)}
+                              >
+                                삭제
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
 
-                      {replyingTo === item.id && (
+                      {!item.isDeleted && replyingTo === item.id && (
                         <form
                           className={styles.replyForm}
                           onSubmit={(event) => submitReply(event, item.id)}

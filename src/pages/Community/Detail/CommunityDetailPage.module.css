@@ -257,6 +257,11 @@
   overflow-wrap: anywhere;
 }
 
+.commentList p.deletedComment {
+  padding: 8px 0;
+  color: rgb(255 255 255 / 42%);
+}
+
 .commentMeta {
   display: flex;
   align-items: center;
