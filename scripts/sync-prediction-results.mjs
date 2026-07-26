@@ -1,9 +1,18 @@
 import { createSupabaseAdminClient } from "./team-standings-utils.mjs";
 
-const SCORE_SETTLE_DELAY_MS = 8 * 60 * 60 * 1000;
 const STORED_RESULTS = new Set(["correct", "incorrect"]);
+const LIVE_MATCH_STATUSES = new Set([
+  "live",
+  "ongoing",
+  "in_progress",
+  "playing",
+  "running",
+]);
 
 const normalizeTeamCode = (teamCode) => String(teamCode ?? "").trim().toUpperCase();
+const normalizeStatus = (status) => String(status ?? "").trim().toLowerCase();
+const isLiveMatchStatus = (status) =>
+  LIVE_MATCH_STATUSES.has(normalizeStatus(status));
 
 const parseScore = (score) => {
   if (!score) {
@@ -21,26 +30,6 @@ const parseScore = (score) => {
   };
 };
 
-const createMatchTimeValue = (match) => {
-  if (!match?.match_date) {
-    return null;
-  }
-
-  const [year, month, day] = String(match.match_date).split("-").map(Number);
-  const [hourText, minuteText] = String(match.match_time ?? "00:00").split(":");
-  const hour = Number(hourText);
-  const minute = Number(minuteText);
-  const matchTime = new Date(
-    year,
-    month - 1,
-    day,
-    Number.isFinite(hour) ? hour : 0,
-    Number.isFinite(minute) ? minute : 0,
-  ).getTime();
-
-  return Number.isFinite(matchTime) ? matchTime : null;
-};
-
 const hasResolvedScore = (match) => {
   const { awayScore, homeScore } = parseScore(match?.score);
 
@@ -48,15 +37,11 @@ const hasResolvedScore = (match) => {
     return false;
   }
 
-  if (match?.status === "finished") {
-    return true;
+  if (isLiveMatchStatus(match?.status)) {
+    return false;
   }
 
-  const matchTime = createMatchTimeValue(match);
-
-  return (
-    matchTime !== null && Date.now() - matchTime >= SCORE_SETTLE_DELAY_MS
-  );
+  return match?.status === "finished";
 };
 
 const resolvePredictionResult = (prediction) => {

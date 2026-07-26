@@ -20,25 +20,25 @@
 .standingsTable th,
 .standingsTable td {
   height: 58px;
-  border-bottom: 1px solid rgb(255 255 255 / 9%);
+  border-bottom: 1px solid var(--color-white-09);
   text-align: center;
   vertical-align: middle;
 }
 
 .standingsTable th {
   height: 42px;
-  color: rgb(255 255 255 / 55%);
+  color: var(--color-white-55);
   font-size: 12px;
   font-weight: 700;
 }
 
 .standingsTable td {
-  color: rgb(255 255 255 / 72%);
+  color: var(--color-white-72);
   font-weight: 800;
 }
 
 .standingsTable tr[data-active="true"] {
-  background-color: rgb(227 27 54 / 11%);
+  background-color: var(--color-accent-11);
 }
 
 .standingsTable tr[data-active="true"] td {

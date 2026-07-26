@@ -67,7 +67,7 @@
   display: grid;
   gap: 28px;
   padding: 28px;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid var(--color-white-10);
   border-radius: 8px;
   background: var(--color-surface-card);
 }
@@ -87,7 +87,7 @@
 }
 
 .sectionHeader > span {
-  color: rgb(255 255 255 / 55%);
+  color: var(--color-white-55);
   font-size: 12px;
   font-weight: 700;
 }

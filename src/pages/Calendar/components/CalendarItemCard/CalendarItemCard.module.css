@@ -8,16 +8,16 @@
   width: 100%;
   margin: 0;
   padding: 10px 12px;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid var(--color-white-10);
   border-radius: 8px;
   color: var(--color-text-white);
-  background-color: rgb(255 255 255 / 4%);
+  background-color: var(--color-white-04);
   box-shadow: 0 10px 24px rgb(0 0 0 / 14%);
   text-align: center;
 }
 
 .calendarItemCard:focus-visible {
-  outline: 2px solid rgb(255 255 255 / 46%);
+  outline: 2px solid var(--color-white-46);
   outline-offset: 2px;
 }
 
@@ -31,11 +31,11 @@
   width: max-content;
   max-width: 260px;
   padding: 8px 10px;
-  border: 1px solid rgb(255 255 255 / 14%);
+  border: 1px solid var(--color-white-14);
   border-radius: 6px;
   color: var(--color-text-white);
   background-color: var(--color-surface-card-strong);
-  box-shadow: 0 12px 28px rgb(0 0 0 / 28%);
+  box-shadow: 0 12px 28px var(--color-black-28);
   font-size: 12px;
   font-weight: 700;
   line-height: 1.35;
@@ -54,8 +54,8 @@
   left: 50%;
   width: 8px;
   height: 8px;
-  border-right: 1px solid rgb(255 255 255 / 14%);
-  border-bottom: 1px solid rgb(255 255 255 / 14%);
+  border-right: 1px solid var(--color-white-14);
+  border-bottom: 1px solid var(--color-white-14);
   background-color: var(--color-surface-card-strong);
   content: "";
   transform: translate(-50%, -4px) rotate(45deg);
@@ -67,7 +67,7 @@
 }
 
 .matchTooltip span:not(.tooltipTitle) {
-  color: rgb(255 255 255 / 68%);
+  color: var(--color-white-68);
   font-family: var(--font-korean);
   font-size: 11px;
   font-weight: 600;
@@ -102,7 +102,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: rgb(255 255 255 / 82%);
+  color: var(--color-white-82);
   font-family: var(--font-display);
   font-size: 12px;
   font-weight: 600;
@@ -117,7 +117,7 @@
 
 .teamLogo {
   object-fit: contain;
-  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 28%));
+  filter: drop-shadow(0 1px 1px var(--color-black-28));
 }
 
 .teamFallback {
@@ -130,11 +130,106 @@
 }
 
 .vs {
-  color: rgb(255 255 255 / 72%);
+  color: var(--color-white-72);
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0;
+}
+
+.agendaItemCard {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--color-white-12);
+  border-radius: 8px;
+  background-color: var(--color-surface-card);
+}
+
+.agendaHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.agendaMeta {
+  overflow: hidden;
+  color: var(--color-white-72);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agendaStatus {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: var(--color-text-white);
+  background-color: var(--color-surface-muted);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.agendaBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.agendaTeam {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.agendaTeamAway {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.agendaTeamName {
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 14px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agendaCenter {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 58px;
+}
+
+.agendaTime {
+  color: var(--color-white-62);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.agendaScore {
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.agendaVenue {
+  overflow: hidden;
+  margin: 0;
+  color: var(--color-white-58);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 900px) {
@@ -200,5 +295,17 @@
   .teamFallback {
     width: 24px;
     height: 24px;
+  }
+
+  .agendaItemCard {
+    padding: 14px;
+  }
+
+  .agendaBody {
+    gap: 8px;
+  }
+
+  .agendaTeamName {
+    font-size: 13px;
   }
 }
