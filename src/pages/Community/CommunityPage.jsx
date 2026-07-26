@@ -31,6 +31,8 @@ const CATEGORY_LABELS = Object.fromEntries(
 );
 const formatAuthorName = (name = "") =>
   name.length > 4 ? `${name.slice(0, 3)}...` : name;
+const formatPostTitle = (title = "") =>
+  title.length > 34 ? `${title.slice(0, 34)}...` : title;
 
 const getVisiblePageNumbers = (currentPage, pageCount) => {
   const visibleCount = Math.min(MAX_VISIBLE_PAGE_COUNT, pageCount);
@@ -373,7 +375,7 @@ const CommunityPage = () => {
                                 {CATEGORY_LABELS[post.category]}
                               </small>
                             )}
-                            {post.title}
+                            {formatPostTitle(post.title)}
                             <b>({post.commentCount})</b>
                           </span>
                         )}

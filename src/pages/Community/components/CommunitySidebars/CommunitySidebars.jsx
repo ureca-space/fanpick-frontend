@@ -135,7 +135,11 @@ export const CommunityPopularPanel = ({
         : popularPosts.map((post) => (
             <li key={post.id}>
               <Link to={`/community/${post.id}`} state={linkState}>
-                <span>{post.title}</span>
+                <span>
+                  {post.title.length > 16
+                    ? `${post.title.slice(0, 16)}...`
+                    : post.title}
+                </span>
                 <b>({Number(post.commentCount ?? 0).toLocaleString()})</b>
               </Link>
             </li>
