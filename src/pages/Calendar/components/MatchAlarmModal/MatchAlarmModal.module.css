@@ -105,6 +105,52 @@
   background-color: rgb(227 27 54 / 12%);
 }
 
+.selectionGroup {
+  display: grid;
+  gap: 8px;
+}
+
+.currentSelectionBadge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 7px 12px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 999px;
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 10%);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.statusBadgeError {
+  border-color: rgb(227 27 54 / 45%);
+  color: rgb(255 223 227);
+  background-color: rgb(227 27 54 / 14%);
+}
+
+.unavailableCard {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid rgb(227 27 54 / 24%);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgb(227 27 54 / 10%), rgb(255 255 255 / 4%));
+}
+
+.unavailableTitle {
+  color: rgb(255 214 220);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.unavailableText {
+  color: rgb(255 255 255 / 66%);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
 .matchCard,
 .controlGroup,
 .previewCard {
@@ -192,6 +238,14 @@
   transform: translateY(-1px);
 }
 
+.presetOptionSelected {
+  border-color: rgb(255 255 255 / 76%);
+  background-color: rgb(255 255 255 / 16%);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 18%) inset,
+    0 10px 24px rgb(0 0 0 / 12%);
+}
+
 .presetOption input {
   position: absolute;
   opacity: 0;
@@ -206,6 +260,10 @@
   position: absolute;
   inset: -1px;
   content: "";
+}
+
+.presetOptionSelected span {
+  color: var(--color-text-white);
 }
 
 .presetOption span {

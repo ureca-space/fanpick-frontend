@@ -143,6 +143,14 @@ const addTeamLogo = (team) => ({
   logo: team.logo || "",
 });
 
+const isAlarmUnavailableMatch = (match) => {
+  const status = String(match?.statusCode ?? match?.statusInfo ?? "")
+    .trim()
+    .toLowerCase();
+
+  return ["finished", "ended", "final", "ft", "canceled", "cancelled", "postponed"].includes(status);
+};
+
 const CalendarPage = () => {
   const { user, isAuthLoading } = useAuth();
   const userId = user?.id || "";
@@ -487,6 +495,20 @@ const CalendarPage = () => {
       return;
     }
 
+    if (isAlarmUnavailableMatch(selectedAlarmMatch)) {
+      setSaveNotice({
+        type: "error",
+        message: "종료, 취소, 연기된 경기에는 알림을 저장할 수 없어요.",
+      });
+      if (saveNoticeTimerRef.current) {
+        window.clearTimeout(saveNoticeTimerRef.current);
+      }
+      saveNoticeTimerRef.current = window.setTimeout(() => {
+        setSaveNotice(null);
+      }, 2500);
+      return;
+    }
+
     if (saveNoticeTimerRef.current) {
       window.clearTimeout(saveNoticeTimerRef.current);
     }
@@ -739,6 +761,9 @@ const CalendarPage = () => {
         defaultReminderSettings={alarmDefaultSettings}
         existingAlarm={selectedAlarmRecord}
         isAlarmLoading={selectedAlarmRecordLoading}
+        canSaveAlarm={
+          selectedAlarmMatch ? !isAlarmUnavailableMatch(selectedAlarmMatch) : false
+        }
       />
     </>
   );

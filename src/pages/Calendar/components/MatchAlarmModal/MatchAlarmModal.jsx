@@ -50,6 +50,20 @@ const buildPreviewLabel = ({ selectedPresetId, customAmount, customUnit }) => {
   return `경기 시작 ${presetLabel} 알림`;
 };
 
+const buildSelectionLabel = ({ selectedPresetId, customAmount, customUnit }) => {
+  if (selectedPresetId === "custom") {
+    const unitLabel = customUnit === "hours" ? "시간" : "분";
+
+    return `${customAmount || 0}${unitLabel} 전`;
+  }
+
+  const presetLabel =
+    PRESET_OPTIONS.find((option) => option.id === selectedPresetId)?.label ||
+    "기본";
+
+  return presetLabel;
+};
+
 const MatchAlarmModal = ({
   match,
   isOpen,
@@ -59,6 +73,7 @@ const MatchAlarmModal = ({
   defaultReminderSettings,
   existingAlarm,
   isAlarmLoading = false,
+  canSaveAlarm = true,
 }) => {
   const titleId = useId();
   const descriptionId = useId();
@@ -120,11 +135,74 @@ const MatchAlarmModal = ({
     customAmount,
     customUnit,
   });
+  const selectionLabel = buildSelectionLabel({
+    selectedPresetId,
+    customAmount,
+    customUnit,
+  });
   const hasExistingAlarm = Boolean(existingAlarm?.id);
   const actionsDisabled = isAlarmLoading;
+  const saveDisabled = actionsDisabled || !canSaveAlarm;
 
   if (!isOpen || !match) {
     return null;
+  }
+
+  if (!canSaveAlarm) {
+    return (
+      <div
+        className={styles.backdrop}
+        role="presentation"
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) {
+            onClose();
+          }
+        }}
+      >
+        <section
+          className={styles.dialog}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          aria-describedby={descriptionId}
+        >
+          <div className={styles.header}>
+            <div>
+              <p className={styles.kicker}>MATCH ALERT</p>
+              <h2 id={titleId} className={styles.title}>
+                알림 설정 불가
+              </h2>
+            </div>
+
+            <button
+              className={styles.closeButton}
+              type="button"
+              aria-label="모달 닫기"
+              onClick={onClose}
+            >
+              ×
+            </button>
+          </div>
+
+          <p id={descriptionId} className={styles.description}>
+            {matchTitle} 경기는 종료, 취소, 연기 상태라 알림을 설정할 수 없어요.
+          </p>
+
+          <div className={styles.unavailableCard}>
+            <strong className={styles.unavailableTitle}>설정할 수 없는 경기예요</strong>
+            <span className={styles.unavailableText}>
+              종료, 취소, 연기된 경기는 알림 저장이 지원되지 않습니다.
+            </span>
+          </div>
+
+          <div className={styles.buttonArea}>
+            <button className={styles.confirmButton} type="button" onClick={onClose}>
+              닫기
+            </button>
+          </div>
+        </section>
+      </div>
+    );
   }
 
   return (
@@ -168,13 +246,18 @@ const MatchAlarmModal = ({
 
         <div className={styles.statusRow}>
           {isAlarmLoading ? (
-            <span className={styles.statusBadge}>기존 알림을 확인 중이에요.</span>
+            <span className={styles.statusBadge}>기존 알림을 확인 중...</span>
           ) : hasExistingAlarm ? (
-            <span className={`${styles.statusBadge} ${styles.statusBadgeSuccess}`}>
-              이미 이 경기에 알림이 설정되어 있어요.
-            </span>
+            <div className={styles.selectionGroup}>
+              <span className={`${styles.statusBadge} ${styles.statusBadgeSuccess}`}>
+                이미 알림 설정이 된 경기
+              </span>
+              <span className={styles.currentSelectionBadge}>
+                현재 선택: {selectionLabel}
+              </span>
+            </div>
           ) : (
-            <span className={styles.statusBadge}>아직 설정된 알림이 없어요.</span>
+            <span className={styles.statusBadge}>아직 설정된 알림이 없습니다.</span>
           )}
         </div>
 
@@ -196,7 +279,17 @@ const MatchAlarmModal = ({
           <h3 className={styles.sectionTitle}>알림 시간</h3>
           <div className={styles.presetGrid}>
             {PRESET_OPTIONS.map((option) => (
-              <label key={option.id} className={styles.presetOption}>
+              <label
+                key={option.id}
+                className={[
+                  styles.presetOption,
+                  selectedPresetId === option.id
+                    ? styles.presetOptionSelected
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
                 <input
                   type="radio"
                   name="alarmPreset"
@@ -209,7 +302,16 @@ const MatchAlarmModal = ({
               </label>
             ))}
 
-            <label className={styles.presetOption}>
+            <label
+              className={[
+                styles.presetOption,
+                selectedPresetId === "custom"
+                  ? styles.presetOptionSelected
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
               <input
                 type="radio"
                 value="custom"
@@ -272,7 +374,7 @@ const MatchAlarmModal = ({
             className={styles.cancelButton}
             type="button"
             onClick={onClose}
-            disabled={actionsDisabled}
+            disabled={saveDisabled}
           >
             닫기
           </button>
@@ -298,7 +400,7 @@ const MatchAlarmModal = ({
                 customUnit,
               })
             }
-            disabled={actionsDisabled}
+            disabled={saveDisabled}
           >
             {hasExistingAlarm ? "알림 수정" : "알림 저장"}
           </button>
