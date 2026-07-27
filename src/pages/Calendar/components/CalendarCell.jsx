@@ -1,10 +1,13 @@
+import { useState } from "react";
 import CalendarItemCard from "./CalendarItemCard";
 import css from "./CalendarCell/CalendarCell.module.css";
 
 const MAX_MOBILE_INDICATOR_MATCHES = 2;
 
 const TeamIndicator = ({ team }) => {
-  if (!team?.logo) {
+  const [hasError, setHasError] = useState(false);
+
+  if (!team?.logo || hasError) {
     return <span className={css.mobileTeamFallback}>{team?.shortName}</span>;
   }
 
@@ -14,11 +17,19 @@ const TeamIndicator = ({ team }) => {
       src={team.logo}
       alt=""
       aria-hidden="true"
+      onError={() => setHasError(true)}
     />
   );
 };
 
-const CalendarCell = ({ day, matches = [], isSelected = false, onSelectDate }) => {
+const CalendarCell = ({
+  day,
+  matches = [],
+  isSelected = false,
+  onSelectDate,
+  onMatchClick,
+  alarmMatchIds = [],
+}) => {
   const hasMatches = matches.length > 0;
   const indicatorMatches = matches.slice(0, MAX_MOBILE_INDICATOR_MATCHES);
   const cellClassName = [
@@ -32,6 +43,7 @@ const CalendarCell = ({ day, matches = [], isSelected = false, onSelectDate }) =
   ]
     .filter(Boolean)
     .join(" ");
+
   const handleSelectDate = () => {
     if (!day.isCurrentMonth) {
       return;
@@ -77,7 +89,12 @@ const CalendarCell = ({ day, matches = [], isSelected = false, onSelectDate }) =
 
       <div className={css.matchList}>
         {matches.map((match) => (
-          <CalendarItemCard key={match.id} match={match} />
+          <CalendarItemCard
+            key={match.id}
+            match={match}
+            onClick={onMatchClick}
+            isAlarmSet={alarmMatchIds.includes(String(match.id))}
+          />
         ))}
       </div>
     </div>
