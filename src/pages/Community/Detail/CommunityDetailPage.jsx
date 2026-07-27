@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { FiEye, FiThumbsDown, FiThumbsUp } from "react-icons/fi";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import Button from "../../../components/Button/Button";
 import EmptyState from "../../../components/EmptyState/EmptyState";
 import FanPickDialog from "../../../components/FanPickDialog/FanPickDialog";
@@ -10,10 +16,15 @@ import {
   deleteCommunityComment,
   deleteCommunityPost,
   fetchCommunityComments,
+  fetchCommunityCommentReactions,
   fetchCommunityPost,
+  fetchCommunityPostReactions,
   fetchCommunityPosts,
   fetchCommunityPredictionStats,
   increaseCommunityPostView,
+  softDeleteCommunityComment,
+  toggleCommunityCommentReaction,
+  toggleCommunityPostReaction,
   updateCommunityComment,
 } from "../../../services/communityApi";
 import { subscribeToCommunityChanges } from "../../../services/communityRealtime";
@@ -32,6 +43,24 @@ const CATEGORY_SPORT = {
   lck: "esports",
   baseball: "baseball",
   soccer: "soccer",
+};
+
+const EMPTY_REACTION = {
+  likeCount: 0,
+  dislikeCount: 0,
+  myReaction: null,
+};
+
+const updateReactionSummary = (summary, nextReaction) => {
+  const nextSummary = { ...EMPTY_REACTION, ...summary };
+
+  if (nextSummary.myReaction === "like") nextSummary.likeCount -= 1;
+  if (nextSummary.myReaction === "dislike") nextSummary.dislikeCount -= 1;
+  if (nextReaction === "like") nextSummary.likeCount += 1;
+  if (nextReaction === "dislike") nextSummary.dislikeCount += 1;
+
+  nextSummary.myReaction = nextReaction;
+  return nextSummary;
 };
 
 const PredictionBadge = ({
@@ -90,6 +119,7 @@ const normalizeComments = (rows) => {
     author: row.author_name,
     avatarUrl: row.author_avatar_url,
     content: row.content,
+    isDeleted: Boolean(row.is_deleted),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     replies: [],
@@ -118,6 +148,47 @@ const ProfileAvatar = ({ avatarUrl, className, name }) => {
     </span>
   );
 };
+
+const ReactionButtons = ({ disabled, onReact, summary = EMPTY_REACTION }) => (
+  <div className={styles.reactionButtons}>
+    <span className={styles.reactionOption}>
+      <button
+        type="button"
+        className={[
+          styles.supportButton,
+          summary.myReaction === "like" ? styles.activeReaction : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        aria-pressed={summary.myReaction === "like"}
+        disabled={disabled}
+        onClick={() => onReact("like")}
+      >
+        <span>응원</span>
+        <FiThumbsUp aria-hidden="true" />
+      </button>
+      <b className={styles.reactionCount}>{summary.likeCount}</b>
+    </span>
+    <span className={styles.reactionOption}>
+      <button
+        type="button"
+        className={[
+          styles.opposeButton,
+          summary.myReaction === "dislike" ? styles.activeReaction : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        aria-pressed={summary.myReaction === "dislike"}
+        disabled={disabled}
+        onClick={() => onReact("dislike")}
+      >
+        <span>반대</span>
+        <FiThumbsDown aria-hidden="true" />
+      </button>
+      <b className={styles.reactionCount}>{summary.dislikeCount}</b>
+    </span>
+  </div>
+);
 
 const CommunityDetailSkeleton = () => (
   <section className={styles.page} aria-label="게시글 불러오는 중">
@@ -181,6 +252,7 @@ const CommunityDetailSkeleton = () => (
 
 const CommunityDetailPage = () => {
   const { postId } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.id;
@@ -190,6 +262,10 @@ const CommunityDetailPage = () => {
   const [nextPost, setNextPost] = useState(null);
   const [popularPosts, setPopularPosts] = useState([]);
   const [comments, setComments] = useState([]);
+  const [commentSort, setCommentSort] = useState("created");
+  const [postReaction, setPostReaction] = useState(EMPTY_REACTION);
+  const [commentReactions, setCommentReactions] = useState({});
+  const [pendingReactionKey, setPendingReactionKey] = useState("");
   const [sportStats, setSportStats] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -198,10 +274,32 @@ const CommunityDetailPage = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [editedContent, setEditedContent] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const currentTime = useRelativeTimeClock();
   const increasedPostIdRef = useRef(null);
 
   const currentAvatarUrl = user?.user_metadata?.avatar_url || "";
+  const communityListSearch = location.state?.communityListSearch;
+  const communityListPath = communityListSearch
+    ? `/community?${communityListSearch}`
+    : "/community";
+  const communityListState = communityListSearch
+    ? { communityListSearch }
+    : undefined;
+
+  const sortedComments = [...comments].sort((a, b) => {
+    if (commentSort === "support") {
+      const supportDifference =
+        (commentReactions[b.id]?.likeCount ?? 0) -
+        (commentReactions[a.id]?.likeCount ?? 0);
+
+      if (supportDifference !== 0) {
+        return supportDifference;
+      }
+    }
+
+    return new Date(a.createdAt) - new Date(b.createdAt);
+  });
 
   const loadDetail = useCallback(async ({ showLoading = true } = {}) => {
     const shouldIncreaseView =
@@ -236,6 +334,23 @@ const CommunityDetailPage = () => {
         [...normalizedPosts].sort((a, b) => b.views - a.views).slice(0, 10),
       );
       setComments(normalizeComments(commentRows));
+
+      try {
+        const [postReactionRows, commentReactionRows] = await Promise.all([
+          fetchCommunityPostReactions([postId], userId),
+          fetchCommunityCommentReactions(
+            commentRows.map((item) => item.id),
+            userId,
+          ),
+        ]);
+
+        setPostReaction(postReactionRows[postId] ?? EMPTY_REACTION);
+        setCommentReactions(commentReactionRows);
+      } catch (reactionError) {
+        console.error("커뮤니티 반응 조회 오류:", reactionError);
+        setPostReaction(EMPTY_REACTION);
+        setCommentReactions({});
+      }
 
       try {
         const authorIds = [
@@ -281,6 +396,61 @@ const CommunityDetailPage = () => {
       window.clearTimeout(timerId);
     };
   }, [loadDetail]);
+
+  const requireLogin = () => {
+    if (user) return true;
+
+    setIsLoginDialogOpen(true);
+    return false;
+  };
+
+  const handlePostReaction = async (reaction) => {
+    if (!requireLogin() || pendingReactionKey) return;
+
+    try {
+      setPendingReactionKey("post");
+      const nextReaction = await toggleCommunityPostReaction({
+        postId,
+        userId,
+        reaction,
+      });
+      setPostReaction((current) =>
+        updateReactionSummary(current, nextReaction),
+      );
+    } catch (error) {
+      console.error("게시글 반응 저장 오류:", error);
+      alert("게시글 반응을 저장하지 못했습니다.");
+    } finally {
+      setPendingReactionKey("");
+    }
+  };
+
+  const handleCommentReaction = async (commentId, reaction) => {
+    const reactionKey = `comment-${commentId}`;
+
+    if (!requireLogin() || pendingReactionKey) return;
+
+    try {
+      setPendingReactionKey(reactionKey);
+      const nextReaction = await toggleCommunityCommentReaction({
+        commentId,
+        userId,
+        reaction,
+      });
+      setCommentReactions((current) => ({
+        ...current,
+        [commentId]: updateReactionSummary(
+          current[commentId],
+          nextReaction,
+        ),
+      }));
+    } catch (error) {
+      console.error("댓글 반응 저장 오류:", error);
+      alert("댓글 반응을 저장하지 못했습니다.");
+    } finally {
+      setPendingReactionKey("");
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = subscribeToCommunityChanges({
@@ -428,10 +598,18 @@ const CommunityDetailPage = () => {
       }
 
       if (deleteTarget.type === "comment") {
-        await deleteCommunityComment(deleteTarget.commentId);
+        await softDeleteCommunityComment(deleteTarget.commentId);
         setComments((currentComments) =>
-          currentComments.filter(
-            (item) => item.id !== deleteTarget.commentId,
+          currentComments.map((item) =>
+            item.id === deleteTarget.commentId
+              ? {
+                  ...item,
+                  author: "",
+                  avatarUrl: "",
+                  content: "",
+                  isDeleted: true,
+                }
+              : item,
           ),
         );
       }
@@ -470,11 +648,14 @@ const CommunityDetailPage = () => {
   return (
     <section className={styles.page}>
       <div className={`container ${styles.layout}`}>
-        <CommunitySidebars popularPosts={popularPosts} />
+        <CommunitySidebars
+          popularLinkState={communityListState}
+          popularPosts={popularPosts}
+        />
 
         <main className={styles.mainArea}>
           <div className={styles.pageControls}>
-            <Button size="sm" to="/community" variant="secondary">
+            <Button size="sm" to={communityListPath} variant="secondary">
               목록
             </Button>
 
@@ -483,6 +664,7 @@ const CommunityDetailPage = () => {
                 <Button
                   size="sm"
                   to={`/community/${previousPost.id}`}
+                  state={communityListState}
                   variant="secondary"
                 >
                   이전글
@@ -492,6 +674,7 @@ const CommunityDetailPage = () => {
                 <Button
                   size="sm"
                   to={`/community/${nextPost.id}`}
+                  state={communityListState}
                   variant="secondary"
                 >
                   다음글
@@ -524,6 +707,16 @@ const CommunityDetailPage = () => {
                     <small>
                       {formatRelativeTime(post.createdAt, currentTime)}
                     </small>
+                    <span className={styles.metaDivider} aria-hidden="true">
+                      ·
+                    </span>
+                    <span
+                      className={styles.viewCount}
+                      aria-label={`조회수 ${post.views}`}
+                    >
+                      <FiEye aria-hidden="true" />
+                      {post.views}
+                    </span>
                     {post.user_id === userId && (
                       <span className={styles.postActions}>
                         <Link to={`/community/${post.id}/edit`}>수정</Link>
@@ -539,10 +732,39 @@ const CommunityDetailPage = () => {
 
             <div className={styles.articleContent}>
               <p>{post.content}</p>
+              <div className={styles.postReactionArea}>
+                <ReactionButtons
+                  disabled={pendingReactionKey === "post"}
+                  summary={postReaction}
+                  onReact={handlePostReaction}
+                />
+              </div>
             </div>
 
             <section className={styles.commentSection}>
-              <h2>댓글 {comments.length}</h2>
+              <div className={styles.commentHeader}>
+                <h2>댓글 {comments.length}</h2>
+                <div className={styles.commentSort}>
+                  <button
+                    type="button"
+                    className={
+                      commentSort === "created" ? styles.activeSort : ""
+                    }
+                    onClick={() => setCommentSort("created")}
+                  >
+                    등록순
+                  </button>
+                  <button
+                    type="button"
+                    className={
+                      commentSort === "support" ? styles.activeSort : ""
+                    }
+                    onClick={() => setCommentSort("support")}
+                  >
+                    응원순
+                  </button>
+                </div>
+              </div>
 
               <form className={styles.commentForm} onSubmit={submitComment}>
                 <ProfileAvatar
@@ -568,23 +790,31 @@ const CommunityDetailPage = () => {
               </form>
 
               <ul className={styles.commentList}>
-                {comments.map((item) => (
+                {sortedComments.map((item) => (
                   <li key={item.id}>
-                    <ProfileAvatar
-                      avatarUrl={item.avatarUrl}
-                      className={styles.smallAvatar}
-                      name={item.author}
-                    />
+                    {!item.isDeleted && (
+                      <ProfileAvatar
+                        avatarUrl={item.avatarUrl}
+                        className={styles.smallAvatar}
+                        name={item.author}
+                      />
+                    )}
                     <div className={styles.commentBody}>
-                      <span className={styles.nicknameWithBadge}>
-                        <b>{item.author}</b>
-                        <PredictionBadge
-                          userId={item.userId}
-                          fallbackSport={CATEGORY_SPORT[post.category]}
-                          sportStats={sportStats}
-                        />
-                      </span>
-                      {editingItem === `comment-${item.id}` ? (
+                      {!item.isDeleted && (
+                        <span className={styles.nicknameWithBadge}>
+                          <b>{item.author}</b>
+                          <PredictionBadge
+                            userId={item.userId}
+                            fallbackSport={CATEGORY_SPORT[post.category]}
+                            sportStats={sportStats}
+                          />
+                        </span>
+                      )}
+                      {item.isDeleted ? (
+                        <p className={styles.deletedComment}>
+                          삭제된 댓글입니다.
+                        </p>
+                      ) : editingItem === `comment-${item.id}` ? (
                         <div className={styles.editArea}>
                           <textarea
                             value={editedContent}
@@ -610,48 +840,61 @@ const CommunityDetailPage = () => {
                       ) : (
                         <p>{item.content}</p>
                       )}
-                      <div className={styles.commentMeta}>
-                        <small>
-                          {formatCommentTime(
-                            item.createdAt,
-                            item.updatedAt,
-                            currentTime,
+                      {!item.isDeleted && (
+                        <div className={styles.commentMeta}>
+                          <small>
+                            {formatCommentTime(
+                              item.createdAt,
+                              item.updatedAt,
+                              currentTime,
+                            )}
+                          </small>
+                          {user && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReplyingTo(
+                                  replyingTo === item.id ? null : item.id,
+                                );
+                                setReply("");
+                              }}
+                            >
+                              {replyingTo === item.id ? "취소" : "답글 쓰기"}
+                            </button>
                           )}
-                        </small>
-                        {user && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setReplyingTo(
-                                replyingTo === item.id ? null : item.id,
-                              );
-                              setReply("");
-                            }}
-                          >
-                            {replyingTo === item.id ? "취소" : "답글 쓰기"}
-                          </button>
-                        )}
-                        {item.userId === userId && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                startEdit(`comment-${item.id}`, item.content)
-                              }
-                            >
-                              수정
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => deleteComment(item.id)}
-                            >
-                              삭제
-                            </button>
-                          </>
-                        )}
-                      </div>
+                          {item.userId === userId && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  startEdit(`comment-${item.id}`, item.content)
+                                }
+                              >
+                                수정
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => deleteComment(item.id)}
+                              >
+                                삭제
+                              </button>
+                            </>
+                          )}
+                          <ReactionButtons
+                            disabled={
+                              pendingReactionKey === `comment-${item.id}`
+                            }
+                            summary={
+                              commentReactions[item.id] ?? EMPTY_REACTION
+                            }
+                            onReact={(reaction) =>
+                              handleCommentReaction(item.id, reaction)
+                            }
+                          />
+                        </div>
+                      )}
 
-                      {replyingTo === item.id && (
+                      {!item.isDeleted && replyingTo === item.id && (
                         <form
                           className={styles.replyForm}
                           onSubmit={(event) => submitReply(event, item.id)}
@@ -758,6 +1001,22 @@ const CommunityDetailPage = () => {
                                   </button>
                                 </>
                               )}
+                              <ReactionButtons
+                                disabled={
+                                  pendingReactionKey ===
+                                  `comment-${replyItem.id}`
+                                }
+                                summary={
+                                  commentReactions[replyItem.id] ??
+                                  EMPTY_REACTION
+                                }
+                                onReact={(reaction) =>
+                                  handleCommentReaction(
+                                    replyItem.id,
+                                    reaction,
+                                  )
+                                }
+                              />
                             </div>
                           </div>
                         </div>
@@ -780,6 +1039,23 @@ const CommunityDetailPage = () => {
         confirmText="삭제"
         onClose={() => setDeleteTarget(null)}
         onConfirm={confirmDelete}
+        lockBodyScroll={false}
+      />
+      <FanPickDialog
+        isOpen={isLoginDialogOpen}
+        title="로그인이 필요합니다"
+        description="응원 또는 반대를 선택하려면 로그인해 주세요."
+        cancelText="취소"
+        confirmText="로그인하기"
+        onClose={() => setIsLoginDialogOpen(false)}
+        onConfirm={() => {
+          setIsLoginDialogOpen(false);
+          navigate("/login", {
+            state: {
+              from: location,
+            },
+          });
+        }}
         lockBodyScroll={false}
       />
     </section>

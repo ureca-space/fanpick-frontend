@@ -6,7 +6,9 @@ import FanPickDialog from "../../components/FanPickDialog/FanPickDialog";
 import MatchFilter from "../../components/MatchFilter/MatchFilter";
 import PaginationControls from "../../components/PaginationControls/PaginationControls";
 import SearchInput from "../../components/SearchInput/SearchInput";
+import SubNav from "../../components/SubNav/SubNav";
 import ViewAllLink from "../../components/ViewAllLink/ViewAllLink";
+import { TEAMS_SUB_NAV_ITEMS } from "../../constants/teamsNav";
 import useAuth from "../../contexts/useAuth";
 import {
   FAVORITE_TEAMS_CHANGED_EVENT,
@@ -376,7 +378,10 @@ const TeamsPage = () => {
   );
 
   return (
-    <main className={styles.teamsPage}>
+    <>
+      <SubNav ariaLabel="팀 메뉴" items={TEAMS_SUB_NAV_ITEMS} />
+
+      <main className={styles.teamsPage}>
       <div className="container">
         <header className={styles.pageHeader}>
           <p className={styles.eyebrow}>FIND YOUR TEAM</p>
@@ -490,7 +495,8 @@ const TeamsPage = () => {
         onClose={handleCloseLoginDialog}
         onConfirm={handleMoveToLogin}
       />
-    </main>
+      </main>
+    </>
   );
 };
 

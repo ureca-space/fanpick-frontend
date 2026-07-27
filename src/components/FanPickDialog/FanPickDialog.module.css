@@ -15,7 +15,7 @@
   overflow: hidden;
   width: min(100%, 420px);
   padding: 48px 34px 32px;
-  border: 1px solid rgb(255 255 255 / 12%);
+  border: 1px solid var(--color-white-12);
   border-radius: 18px;
   color: var(--color-text-white);
   background:
@@ -47,7 +47,7 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  color: rgb(255 255 255 / 52%);
+  color: var(--color-white-52);
   background-color: transparent;
   font-size: 27px;
   font-weight: 300;
@@ -59,7 +59,7 @@
 
 .closeButton:hover {
   color: var(--color-text-white);
-  background-color: rgb(255 255 255 / 8%);
+  background-color: var(--color-white-08);
 }
 
 .title {
@@ -72,7 +72,7 @@
 
 .description {
   margin-top: 12px;
-  color: rgb(255 255 255 / 62%);
+  color: var(--color-white-62);
   font-size: 15px;
   line-height: 1.7;
   word-break: keep-all;
@@ -86,12 +86,18 @@
 
 .cancelButton,
 .confirmButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: 1;
   height: 48px;
+  min-height: 48px;
   padding: 0 20px;
   border-radius: 8px;
+  appearance: none;
   font-size: 14px;
   font-weight: 700;
+  line-height: 1;
   transition:
     border-color 0.2s ease,
     color 0.2s ease,
@@ -100,15 +106,15 @@
 }
 
 .cancelButton {
-  border: 1px solid rgb(255 255 255 / 22%);
-  color: rgb(255 255 255 / 78%);
+  border: 1px solid var(--color-white-22);
+  color: var(--color-white-78);
   background-color: transparent;
 }
 
 .cancelButton:hover {
-  border-color: rgb(255 255 255 / 45%);
+  border-color: var(--color-white-45);
   color: var(--color-text-white);
-  background-color: rgb(255 255 255 / 7%);
+  background-color: var(--color-white-07);
 }
 
 .confirmButton {
@@ -171,11 +177,16 @@
   }
 
   .buttonArea {
+    align-items: center;
     flex-direction: column-reverse;
+    gap: 10px;
   }
 
   .cancelButton,
   .confirmButton {
     width: 100%;
+    max-width: 260px;
+    height: 46px;
+    min-height: 46px;
   }
 }

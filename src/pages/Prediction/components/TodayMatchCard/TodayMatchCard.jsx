@@ -1,5 +1,9 @@
 import { forwardRef } from "react";
 import Skeleton from "../../../../components/Skeleton/Skeleton";
+import {
+  isLiveMatchStatus,
+  isResultPendingMatchStatus,
+} from "../../../../utils/matchStatus";
 import { SPORT_ICONS } from "../../predictionUtils";
 import TeamMark from "../TeamMark/TeamMark";
 import styles from "./TodayMatchCard.module.css";
@@ -28,7 +32,10 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
   const SportIcon = SPORT_ICONS[match.sport];
   const hasSelection = Boolean(selection);
   const closedStatusLabel = CLOSED_STATUS_LABELS[match.status] ?? "";
-  const isClosed = match.isFinished || Boolean(closedStatusLabel);
+  const isLive = isLiveMatchStatus(match.status);
+  const isResultPending = isResultPendingMatchStatus(match.status);
+  const isClosed =
+    isLive || isResultPending || match.isFinished || Boolean(closedStatusLabel);
   const canChangeSelection =
     hasSelection && canChangePrediction && !isClosed;
   const isHomeSelected = selection === "home";
@@ -43,9 +50,20 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
     isSaving ||
     (hasSelection && !canChangeSelection);
   const headingStatusLabel =
-    closedStatusLabel || (match.isFinished ? "경기종료" : "경기예정");
+    closedStatusLabel ||
+    (isLive
+      ? "경기중"
+      : isResultPending
+        ? "결과 확인중"
+        : match.isFinished
+          ? "경기종료"
+          : "경기예정");
   const statusLabel = closedStatusLabel
     ? closedStatusLabel
+    : isLive
+      ? "경기중"
+    : isResultPending
+      ? "결과 확인중"
     : match.isFinished
       ? selection
         ? "경기종료"
@@ -78,7 +96,15 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
         </p>
         <span
           className={
-            isCancelled ? styles.cancelled : isClosed ? styles.finished : ""
+            isCancelled
+              ? styles.cancelled
+              : isLive
+                ? styles.live
+                : isResultPending
+                  ? styles.resultPending
+                : isClosed
+                  ? styles.finished
+                  : ""
           }
         >
           {statusLabel}

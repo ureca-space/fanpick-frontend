@@ -14,6 +14,8 @@ export const SPORT_ICONS = {
 // - 예측 결과별 화면 문구
 export const RESULT_LABELS = {
   pending: "예측진행중",
+  live: "경기중",
+  resultPending: "결과 확인중",
   correct: "예측성공",
   incorrect: "예측실패",
   cancelled: "경기취소",
@@ -23,6 +25,8 @@ export const RESULT_LABELS = {
 // - Supabase 결과를 기존 CSS 클래스 이름으로 연결
 export const RESULT_STYLES = {
   pending: "waiting",
+  live: "live",
+  resultPending: "resultPending",
   correct: "correct",
   incorrect: "incorrect",
   cancelled: "cancelled",

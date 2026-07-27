@@ -19,7 +19,7 @@
 
 .description {
   margin: 14px 0 0;
-  color: rgb(255 255 255 / 60%);
+  color: var(--color-white-60);
   font-size: 16px;
   line-height: 1.6;
 }
@@ -61,8 +61,8 @@
 }
 
 .teamCard:hover {
-  border-color: rgb(255 255 255 / 24%);
-  box-shadow: 0 14px 30px rgb(0 0 0 / 22%);
+  border-color: var(--color-white-24);
+  box-shadow: 0 14px 30px var(--color-black-22);
   transform: translateY(-4px);
 }
 
@@ -71,7 +71,7 @@
   border-color: var(--color-accent);
   box-shadow:
     0 0 0 1px var(--color-accent),
-    0 14px 30px rgb(0 0 0 / 22%);
+    0 14px 30px var(--color-black-22);
 }
 
 .hotMatchSkeleton {
@@ -139,6 +139,20 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-width: 0;
+}
+
+.league {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-family: var(--font-korean);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .vs {
@@ -167,7 +181,7 @@
 
 .time {
   margin-top: 6px;
-  color: rgb(255 255 255 / 72%);
+  color: var(--color-white-72);
   font-size: 16px;
   font-weight: 500;
 }
@@ -322,6 +336,10 @@
     text-shadow: 1px 1px 0 var(--color-text-white);
   }
 
+  .league {
+    font-size: 13px;
+  }
+
   .schedule {
     margin-top: 24px;
   }
@@ -389,6 +407,10 @@
 
   .vs {
     font-size: 28px;
+  }
+
+  .league {
+    font-size: 12px;
   }
 
   .schedule {

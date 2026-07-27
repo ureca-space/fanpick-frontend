@@ -8,6 +8,11 @@
   font-family: var(--font-display);
 }
 
+.transparentHeader {
+  background-color: transparent;
+  box-shadow: none;
+}
+
 /* 좌측 로고 / 중앙 메뉴 / 우측 로그인 */
 .inner {
   display: grid;

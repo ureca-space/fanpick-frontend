@@ -52,7 +52,7 @@
 .pageDescription {
   max-width: 650px;
   margin-top: 24px;
-  color: rgb(255 255 255 / 60%);
+  color: var(--color-white-60);
   font-size: 16px;
   line-height: 1.8;
 }
@@ -86,7 +86,7 @@
   justify-content: space-between;
   gap: 48px;
   padding: 36px;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid var(--color-white-10);
   border-radius: 8px;
   background-color: var(--color-surface-card);
 }
@@ -208,7 +208,7 @@
 .email,
 .joinedAt {
   overflow: hidden;
-  color: rgb(255 255 255 / 58%);
+  color: var(--color-white-58);
   font-size: 15px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -220,9 +220,9 @@
 .cancelButton {
   flex-shrink: 0;
   padding: 6px 10px;
-  border: 1px solid rgb(255 255 255 / 18%);
+  border: 1px solid var(--color-white-18);
   border-radius: 6px;
-  color: rgb(255 255 255 / 70%);
+  color: var(--color-white-70);
   background-color: transparent;
   font-size: 13px;
   transition:
@@ -239,9 +239,9 @@
 
 .editButton:hover,
 .cancelButton:hover:not(:disabled) {
-  border-color: rgb(255 255 255 / 40%);
+  border-color: var(--color-white-40);
   color: var(--color-text-white);
-  background-color: rgb(255 255 255 / 6%);
+  background-color: var(--color-white-06);
 }
 
 .nicknameEdit {
@@ -254,11 +254,11 @@
   width: 220px;
   height: 42px;
   padding: 0 12px;
-  border: 1px solid rgb(255 255 255 / 20%);
+  border: 1px solid var(--color-white-20);
   border-radius: 8px;
   outline: none;
   color: var(--color-text-white);
-  background-color: rgb(255 255 255 / 6%);
+  background-color: var(--color-white-06);
   caret-color: var(--color-text-white);
   transition:
     border-color 0.2s ease,
@@ -267,7 +267,7 @@
 
 .nicknameInput:focus {
   border-color: var(--color-accent);
-  background-color: rgb(255 255 255 / 8%);
+  background-color: var(--color-white-08);
 }
 
 .editActions {
@@ -309,21 +309,21 @@
 
 .profileBadges {
   display: grid;
-  grid-template-columns: repeat(3, minmax(150px, 1fr));
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
   gap: 14px;
-  width: min(100%, 650px);
+  width: min(100%, 860px);
 }
 
 .profileBadge {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
   min-height: 88px;
-  padding: 16px;
-  border: 1px solid rgb(255 255 255 / 9%);
+  padding: 16px 14px;
+  border: 1px solid var(--color-white-09);
   border-radius: 8px;
-  background-color: rgb(255 255 255 / 4%);
+  background-color: var(--color-white-04);
   transition:
     border-color 0.2s ease,
     background-color 0.2s ease,
@@ -331,91 +331,9 @@
 }
 
 .profileBadge:hover {
-  border-color: rgb(255 255 255 / 18%);
-  background-color: rgb(255 255 255 / 7%);
+  border-color: var(--color-white-18);
+  background-color: var(--color-white-07);
   transform: translateY(-2px);
-}
-
-.profileBadgeIcon {
-  --badge-color: var(--color-accent);
-  --badge-border: rgb(227 27 54 / 32%);
-  --badge-bg: rgb(227 27 54 / 10%);
-
-  position: relative;
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border: 1px solid var(--badge-border);
-  border-radius: 50%;
-  color: var(--badge-color);
-  background:
-    radial-gradient(circle at 35% 28%, rgb(255 255 255 / 16%), transparent 36%),
-    var(--badge-bg);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 5%);
-}
-
-.profileBadgeIcon[data-tier="beginner"] {
-  --badge-color: #7dd3fc;
-  --badge-border: rgb(125 211 252 / 34%);
-  --badge-bg: rgb(125 211 252 / 10%);
-}
-
-.profileBadgeIcon[data-tier="god"] {
-  --badge-color: #facc15;
-  --badge-border: rgb(250 204 21 / 38%);
-  --badge-bg: rgb(250 204 21 / 12%);
-}
-
-.profileBadgeIcon[data-tier="expert"] {
-  --badge-color: #fb7185;
-  --badge-border: rgb(251 113 133 / 36%);
-  --badge-bg: rgb(251 113 133 / 12%);
-}
-
-.profileBadgeIcon[data-tier="normal"] {
-  --badge-color: #a7f3d0;
-  --badge-border: rgb(167 243 208 / 30%);
-  --badge-bg: rgb(167 243 208 / 9%);
-}
-
-.profileBadgeIcon[data-tier="poor"] {
-  --badge-color: #c4b5fd;
-  --badge-border: rgb(196 181 253 / 32%);
-  --badge-bg: rgb(196 181 253 / 10%);
-}
-
-.profileBadgeIcon[data-tier="worst"] {
-  --badge-color: #fca5a5;
-  --badge-border: rgb(252 165 165 / 34%);
-  --badge-bg: rgb(252 165 165 / 10%);
-}
-
-.profileBadgeIcon > svg {
-  width: 24px;
-  height: 24px;
-}
-
-.profileBadgeTierIcon {
-  position: absolute;
-  right: -3px;
-  bottom: -3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border: 1px solid var(--badge-border);
-  border-radius: 50%;
-  color: var(--badge-color);
-  background-color: var(--color-surface-card);
-}
-
-.profileBadgeTierIcon svg {
-  width: 12px;
-  height: 12px;
 }
 
 .profileBadge > div {
@@ -426,7 +344,7 @@
 }
 
 .profileBadgeSport {
-  color: rgb(255 255 255 / 45%);
+  color: var(--color-white-45);
   font-family: var(--font-display);
   font-size: 11px;
   line-height: 1.2;
@@ -444,11 +362,9 @@
 }
 
 .profileBadgeAccuracy {
-  overflow: hidden;
-  color: rgb(255 255 255 / 48%);
-  font-size: 12px;
+  color: var(--color-white-48);
+  font-size: 11px;
   line-height: 1.4;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -477,8 +393,183 @@
   height: 12px;
 }
 
+/* 배지 가이드 */
+
+.badgeGuideGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.badgeGuideCard {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 22px;
+  padding: 24px;
+  border: 1px solid var(--color-white-08);
+  border-radius: 8px;
+  background-color: var(--color-surface-card);
+}
+
+.badgeGuideHeader,
+.skeletonBadgeGuideHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.badgeGuideTitleGroup {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.badgeGuideSport {
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.badgeGuideCurrent {
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 18px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badgeGuideSummary {
+  color: var(--color-white-52);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.badgeTierList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.badgeTierItem {
+  --tier-color: rgb(255 255 255 / 34%);
+
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--color-white-07);
+}
+
+.badgeTierItem[data-status="current"] {
+  --tier-color: var(--color-accent);
+}
+
+.badgeTierIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--color-white-13);
+  border-radius: 50%;
+  color: var(--tier-color);
+  background-color: var(--color-white-05);
+}
+
+.badgeTierIcon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.badgeTierBody {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.badgeTierTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.badgeTierTop strong {
+  overflow: hidden;
+  color: var(--color-text-white);
+  font-size: 14px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badgeTierStatus {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--color-white-68);
+  background-color: var(--color-white-09);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.badgeTierItem[data-status="current"] .badgeTierStatus {
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+}
+
+.badgeTierBody p {
+  color: var(--color-white-50);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.badgeTierProgress {
+  overflow: hidden;
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background-color: var(--color-white-08);
+}
+
+.badgeTierProgress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background-color: var(--tier-color);
+}
+
+.badgeTierBody small {
+  color: rgb(255 255 255 / 44%);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.skeletonBadgeGuideList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeletonBadgeGuideItem {
+  width: 100%;
+  height: 34px;
+}
+
 /* 공통 섹션 */
 
+.badgeGuideSection,
 .statisticsSection,
 .favoriteTeamsSection,
 .historySection {
@@ -503,7 +594,7 @@
 }
 
 .sectionDescription {
-  color: rgb(255 255 255 / 55%);
+  color: var(--color-white-55);
   font-size: 15px;
   line-height: 1.6;
 }
@@ -522,13 +613,13 @@
   gap: 20px;
   min-height: 150px;
   padding: 26px;
-  border: 1px solid rgb(255 255 255 / 8%);
+  border: 1px solid var(--color-white-08);
   border-radius: 8px;
   background-color: var(--color-surface-card);
 }
 
 .statisticLabel {
-  color: rgb(255 255 255 / 52%);
+  color: var(--color-white-52);
   font-family: var(--font-display);
   font-size: 14px;
   line-height: 1.4;
@@ -544,7 +635,7 @@
 
 .statisticUnit {
   margin-left: 6px;
-  color: rgb(255 255 255 / 60%);
+  color: var(--color-white-60);
   font-family: var(--font-korean);
   font-size: 15px;
 }
@@ -585,7 +676,7 @@
   align-items: center;
   min-height: 132px;
   padding: 22px;
-  border: 1px solid rgb(255 255 255 / 8%);
+  border: 1px solid var(--color-white-08);
   border-radius: 8px;
   color: inherit;
   background-color: var(--color-surface-card);
@@ -596,7 +687,7 @@
 }
 
 .favoriteTeamCard:hover {
-  border-color: rgb(255 255 255 / 18%);
+  border-color: var(--color-white-18);
   transform: translateY(-2px);
 }
 
@@ -611,9 +702,9 @@
   justify-content: center;
   width: 86px;
   height: 86px;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid var(--color-white-10);
   border-radius: 8px;
-  background-color: rgb(255 255 255 / 5%);
+  background-color: var(--color-white-05);
 }
 
 .favoriteTeamLogo {
@@ -630,7 +721,7 @@
   height: 62px;
   border-radius: 50%;
   color: var(--color-text-white);
-  background-color: rgb(255 255 255 / 10%);
+  background-color: var(--color-white-10);
   font-family: var(--font-korean);
   font-size: 13px;
   font-weight: 800;
@@ -662,7 +753,7 @@
 .favoriteTeamTone {
   display: -webkit-box;
   overflow: hidden;
-  color: rgb(255 255 255 / 52%);
+  color: var(--color-white-52);
   font-size: 13px;
   line-height: 1.5;
   -webkit-box-orient: vertical;
@@ -738,7 +829,7 @@
   flex-direction: column;
   gap: 18px;
   padding: 24px;
-  border: 1px solid rgb(255 255 255 / 8%);
+  border: 1px solid var(--color-white-08);
   border-radius: 8px;
   color: inherit;
   background-color: var(--color-surface-card);
@@ -748,7 +839,7 @@
 }
 
 .historyCard:hover {
-  border-color: rgb(255 255 255 / 18%);
+  border-color: var(--color-white-18);
   transform: translateY(-2px);
 }
 
@@ -760,12 +851,12 @@
 .profileBadge.skeletonStaticCard:hover,
 .favoriteTeamCard.skeletonStaticCard:hover,
 .historyCard.skeletonStaticCard:hover {
-  border-color: rgb(255 255 255 / 8%);
+  border-color: var(--color-white-08);
   transform: none;
 }
 
 .profileBadge.skeletonStaticCard:hover {
-  background-color: rgb(255 255 255 / 4%);
+  background-color: var(--color-white-04);
 }
 
 .historyMeta,
@@ -779,7 +870,7 @@
 
 .historyMeta span {
   overflow: hidden;
-  color: rgb(255 255 255 / 52%);
+  color: var(--color-white-52);
   font-family: var(--font-display);
   font-size: 12px;
   line-height: 1.2;
@@ -792,7 +883,7 @@
   padding: 5px 9px;
   border-radius: 999px;
   color: var(--color-text-white);
-  background-color: rgb(255 255 255 / 14%);
+  background-color: var(--color-white-14);
   font-size: 11px;
   font-weight: 800;
   line-height: 1;
@@ -807,15 +898,23 @@
 }
 
 .historyResult[data-result="void"] {
-  background-color: rgb(245 158 11 / 92%);
+  background-color: var(--color-status-warning);
 }
 
 .historyResult[data-result="cancelled"] {
-  background-color: rgb(100 116 139 / 92%);
+  background-color: var(--color-status-neutral);
 }
 
 .historyResult[data-result="pending"] {
   background-color: var(--color-accent);
+}
+
+.historyResult[data-result="live"] {
+  background-color: var(--color-status-info);
+}
+
+.historyResult[data-result="resultPending"] {
+  background-color: var(--color-status-neutral);
 }
 
 .historyDate strong {
@@ -826,7 +925,7 @@
 }
 
 .historyDate span {
-  color: rgb(255 255 255 / 58%);
+  color: var(--color-white-58);
   font-size: 13px;
   font-weight: 700;
 }
@@ -838,7 +937,7 @@
 
 .historyTeam {
   overflow: hidden;
-  color: rgb(255 255 255 / 62%);
+  color: var(--color-white-62);
   font-size: 15px;
   font-weight: 700;
   line-height: 1.3;
@@ -873,7 +972,7 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  color: rgb(255 255 255 / 62%);
+  color: var(--color-white-62);
   font-size: 11px;
   line-height: 1.3;
 }
@@ -933,7 +1032,7 @@
 
 .historySelectedTeam {
   min-width: 0;
-  color: rgb(255 255 255 / 52%);
+  color: var(--color-white-52);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -998,7 +1097,7 @@
 
 /* 작은 데스크톱 */
 
-@media (max-width: 1180px) {
+@media (max-width: 1360px) {
   .profileSection {
     align-items: flex-start;
     flex-direction: column;
@@ -1006,6 +1105,7 @@
   }
 
   .profileBadges {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
   }
 }
@@ -1013,6 +1113,8 @@
 /* 태블릿 */
 
 @media (max-width: 1000px) {
+  .profileBadges,
+  .badgeGuideGrid,
   .statisticsGrid,
   .favoriteTeamsGrid,
   .historyList {
@@ -1085,13 +1187,40 @@
     padding: 15px;
   }
 
-  .profileBadgeIcon {
-    width: 40px;
-    height: 40px;
-  }
-
   .profileBadgeTitle {
     font-size: 14px;
+  }
+
+  .badgeGuideGrid {
+    display: grid;
+    grid-auto-columns: minmax(280px, 88%);
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    gap: 14px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scroll-padding-inline: 0;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .badgeGuideGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .badgeGuideCard {
+    padding: 20px;
+    scroll-snap-align: start;
+  }
+
+  .badgeTierItem {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .badgeTierIcon {
+    width: 32px;
+    height: 32px;
   }
 
   .sectionTitle {

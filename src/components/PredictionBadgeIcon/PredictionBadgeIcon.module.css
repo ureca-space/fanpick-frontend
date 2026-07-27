@@ -1,0 +1,99 @@
+.icon {
+  --badge-color: var(--color-accent);
+  --badge-border: var(--color-accent-32);
+  --badge-bg: var(--color-accent-10);
+  --badge-size: 42px;
+  --badge-icon-size: 24px;
+  --badge-tier-size: 18px;
+  --badge-tier-icon-size: 12px;
+
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--badge-size);
+  height: var(--badge-size);
+  border: 1px solid var(--badge-border);
+  border-radius: 50%;
+  color: var(--badge-color);
+  background:
+    radial-gradient(circle at 35% 28%, var(--color-white-16), transparent 36%),
+    var(--badge-bg);
+  box-shadow: inset 0 0 0 1px var(--color-white-05);
+}
+
+.icon[data-size="sm"] {
+  --badge-size: 34px;
+  --badge-icon-size: 20px;
+  --badge-tier-size: 16px;
+  --badge-tier-icon-size: 11px;
+}
+
+.icon[data-size="xs"] {
+  --badge-size: 22px;
+  --badge-icon-size: 14px;
+  --badge-tier-size: 11px;
+  --badge-tier-icon-size: 8px;
+}
+
+.icon[data-tier="beginner"] {
+  --badge-color: var(--color-badge-beginner);
+  --badge-border: var(--color-badge-beginner-border);
+  --badge-bg: var(--color-badge-beginner-bg);
+}
+
+.icon[data-tier="god"] {
+  --badge-color: var(--color-badge-god);
+  --badge-border: var(--color-badge-god-border);
+  --badge-bg: var(--color-badge-god-bg);
+}
+
+.icon[data-tier="expert"] {
+  --badge-color: var(--color-badge-expert);
+  --badge-border: var(--color-badge-expert-border);
+  --badge-bg: var(--color-badge-expert-bg);
+}
+
+.icon[data-tier="normal"] {
+  --badge-color: var(--color-badge-normal);
+  --badge-border: var(--color-badge-normal-border);
+  --badge-bg: var(--color-badge-normal-bg);
+}
+
+.icon[data-tier="poor"] {
+  --badge-color: var(--color-badge-poor);
+  --badge-border: var(--color-badge-poor-border);
+  --badge-bg: var(--color-badge-poor-bg);
+}
+
+.icon[data-tier="worst"] {
+  --badge-color: var(--color-badge-worst);
+  --badge-border: var(--color-badge-worst-border);
+  --badge-bg: var(--color-badge-worst-bg);
+}
+
+.icon > svg {
+  width: var(--badge-icon-size);
+  height: var(--badge-icon-size);
+}
+
+.tierIcon {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--badge-tier-size);
+  height: var(--badge-tier-size);
+  border: 1px solid var(--badge-border);
+  border-radius: 50%;
+  color: var(--badge-color);
+  background-color: var(--color-surface-card);
+}
+
+.tierIcon svg {
+  width: var(--badge-tier-icon-size);
+  height: var(--badge-tier-icon-size);
+}

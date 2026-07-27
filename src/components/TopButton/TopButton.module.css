@@ -1,7 +1,10 @@
 .topButton {
   position: fixed;
   right: clamp(20px, 4vw, 60px);
-  bottom: clamp(20px, 4vw, 60px);
+
+  /* AI 버튼 72px + 버튼 사이 간격 18px */
+  bottom: calc(clamp(20px, 4vw, 60px) + 90px);
+
   z-index: 900;
 
   display: flex;
@@ -12,9 +15,9 @@
   height: 72px;
   padding: 0;
 
-  color: rgb(255 255 255 / 70%);
+  color: var(--color-white-70);
   background-color: rgb(12 13 29 / 85%);
-  border: 1px solid rgb(255 255 255 / 14%);
+  border: 1px solid var(--color-white-14);
   border-radius: 50%;
 
   opacity: 0;
@@ -40,6 +43,7 @@
 .topButton svg {
   width: 30px;
   height: 30px;
+
   fill: none;
   stroke: currentColor;
   stroke-width: 1.7;
@@ -50,7 +54,7 @@
 .topButton:hover {
   color: var(--color-text-white);
   background-color: rgb(20 22 43 / 95%);
-  border-color: rgb(255 255 255 / 35%);
+  border-color: var(--color-white-35);
   transform: translateY(-3px);
 }
 
@@ -59,14 +63,17 @@
 }
 
 .topButton:focus-visible {
-  outline: 2px solid var(--color-text-white);
-  outline-offset: 4px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--color-text-white);
 }
 
 @media (max-width: 768px) {
   .topButton {
     right: 20px;
-    bottom: 20px;
+
+    /* 하단 20px + AI 버튼 56px + 간격 18px */
+    bottom: 94px;
+
     width: 56px;
     height: 56px;
   }

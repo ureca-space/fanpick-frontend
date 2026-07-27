@@ -21,9 +21,13 @@ const TEAM_MATCH_CODES = {
   "kleague-seoul": ["K09"],
   "kleague-pohang": ["K03"],
   "kleague-daejeon": ["K10"],
-  "kleague-daegu": ["K17"],
   "kleague-jeju": ["K04"],
   "kleague-gangwon": ["K21"],
+  "kleague-anyang": ["K27"],
+  "kleague-incheon": ["K18"],
+  "kleague-bucheon": ["K26"],
+  "kleague-gimcheon": ["K35"],
+  "kleague-gwangju": ["K22"],
   "lck-t1": ["T1"],
   "lck-gen": ["GEN"],
   "lck-hle": ["HLE"],
@@ -703,40 +707,6 @@ const TEAM_MEMBERS_BY_ID = {
         "https://d2tfp74nsbbrkr.cloudfront.net/v1/player/2026/K10/player_20240116.png",
     },
   ]),
-  "kleague-daegu": createKLeagueMembers([
-    {
-      playerId: "20240055",
-      name: "Minyoung KIM",
-      role: "FW",
-      number: "43",
-      photo:
-        "https://d2tfp74nsbbrkr.cloudfront.net/v1/player/2025/K17/player_20240055.png",
-    },
-    {
-      playerId: "20240053",
-      name: "Gwangdeok GWON",
-      role: "MF",
-      number: "39",
-      photo:
-        "https://d2tfp74nsbbrkr.cloudfront.net/v1/player/2026/K17/player_20240053.png",
-    },
-    {
-      playerId: "20200136",
-      name: "KangSan KIM",
-      role: "DF",
-      number: "20",
-      photo:
-        "https://d2tfp74nsbbrkr.cloudfront.net/v1/player/2026/K17/player_20200136.png",
-    },
-    {
-      playerId: "20220156",
-      name: "Dongmin",
-      role: "GK",
-      number: "1",
-      photo:
-        "https://d2tfp74nsbbrkr.cloudfront.net/v1/player/2026/K17/player_20220156.png",
-    },
-  ]),
   "kleague-jeju": createKLeagueMembers([
     {
       playerId: "20220166",
@@ -803,6 +773,144 @@ const TEAM_MEMBERS_BY_ID = {
       number: "41",
       photo:
         "https://d2tfp74nsbbrkr.cloudfront.net/v1/player/2026/K21/player_20240099.png",
+    },
+  ]),
+  "kleague-anyang": createKLeagueMembers([
+    {
+      playerId: "20240078",
+      name: "마테우스",
+      role: "MF",
+      number: "7",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/663e47fc-17cd-4a1d-b863-36ec62bc805b.png",
+    },
+    {
+      playerId: "20260091",
+      name: "아일톤",
+      role: "FW",
+      number: "11",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/ce45282e-b793-4536-b722-8fdb29267922.png",
+    },
+    {
+      playerId: "20200170",
+      name: "최건주",
+      role: "FW",
+      number: "27",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/0fbf772b-5e9a-4c18-b720-06c3f02db368.png",
+    },
+    {
+      playerId: "20240084",
+      name: "김운",
+      role: "FW",
+      number: "19",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/70add80c-b98b-4790-86d8-30695714f9f7.png",
+    },
+  ]),
+  "kleague-incheon": createKLeagueMembers([
+    {
+      playerId: "20180196",
+      name: "무고사",
+      role: "FW",
+      number: "9",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/ec17f023-90b0-4b12-b8b7-cabbf17bbac0.png",
+    },
+    {
+      playerId: "20260168",
+      name: "페리어",
+      role: "FW",
+      number: "99",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/2e1c239d-0236-49b6-a684-168bbfb281a6.png",
+    },
+    {
+      playerId: "20210223",
+      name: "제르소",
+      role: "MF",
+      number: "11",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/25a15ab0-b311-49e3-9d00-eb281143fb81.png",
+    },
+    {
+      playerId: "20190131",
+      name: "이동률",
+      role: "FW",
+      number: "10",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/e6e15ba3-f217-490c-8e33-b8c254b7eaac.png",
+    },
+  ]),
+  "kleague-bucheon": createKLeagueMembers([
+    {
+      playerId: "20220353",
+      name: "갈레고",
+      role: "FW",
+      number: "11",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/69e85310-2d02-4a19-9359-6ef37fdfde7a.png",
+    },
+    {
+      playerId: "20230333",
+      name: "가브리엘",
+      role: "FW",
+      number: "63",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/d79be906-a876-47b1-a01a-f8f18b26af68.png",
+    },
+  ]),
+  "kleague-gimcheon": createKLeagueMembers([
+    {
+      playerId: "20180123",
+      name: "고재현",
+      role: "FW",
+      number: "7",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/24b78ec7-0ab3-4f3c-87f2-85b98814588e.png",
+    },
+    {
+      playerId: "20200164",
+      name: "이건희",
+      role: "FW",
+      number: "9",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/f1667337-1899-4256-b43b-6cb489f85753.png",
+    },
+    {
+      playerId: "20230103",
+      name: "김주찬",
+      role: "FW",
+      number: "17",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/6ad12b00-e642-41f4-b844-8eb97334dae7.png",
+    },
+    {
+      playerId: "20220139",
+      name: "박철우",
+      role: "DF",
+      number: "3",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/d566158c-6d37-4a71-8a44-dca440512ecf.png",
+    },
+  ]),
+  "kleague-gwangju": createKLeagueMembers([
+    {
+      playerId: "20240210",
+      name: "문민서",
+      role: "MF",
+      number: "88",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/437e8875-eb68-4ca5-be39-7107bb4a2fed.png",
+    },
+    {
+      playerId: "20140134",
+      name: "신창무",
+      role: "FW",
+      number: "40",
+      photo:
+        "https://ssl.pstatic.net/sstatic/people/profileImg/t/aa6fe3ff-4fa6-444f-b900-af9f6292305a.png",
     },
   ]),
   "lck-t1": createLckMembers("lck-t1", "https://www.t1.gg/teams/leagueoflegends", [
@@ -1848,64 +1956,6 @@ const TEAM_EXTRA_MEMBERS_BY_ID = {
         "https://d2tfp74nsbbrkr.cloudfront.net/v1/player/2026/K10/player_20170122.png",
     },
   ]),
-  "kleague-daegu": createKLeagueMembers([
-    {
-      playerId: "20250064",
-      name: "Min KIM",
-      role: "FW",
-      number: "47",
-      photo:
-        "https://d2tfp74nsbbrkr.cloudfront.net/v1/player/2026/K17/player_20250064.png",
-    },
-    {
-      playerId: "20210115",
-      name: "DAEWOO",
-      role: "MF",
-      number: "25",
-      photo:
-        "https://d2tfp74nsbbrkr.cloudfront.net/v1/player/2026/K17/player_20210115.png",
-    },
-    {
-      playerId: "20130031",
-      name: "JOOWON",
-      role: "DF",
-      number: "6",
-      photo:
-        "https://d2tfp74nsbbrkr.cloudfront.net/v1/player/2026/K17/player_20130031.png",
-    },
-    {
-      playerId: "20240094",
-      name: "Sangyoung PARK",
-      role: "GK",
-      number: "41",
-      photo:
-        "https://d2tfp74nsbbrkr.cloudfront.net/v1/player/2026/K17/player_20240094.png",
-    },
-    {
-      playerId: "20190174",
-      name: "Jukong",
-      role: "FW",
-      number: "77",
-      photo:
-        "https://d2tfp74nsbbrkr.cloudfront.net/v1/player/2026/K17/player_20190174.png",
-    },
-    {
-      playerId: "20240057",
-      name: "Kim Min-Sub",
-      role: "MF",
-      number: "48",
-      photo:
-        "https://d2tfp74nsbbrkr.cloudfront.net/v1/player/2024/K17/player_20240057.png",
-    },
-    {
-      playerId: "20160040",
-      name: "Hyeongjin",
-      role: "DF",
-      number: "50",
-      photo:
-        "https://d2tfp74nsbbrkr.cloudfront.net/v1/player/2026/K17/player_20160040.png",
-    },
-  ]),
   "kleague-jeju": createKLeagueMembers([
     {
       playerId: "20200176",
@@ -2529,36 +2579,6 @@ export const FEATURED_TEAMS = [
     },
   }),
   createTeam({
-    id: "kleague-daegu",
-    league: "kleague",
-    name: "대구 FC",
-    shortName: "대구",
-    home: "대구",
-    logo: `${KLEAGUE_LOGO_URL}/emblem_K17.png`,
-    tone: "전용구장과 역습의 맛",
-    intro:
-      "축구전용구장의 밀도와 빠른 역습을 좋아하면 잘 맞는 팀입니다.",
-    entryPoint: "DGB대구은행파크 분위기와 역습 장면을 먼저 보세요.",
-    tags: ["전용구장", "역습", "대팍"],
-    players: [
-      { name: "역습형 공격수", role: "FW", note: "한 번에 공간을 찢는 유형" },
-      { name: "세컨볼 미드필더", role: "MID", note: "전환의 속도를 만드는 선수군" },
-      { name: "파이팅 수비수", role: "DF", note: "몸을 던지는 수비의 재미" },
-    ],
-    fanGuide: [
-      "대팍 직관 후기부터 보기",
-      "역습 한 장면의 속도를 느껴보기",
-      "홈 관중 밀도를 보면 팀 매력이 강해집니다.",
-    ],
-    ratings: {
-      입문난이도: 4,
-      팬덤화력: 4,
-      직관재미: 5,
-      스토리성: 4,
-      굿즈욕구: 4,
-    },
-  }),
-  createTeam({
     id: "kleague-jeju",
     league: "kleague",
     name: "제주SK FC",
@@ -2612,6 +2632,156 @@ export const FEATURED_TEAMS = [
     ],
     ratings: {
       입문난이도: 3,
+      팬덤화력: 3,
+      직관재미: 4,
+      스토리성: 5,
+      굿즈욕구: 3,
+    },
+  }),
+  createTeam({
+    id: "kleague-anyang",
+    league: "kleague",
+    name: "FC 안양",
+    shortName: "안양",
+    home: "안양",
+    logo: `${KLEAGUE_LOGO_URL}/emblem_K27.png`,
+    tone: "끈질긴 압박과 승격 서사",
+    intro:
+      "승격 이후의 도전과 지역 팬덤의 밀도를 함께 느끼기 좋은 팀입니다.",
+    entryPoint: "안양 홈 응원과 빠른 전환 장면을 먼저 보면 팀 색이 잘 보입니다.",
+    tags: ["안양", "승격", "압박"],
+    players: [
+      { name: "전방 압박수", role: "FW", note: "수비를 공격처럼 시작하는 유형" },
+      { name: "활동량 미드필더", role: "MID", note: "경기장을 넓게 쓰는 선수군" },
+      { name: "수비 리더", role: "DF", note: "버티는 경기의 중심" },
+    ],
+    fanGuide: [
+      "승격 시즌 서사부터 보기",
+      "전방 압박과 빠른 전환 장면을 따라가기",
+      "안양 홈 응원 분위기를 보면 매력이 큽니다.",
+    ],
+    ratings: {
+      입문난이도: 4,
+      팬덤화력: 4,
+      직관재미: 4,
+      스토리성: 5,
+      굿즈욕구: 3,
+    },
+  }),
+  createTeam({
+    id: "kleague-incheon",
+    league: "kleague",
+    name: "인천 유나이티드",
+    shortName: "인천",
+    home: "인천",
+    logo: `${KLEAGUE_LOGO_URL}/emblem_K18.png`,
+    tone: "끈질긴 생존력과 항구도시 팬덤",
+    intro:
+      "극적인 경기와 지역성이 뚜렷해 스토리로 입문하기 좋은 팀입니다.",
+    entryPoint: "인천 홈 응원과 막판 승부처 경기를 먼저 보면 팀 매력이 잘 보입니다.",
+    tags: ["인천", "생존왕", "지역성"],
+    players: [
+      { name: "결정력 공격수", role: "FW", note: "적은 찬스를 살리는 포인트" },
+      { name: "역습형 윙어", role: "FW", note: "공간을 빠르게 파고드는 유형" },
+      { name: "수비 리더", role: "DF", note: "버티는 경기의 중심" },
+    ],
+    fanGuide: [
+      "인천 홈 응원 분위기 보기",
+      "막판 승부처 경기 서사를 따라가기",
+      "역습과 세트피스 장면을 같이 보면 좋습니다.",
+    ],
+    ratings: {
+      입문난이도: 4,
+      팬덤화력: 4,
+      직관재미: 4,
+      스토리성: 5,
+      굿즈욕구: 3,
+    },
+  }),
+  createTeam({
+    id: "kleague-bucheon",
+    league: "kleague",
+    name: "부천 FC 1995",
+    shortName: "부천",
+    home: "부천",
+    logo: `${KLEAGUE_LOGO_URL}/emblem_K26.png`,
+    tone: "도전자 감성과 단단한 조직력",
+    intro:
+      "언더독 서사와 압축적인 홈 분위기를 좋아하는 팬에게 잘 맞는 팀입니다.",
+    entryPoint: "부천 홈경기와 빠른 공격 전환 장면부터 보면 입문이 쉽습니다.",
+    tags: ["부천", "언더독", "조직력"],
+    players: [
+      { name: "활동량 공격수", role: "FW", note: "압박과 침투를 함께 보는 유형" },
+      { name: "중원 연결자", role: "MID", note: "공격 전환의 속도를 만드는 선수군" },
+      { name: "수비 리더", role: "DF", note: "버티는 경기의 중심" },
+    ],
+    fanGuide: [
+      "부천 홈 응원 분위기 보기",
+      "언더독 승리 경기부터 보기",
+      "조직적인 수비 전환을 따라가면 좋습니다.",
+    ],
+    ratings: {
+      입문난이도: 3,
+      팬덤화력: 3,
+      직관재미: 4,
+      스토리성: 4,
+      굿즈욕구: 3,
+    },
+  }),
+  createTeam({
+    id: "kleague-gimcheon",
+    league: "kleague",
+    name: "김천 상무",
+    shortName: "김천",
+    home: "김천",
+    logo: `${KLEAGUE_LOGO_URL}/emblem_K35.png`,
+    tone: "군 팀 특유의 변화와 전력 밀도",
+    intro:
+      "선수단 변화가 잦지만 탄탄한 기본기와 새로운 조합을 보는 재미가 있습니다.",
+    entryPoint: "새로 합류한 선수들의 역할 변화와 빠른 적응 과정을 따라가 보세요.",
+    tags: ["김천", "상무", "전력밀도"],
+    players: [
+      { name: "전방 공격수", role: "FW", note: "결정력과 움직임을 보는 유형" },
+      { name: "중원 활동량", role: "MID", note: "경기장을 넓게 쓰는 선수군" },
+      { name: "수비 코어", role: "DF", note: "조직력을 잡아주는 포인트" },
+    ],
+    fanGuide: [
+      "선수단 변화 흐름 보기",
+      "군 팀 특유의 조합 변화를 따라가기",
+      "전술 적응 과정을 보면 더 재밌습니다.",
+    ],
+    ratings: {
+      입문난이도: 3,
+      팬덤화력: 3,
+      직관재미: 3,
+      스토리성: 4,
+      굿즈욕구: 3,
+    },
+  }),
+  createTeam({
+    id: "kleague-gwangju",
+    league: "kleague",
+    name: "광주 FC",
+    shortName: "광주",
+    home: "광주",
+    logo: `${KLEAGUE_LOGO_URL}/emblem_K22.png`,
+    tone: "전술 색이 강한 도전형 팀",
+    intro:
+      "짜임새 있는 빌드업과 압박 축구를 보는 재미가 분명한 팀입니다.",
+    entryPoint: "후방 빌드업과 압박 전환 장면을 먼저 보면 팀 색이 선명합니다.",
+    tags: ["광주", "전술", "빌드업"],
+    players: [
+      { name: "볼 운반 미드필더", role: "MID", note: "중원에서 전진을 만드는 유형" },
+      { name: "압박형 공격수", role: "FW", note: "수비를 공격처럼 시작하는 선수군" },
+      { name: "빌드업 수비수", role: "DF", note: "후방 전개의 시작점" },
+    ],
+    fanGuide: [
+      "빌드업 장면을 천천히 보기",
+      "압박 후 전환 속도에 집중하기",
+      "전술 색이 뚜렷한 경기부터 보면 좋습니다.",
+    ],
+    ratings: {
+      입문난이도: 4,
       팬덤화력: 3,
       직관재미: 4,
       스토리성: 5,

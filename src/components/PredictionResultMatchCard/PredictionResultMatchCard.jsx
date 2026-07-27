@@ -1,4 +1,8 @@
 import { useState } from "react";
+import {
+  isLiveMatchStatus,
+  isResultPendingMatchStatus,
+} from "../../utils/matchStatus";
 import PredictionResultInsight from "../PredictionResultInsight/PredictionResultInsight";
 import styles from "./PredictionResultMatchCard.module.css";
 
@@ -71,6 +75,14 @@ const getFocusTeamResult = ({ awayScore, focusTeam, hasScore, homeScore, match }
     return match.status;
   }
 
+  if (isLiveMatchStatus(match.status)) {
+    return "live";
+  }
+
+  if (isResultPendingMatchStatus(match.status)) {
+    return "resultPending";
+  }
+
   if (!hasScore) {
     return "";
   }
@@ -96,6 +108,8 @@ const FOCUS_RESULT_LABELS = {
   cancelled: "경기 취소",
   draw: "무승부",
   loss: "패배",
+  live: "경기중",
+  resultPending: "결과 확인중",
   postponed: "경기 연기",
   win: "승리",
 };
@@ -218,6 +232,12 @@ const PredictionResultMatchCard = ({
           team={match.homeTeam}
           score={displayHomeScore}
         />
+      </div>
+
+      <div className={styles.mobileScoreRow} aria-hidden="true">
+        <b>{displayAwayScore}</b>
+        <span>:</span>
+        <b>{displayHomeScore}</b>
       </div>
 
       {showPrediction && (

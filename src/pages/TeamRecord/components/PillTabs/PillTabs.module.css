@@ -1,0 +1,64 @@
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 4px 0 8px;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tabButton {
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.calendar {
+  min-width: auto;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 40px;
+  border-color: transparent;
+  background-color: var(--color-primary);
+  color: var(--color-white-74);
+  font-size: 12px;
+}
+
+.calendar:hover {
+  background-color: var(--color-primary-light);
+}
+
+.active {
+}
+
+.calendar.active {
+  border-color: var(--color-text-secondary);
+  background-color: var(--color-accent);
+  color: var(--color-text-white);
+  box-shadow: 0 0 0 1px var(--color-white-06);
+}
+
+@media (max-width: 700px) {
+  .tabs {
+    gap: 10px;
+  }
+
+  .calendar {
+    height: 36px;
+    padding: 0 14px;
+    font-size: 11px;
+  }
+}

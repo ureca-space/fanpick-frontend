@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabase";
 import {
-  createMatchDateTime,
+  isLiveMatchStatus,
+  isResultPendingMatchStatus,
   normalizeMatchTimingStatus,
 } from "../utils/matchStatus";
 
@@ -8,7 +9,6 @@ const getMatchStatsId = (match) => String(match.databaseId ?? match.id);
 const normalizeMatchIds = (matchIds) =>
   [...new Set(matchIds.filter(Boolean).map(String))];
 const SETTLED_PREDICTION_RESULTS = new Set(["correct", "incorrect"]);
-const SCORE_SETTLE_DELAY_MS = 8 * 60 * 60 * 1000;
 
 const normalizeTeamCode = (teamCode) => teamCode?.trim().toUpperCase() ?? "";
 
@@ -28,14 +28,6 @@ const parsePredictionScore = (score) => {
   };
 };
 
-const createMatchTimeValue = (match) => {
-  if (!match?.match_date) {
-    return null;
-  }
-
-  return createMatchDateTime(match.match_date, match.match_time ?? "00:00");
-};
-
 const normalizePredictionMatchTiming = (prediction) => {
   const match = prediction.matches;
 
@@ -48,6 +40,7 @@ const normalizePredictionMatchTiming = (prediction) => {
     matchDate: match.match_date,
     matchTime,
     score: match.score,
+    sport: match.sport,
     status: match.status,
   });
 
@@ -68,15 +61,11 @@ export const hasResolvedPredictionScore = (match) => {
     return false;
   }
 
-  if (match?.status === "finished") {
-    return true;
+  if (isLiveMatchStatus(match?.status)) {
+    return false;
   }
 
-  const matchTime = createMatchTimeValue(match);
-
-  return (
-    matchTime !== null && Date.now() - matchTime >= SCORE_SETTLE_DELAY_MS
-  );
+  return match?.status === "finished";
 };
 
 export const resolvePredictionResult = (prediction) => {
@@ -87,12 +76,18 @@ export const resolvePredictionResult = (prediction) => {
     return "cancelled";
   }
 
-  if (SETTLED_PREDICTION_RESULTS.has(storedResult)) {
-    return storedResult;
+  if (isLiveMatchStatus(match?.status)) {
+    return "live";
+  }
+
+  if (isResultPendingMatchStatus(match?.status)) {
+    return "resultPending";
   }
 
   if (!hasResolvedPredictionScore(match)) {
-    return "pending";
+    return !match && SETTLED_PREDICTION_RESULTS.has(storedResult)
+      ? storedResult
+      : "pending";
   }
 
   const { awayScore, homeScore } = parsePredictionScore(match?.score);

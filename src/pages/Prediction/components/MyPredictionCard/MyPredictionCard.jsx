@@ -1,4 +1,8 @@
 import Skeleton from "../../../../components/Skeleton/Skeleton";
+import {
+  isLiveMatchStatus,
+  isResultPendingMatchStatus,
+} from "../../../../utils/matchStatus";
 import { RESULT_LABELS, RESULT_STYLES, SPORT_ICONS } from "../../predictionUtils";
 import TeamMark from "../TeamMark/TeamMark";
 import styles from "./MyPredictionCard.module.css";
@@ -16,12 +20,27 @@ const MyPredictionCard = ({ match, selection, result = "pending" }) => {
   const awayRate = match.awayRate ?? 50;
   const isHomeSelected = selection === "home";
   const isAwaySelected = selection === "away";
-  const resultStyle = RESULT_STYLES[result] ?? "waiting";
+  const isLive = isLiveMatchStatus(match.status);
+  const isResultPending = isResultPendingMatchStatus(match.status);
+  const displayResult = isLive
+    ? "live"
+    : isResultPending
+      ? "resultPending"
+      : result;
+  const resultStyle = RESULT_STYLES[displayResult] ?? "waiting";
   const SportIcon = SPORT_ICONS[match.sport];
   const closedStatusLabel = MATCH_STATUS_LABELS[match.status] ?? "";
-  const isClosed = match.isFinished || Boolean(closedStatusLabel);
+  const isClosed =
+    isLive || isResultPending || match.isFinished || Boolean(closedStatusLabel);
   const headingStatusLabel =
-    closedStatusLabel || (match.isFinished ? "경기종료" : "경기예정");
+    closedStatusLabel ||
+    (isLive
+      ? "경기중"
+      : isResultPending
+        ? "결과 확인중"
+        : match.isFinished
+          ? "경기종료"
+          : "경기예정");
 
   return (
     <article className={styles.matchCard}>
@@ -39,7 +58,9 @@ const MyPredictionCard = ({ match, selection, result = "pending" }) => {
         <p>
           <strong>{match.time}</strong> {headingStatusLabel}
         </p>
-        <span className={styles[resultStyle]}>{RESULT_LABELS[result]}</span>
+        <span className={styles[resultStyle]}>
+          {RESULT_LABELS[displayResult]}
+        </span>
       </div>
 
       <div
