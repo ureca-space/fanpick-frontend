@@ -1,4 +1,4 @@
-import { getTeamsByIds } from "../../Teams/data/teams";
+import { FEATURED_TEAMS } from "../../Teams/data/teams";
 
 const createTeamCandidates = (teams, leagueName) =>
   teams.map((team) => ({
@@ -7,6 +7,16 @@ const createTeamCandidates = (teams, leagueName) =>
     description: `${leagueName} · ${team.home}`,
     image: team.logo,
   }));
+
+const createPlayerCandidates = (teams, leagueName) =>
+  teams.flatMap((team) =>
+    team.members.map((player) => ({
+      id: player.id,
+      title: player.name,
+      description: `${team.name || leagueName} · ${player.role || "선수"}`,
+      image: player.photo || "",
+    })),
+  );
 
 // BASEBALL
 // 야구 웃긴짤
@@ -60,129 +70,217 @@ const BASEBALL_FUNNY_CANDIDATES = [
   },
 ];
 
-// 야구 보면서 가장 짜증나는 상황
-const BASEBALL_SITUATION_CANDIDATES = [
-  {
-    id: "uniform-number-change",
-    title: "유니폼 샀는데 번호 바꿀 때",
-    description: "야구를 보며 가장 짜증나는 상황을 골라보세요.",
-    image:
-      "https://img.piku.co.kr/w/uploads/87oi9R/aebbfd3512dee41741df4e8db34f7746.jpg",
-  },
-  {
-    id: "upset-loss",
-    title: "업셋 당할 때",
-    description: "야구를 보며 가장 짜증나는 상황을 골라보세요.",
-    image:
-      "https://img.piku.co.kr/w/uploads/87oi9R/f741b3e5f4bbfd2de5c9e733d2d914e8.jpg",
-  },
-  {
-    id: "bad-commemorative-uniform",
-    title: "기념 유니폼 이상할때",
-    description: "야구를 보며 가장 짜증나는 상황을 골라보세요.",
-    image:
-      "https://img.piku.co.kr/w/uploads/87oi9R/5aadf75cd83a9d33a0b4d38a8639db52.jpg",
-  },
-  {
-    id: "simple-pitch-selection",
-    title: "볼 배합 단순할 때",
-    description: "야구를 보며 가장 짜증나는 상황을 골라보세요.",
-    image:
-      "https://img.piku.co.kr/w/uploads/87oi9R/870cec9c62c925333ca41f35f432b29d.jpg",
-  },
-  {
-    id: "late-inning-reversal",
-    title: "동점상황에서 홈런 맞거나 연속 안타 맞아서 역전당할때",
-    description: "야구를 보며 가장 짜증나는 상황을 골라보세요.",
-    image:
-      "https://img.piku.co.kr/w/uploads/87oi9R/6ccb1872c04c41bf845947e1da083042.jpg",
-  },
-  {
-    id: "lazy-run-to-first",
-    title: "1루까지 설렁설렁 갈 때",
-    description: "야구를 보며 가장 짜증나는 상황을 골라보세요.",
-    image:
-      "https://img.piku.co.kr/w/uploads/87oi9R/c2cce6b003ef3bf6456001ee599757cd.jpg",
-  },
-  {
-    id: "fan-on-field",
-    title: "야구장에 난입하는 관중",
-    description: "야구를 보며 가장 짜증나는 상황을 골라보세요.",
-    image:
-      "https://img.piku.co.kr/w/uploads/87oi9R/b17af185fcc9781e1221a20bab39ea79.jpg",
-  },
-  {
-    id: "underperforming-foreign-player",
-    title: "용병이라고 데려왔는데 우리 팀에서 못하는 애랑 별 차이 없을때",
-    description: "야구를 보며 가장 짜증나는 상황을 골라보세요.",
-    image:
-      "https://img.piku.co.kr/w/uploads/87oi9R/03fa45b5f957221d1d4447695d83bbac.jpg",
-  },
-];
-
 // 팀 / 선수
-const KBO_PLAYER_PICKS = [
-  { teamId: "kbo-doosan", playerName: "양의지" },
-  { teamId: "kbo-lg", playerName: "오지환" },
-  { teamId: "kbo-kia", playerName: "김도영" },
-  { teamId: "kbo-samsung", playerName: "구자욱" },
-  { teamId: "kbo-lotte", playerName: "전준우" },
-  { teamId: "kbo-hanwha", playerName: "류현진" },
-  { teamId: "kbo-ssg", playerName: "최정" },
-  { teamId: "kbo-kiwoom", playerName: "이주형" },
-];
-
-const KBO_TEAMS = getTeamsByIds(KBO_PLAYER_PICKS.map((pick) => pick.teamId));
+const KBO_TEAMS = FEATURED_TEAMS.filter((team) => team.league === "kbo");
 const KBO_TEAM_CANDIDATES = createTeamCandidates(KBO_TEAMS, "KBO");
-
-const KBO_PLAYER_CANDIDATES = KBO_PLAYER_PICKS.map((pick) => {
-  const team = KBO_TEAMS.find((item) => item.id === pick.teamId);
-  const player = team?.members.find(
-    (member) => member.name === pick.playerName,
-  );
-
-  return {
-    id: player?.id || `${pick.teamId}-${pick.playerName}`,
-    title: pick.playerName,
-    description: `${team?.name || "KBO"} · ${player?.role || "선수"}`,
-    image: player?.photo || "",
-  };
-});
+const KBO_PLAYER_CANDIDATES = createPlayerCandidates(KBO_TEAMS, "KBO");
 
 // SOCCER
-// 팀 / 선수
-const KLEAGUE_PLAYER_PICKS = [
-  { teamId: "kleague-ulsan", playerName: "MARCOS" },
-  { teamId: "kleague-jeonbuk", playerName: "Hyeon KANG" },
-  { teamId: "kleague-seoul", playerName: "SeonMin" },
-  { teamId: "kleague-pohang", playerName: "Yonghak" },
-  { teamId: "kleague-daejeon", playerName: "Diogo DE OLIVEIRA BARBOSA" },
-  { teamId: "kleague-daegu", playerName: "Minyoung KIM" },
-  { teamId: "kleague-jeju", playerName: "Sinjin KIM" },
-  { teamId: "kleague-gangwon", playerName: "Gunhee" },
-];
-
-const KLEAGUE_TEAMS = getTeamsByIds(
-  KLEAGUE_PLAYER_PICKS.map((pick) => pick.teamId),
+// Teams 데이터 기반 K리그 팀 / 선수
+const KLEAGUE_TEAMS = FEATURED_TEAMS.filter(
+  (team) => team.league === "kleague",
 );
 const KLEAGUE_TEAM_CANDIDATES = createTeamCandidates(KLEAGUE_TEAMS, "K리그");
+const KLEAGUE_PLAYER_CANDIDATES = createPlayerCandidates(
+  KLEAGUE_TEAMS,
+  "K리그",
+);
 
-const KLEAGUE_PLAYER_CANDIDATES = KLEAGUE_PLAYER_PICKS.map((pick) => {
-  const team = KLEAGUE_TEAMS.find((item) => item.id === pick.teamId);
-  const player = team?.members.find(
-    (member) => member.name === pick.playerName,
-  );
-
-  return {
-    id: player?.id || `${pick.teamId}-${pick.playerName}`,
-    title: pick.playerName,
-    description: `${team?.name || "K리그"} · ${player?.role || "선수"}`,
-    image: player?.photo || "",
-  };
-});
-
-// 짜증나는 상황
-const SOCCER_SITUATION_CANDIDATES = [];
+// 현역 축구선수 실력 월드컵
+const SOCCER_PLAYER_SKILL_CANDIDATES = [
+  {
+    id: "soccer-skill-01",
+    title: "리오넬 메시",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/41d2ba82015a8f4f39b82d39dfed8f82.jpg",
+  },
+  {
+    id: "soccer-skill-02",
+    title: "손흥민",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/5d81d1691e88311c75a36db135e0d9c8.jpg",
+  },
+  {
+    id: "soccer-skill-03",
+    title: "킬리안 음바페",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/b9f66f2a4cf9c425f1f14f20f84e519a.jpg",
+  },
+  {
+    id: "soccer-skill-04",
+    title: "크리스티아누 호날두",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/ef86d95c81e3e8a6a10286fb30c0cf78.jpg",
+  },
+  {
+    id: "soccer-skill-05",
+    title: "엘링 홀란드",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/52f63ddec3a9a7c0f60c192626f7ef03.jpg",
+  },
+  {
+    id: "soccer-skill-06",
+    title: "케빈 더브라위너",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/ebd0278698cb6a65cc5d6e63114a543b.jpg",
+  },
+  {
+    id: "soccer-skill-07",
+    title: "네이마르 주니오르",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/6bee78bb15f17dd5554439b9d3404c68.jpg",
+  },
+  {
+    id: "soccer-skill-08",
+    title: "로베르트 레반도프스키",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/bc70584522cff89cc3c9927b48b1e409.jpg",
+  },
+  {
+    id: "soccer-skill-09",
+    title: "해리 케인",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/cf08946b77ff6cc54ccd2b0da0ac805c.jpg",
+  },
+  {
+    id: "soccer-skill-10",
+    title: "카림 벤제마",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/81679d8d5d02696c892cb2e2601cfdf3.jpg",
+  },
+  {
+    id: "soccer-skill-11",
+    title: "루카 모드리치",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/9c604db0687289f89f23dfe4e6348762.jpg",
+  },
+  {
+    id: "soccer-skill-12",
+    title: "주드 벨링엄",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/354d4e472166cfffa5953d9bc4c95c40.jpg",
+  },
+  {
+    id: "soccer-skill-13",
+    title: "모하메드 살라",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/5c9028ea3e41a17f61309cb66343c740.jpg",
+  },
+  {
+    id: "soccer-skill-14",
+    title: "이강인",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/73dcfba2d0d080cdaa82a8d6827902fa.jpg",
+  },
+  {
+    id: "soccer-skill-15",
+    title: "김민재",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/274db43af0be43d445c0e17643e94cd5.jpg",
+  },
+  {
+    id: "soccer-skill-16",
+    title: "비니시우스 주니오르",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/5f59220ec9e17a1f30250e4ca7b94b6f.jpg",
+  },
+  {
+    id: "soccer-skill-17",
+    title: "버진 반데이크",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/9afcc6abdf482ed44bbf484335c98496.jpg",
+  },
+  {
+    id: "soccer-skill-18",
+    title: "로드리",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/fe211e5b57d70044de94074436d9679b.jpg",
+  },
+  {
+    id: "soccer-skill-19",
+    title: "황희찬",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/920430924d0eddf06e9af2121d1afbf9.jpg",
+  },
+  {
+    id: "soccer-skill-20",
+    title: "세르히오 라모스",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/f0d29c975aba4fe66cad1e62b6798978.jpg",
+  },
+  {
+    id: "soccer-skill-21",
+    title: "마누엘 노이어",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/51c47ac24036ae2518d1aac6ee674a71.jpg",
+  },
+  {
+    id: "soccer-skill-22",
+    title: "루이스 수아레스",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/78365651fc5173731fb4b7859e120984.jpg",
+  },
+  {
+    id: "soccer-skill-23",
+    title: "앙투안 그리즈만",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/fba2b42d358343e9d01482c3ecd96edb.jpg",
+  },
+  {
+    id: "soccer-skill-24",
+    title: "필 포든",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/3bee5f54962c21b5bf29c506e0672243.jpg",
+  },
+  {
+    id: "soccer-skill-25",
+    title: "티보 쿠르투아",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/d410672dd2545a1dcfc969a9e603bea1.jpg",
+  },
+  {
+    id: "soccer-skill-26",
+    title: "후벵 디아스",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/f34ab87e78d2d2e749db91836b4ad89e.jpg",
+  },
+  {
+    id: "soccer-skill-27",
+    title: "토마스 뮐러",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/5e69f3aa3bc3bdd47ddef0408ce6cb2a.jpg",
+  },
+  {
+    id: "soccer-skill-28",
+    title: "흐비차 크라바츠헬리아",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/bcb32242d08354f14a9fab34d2ff34f0.jpg",
+  },
+  {
+    id: "soccer-skill-29",
+    title: "기성용",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/4abcfd41592e7c4cdc5146eac91946f6.jpg",
+  },
+  {
+    id: "soccer-skill-30",
+    title: "브루노 페르난데스",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/c8a18643d791c141e32257620582fbb8.jpg",
+  },
+  {
+    id: "soccer-skill-31",
+    title: "히샬리송",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/fe594945be111f46149042195e162bdb.jpg",
+  },
+  {
+    id: "soccer-skill-32",
+    title: "페드리",
+    image:
+      "https://img.piku.co.kr/w/uploads/32SsR2/9583687ba55a05d001e69ac095a1e7cf.jpg",
+  },
+];
 
 // LOL
 // LCK 썸네일 이상형 월드컵
@@ -370,33 +468,69 @@ const LCK_THUMBNAIL_CANDIDATES = [
 ];
 
 // 팀 / 선수
-const LCK_PLAYER_PICKS = [
-  { teamId: "lck-t1", playerName: "Faker" },
-  { teamId: "lck-gen", playerName: "Chovy" },
-  { teamId: "lck-hle", playerName: "Zeus" },
-  { teamId: "lck-dk", playerName: "ShowMaker" },
-  { teamId: "lck-kt", playerName: "Bdd" },
-  { teamId: "lck-krx", playerName: "Ucal" },
-  { teamId: "lck-ns", playerName: "Scout" },
-  { teamId: "lck-bfx", playerName: "VicLa" },
+const LCK_TEAMS = FEATURED_TEAMS.filter((team) => team.league === "lck");
+const LCK_TEAM_CANDIDATES = [
+  {
+    id: "lck-team-t1",
+    title: "T1",
+    image:
+      "https://i.ytimg.com/vi/2jq4g8OPftA/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBWbn1vQ577noO8iIAG-6cV0dzC3g",
+  },
+  {
+    id: "lck-team-nongshim",
+    title: "농심 레드포스",
+    image:
+      "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/514dfe322927a585bb91dae0aa98ab781fc80d04-3840x2160.jpg?accountingTag=lol_esports",
+  },
+  {
+    id: "lck-team-gen-g",
+    title: "젠지",
+    image: "https://i.ytimg.com/vi/N9TonXlw204/hqdefault.jpg",
+  },
+  {
+    id: "lck-team-hanwha-life",
+    title: "한화생명",
+    image: "https://i.ytimg.com/vi/g1s64U1z1Lo/hqdefault.jpg",
+  },
+  {
+    id: "lck-team-kt-rolster",
+    title: "KT Rolster",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSM12a-RmIy4G_n3O3k0VVsgy2XZP8JV3eqpMCPwtuGcBqBd6p_KdRt51I&s=10",
+  },
+  {
+    id: "lck-team-dplus-kia",
+    title: "Dplus KIA",
+    image:
+      "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/4e65732f94971d0c8c6c754a89832f06e65dcbb0-3840x2160.jpg?accountingTag=lol_esports",
+  },
+  {
+    id: "lck-team-kiwoom-drx",
+    title: "Kiwoom DRX",
+    image:
+      "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/6b8504ae1abbbbad863653780d1889227ccbff5a-3840x2160.jpg?accountingTag=lol_esports",
+  },
+  {
+    id: "lck-team-dn-soopers",
+    title: "DN SOOPers",
+    image:
+      "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/4c979c7127b889f73a17de00788d4ec3206f7f43-3840x2160.jpg?accountingTag=lol_esports",
+  },
+  {
+    id: "lck-team-hajin-brion",
+    title: "HAJIN BRION",
+    image:
+      "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/5d76a1b2f8bf73546ce697c0c1fd63b0b2706cf1-3840x2160.jpg?accountingTag=lol_esports",
+  },
+  {
+    id: "lck-team-bnk-fearx",
+    title: "BNK FEARX",
+    image:
+      "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/741d37b668cf75a5b9742958aae887f16ed6a85d-3840x2160.jpg?accountingTag=lol_esports",
+  },
 ];
 
-const LCK_TEAMS = getTeamsByIds(LCK_PLAYER_PICKS.map((pick) => pick.teamId));
-const LCK_TEAM_CANDIDATES = createTeamCandidates(LCK_TEAMS, "LCK");
-
-const LCK_PLAYER_CANDIDATES = LCK_PLAYER_PICKS.map((pick) => {
-  const team = LCK_TEAMS.find((item) => item.id === pick.teamId);
-  const player = team?.members.find(
-    (member) => member.name === pick.playerName,
-  );
-
-  return {
-    id: player?.id || `${pick.teamId}-${pick.playerName}`,
-    title: pick.playerName,
-    description: `${team?.name || "LCK"} · ${player?.role || "선수"}`,
-    image: player?.photo || "",
-  };
-});
+const LCK_PLAYER_CANDIDATES = createPlayerCandidates(LCK_TEAMS, "LCK");
 
 export const WORLD_CUP_FILTERS = [
   { id: "all", label: "전체" },
@@ -425,17 +559,6 @@ export const WORLD_CUPS = [
     candidates: BASEBALL_FUNNY_CANDIDATES,
   },
   {
-    id: "baseball-situation",
-    playId: "baseball",
-    category: "BASEBALL",
-    title: "야구 보면서 가장 짜증나는 상황 월드컵",
-    round: "8강",
-    description: "야구를 볼 때 가장 참기 힘든 순간을 골라보세요.",
-    leftImage: BASEBALL_SITUATION_CANDIDATES[0].image,
-    rightImage: BASEBALL_SITUATION_CANDIDATES[1].image,
-    candidates: BASEBALL_SITUATION_CANDIDATES,
-  },
-  {
     id: "baseball-team",
     playId: "baseball",
     category: "BASEBALL",
@@ -451,7 +574,7 @@ export const WORLD_CUPS = [
     playId: "baseball",
     category: "BASEBALL",
     title: "KBO 최애 선수",
-    round: "8강",
+    round: "64강",
     description: "실력과 매력을 모두 갖춘 최애 선수를 찾아보세요.",
     leftImage: KBO_PLAYER_CANDIDATES[0].image,
     rightImage: KBO_PLAYER_CANDIDATES[1].image,
@@ -460,11 +583,22 @@ export const WORLD_CUPS = [
 
   // SOCCER
   {
+    id: "soccer-player-skill",
+    playId: "soccer",
+    category: "SOCCER",
+    title: "현역 축구선수 실력 월드컵",
+    round: "32강",
+    description: "오직 실력만 보고 최고의 현역 축구선수를 골라보세요.",
+    leftImage: SOCCER_PLAYER_SKILL_CANDIDATES[0].image,
+    rightImage: SOCCER_PLAYER_SKILL_CANDIDATES[1].image,
+    candidates: SOCCER_PLAYER_SKILL_CANDIDATES,
+  },
+  {
     id: "soccer-team",
     playId: "soccer",
     category: "SOCCER",
     title: "K리그 최애 팀",
-    round: "8강",
+    round: "16강",
     description: "가장 마음이 가는 K리그 팀을 선택해 보세요.",
     leftImage: KLEAGUE_TEAM_CANDIDATES[0].image,
     rightImage: KLEAGUE_TEAM_CANDIDATES[1].image,
@@ -475,22 +609,11 @@ export const WORLD_CUPS = [
     playId: "soccer",
     category: "SOCCER",
     title: "K리그 최애 선수",
-    round: "8강",
+    round: "64강",
     description: "K리그 선수 중 나만의 최애 선수를 골라보세요.",
     leftImage: KLEAGUE_PLAYER_CANDIDATES[0].image,
     rightImage: KLEAGUE_PLAYER_CANDIDATES[1].image,
     candidates: KLEAGUE_PLAYER_CANDIDATES,
-  },
-  {
-    id: "soccer-situation",
-    playId: "soccer",
-    category: "SOCCER",
-    title: "축구 보면서 가장 짜증나는 상황 월드컵",
-    round: "32강",
-    description: "축구를 볼 때 가장 참기 힘든 순간을 골라보세요.",
-    leftImage: "",
-    rightImage: "",
-    candidates: SOCCER_SITUATION_CANDIDATES,
   },
 
   // LOL
@@ -521,7 +644,7 @@ export const WORLD_CUPS = [
     playId: "esports",
     category: "LOL",
     title: "LCK 최애 선수",
-    round: "8강",
+    round: "64강",
     description: "플레이와 매력을 비교해 최애 선수를 찾아보세요.",
     leftImage: LCK_PLAYER_CANDIDATES[0].image,
     rightImage: LCK_PLAYER_CANDIDATES[1].image,

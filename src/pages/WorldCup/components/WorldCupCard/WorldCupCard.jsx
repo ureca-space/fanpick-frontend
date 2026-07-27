@@ -43,7 +43,9 @@ const WorldCupCard = ({ worldCup, onStart }) => {
 
         <div
           className={`${styles.imageArea} ${
-            ["baseball-funny", "lol-thumbnail"].includes(worldCup.id)
+            ["baseball-funny", "lol-thumbnail", "lol-team"].includes(
+              worldCup.id,
+            )
               ? styles.thumbnailImageArea
               : ""
           }`}

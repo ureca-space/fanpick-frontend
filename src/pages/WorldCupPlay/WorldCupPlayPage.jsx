@@ -24,6 +24,14 @@ const isVideoSource = (src) => /\.mp4(?:$|\?)/i.test(src);
 const shuffleCandidates = (candidates) =>
   [...candidates].sort(() => Math.random() - 0.5);
 
+const ROUND_OPTIONS = [4, 8, 16, 32, 64];
+
+const getInitialCandidates = (worldCup, roundSize) => {
+  const shuffledCandidates = shuffleCandidates(worldCup.candidates);
+
+  return shuffledCandidates.slice(0, roundSize);
+};
+
 const CandidateMedia = ({ candidate, className, alt = "" }) => {
   if (!candidate.image) {
     return null;
@@ -60,12 +68,14 @@ const WorldCupGame = ({ worldCup }) => {
   const worldCupId = worldCup.id;
   const usesExpandedImages = [
     "baseball-funny",
-    "baseball-situation",
     "lol-thumbnail",
+    "lol-team",
   ].includes(worldCup.id);
-  const [contestants, setContestants] = useState(() =>
-    shuffleCandidates(worldCup.candidates),
-  );
+  const usesLargePortraitImages = worldCup.id === "soccer-player-skill";
+  const [selectedRound, setSelectedRound] = useState(null);
+  const [roundSelection, setRoundSelection] = useState("");
+  const [isRoundSelectOpen, setIsRoundSelectOpen] = useState(false);
+  const [contestants, setContestants] = useState([]);
   const [pairIndex, setPairIndex] = useState(0);
   const [roundWinners, setRoundWinners] = useState([]);
   const [champion, setChampion] = useState(null);
@@ -73,6 +83,11 @@ const WorldCupGame = ({ worldCup }) => {
   const [resultSaveError, setResultSaveError] = useState("");
   const [resultStats, setResultStats] = useState([]);
   const [statsStatus, setStatsStatus] = useState("idle");
+  const availableRounds = ROUND_OPTIONS.filter(
+    (roundSize) => roundSize <= worldCup.candidates.length,
+  );
+  const selectedRoundOption =
+    Number(roundSelection) || availableRounds[availableRounds.length - 1];
 
   useEffect(() => {
     if (!champion) {
@@ -109,7 +124,11 @@ const WorldCupGame = ({ worldCup }) => {
 
   const currentPair = contestants.slice(pairIndex, pairIndex + 2);
   const matchNumber = pairIndex / 2 + 1;
-  const totalMatches = Math.ceil(contestants.length / 2);
+  const hasBye = contestants.length % 2 === 1;
+  const pairedCandidateCount = hasBye
+    ? contestants.length - 1
+    : contestants.length;
+  const totalMatches = pairedCandidateCount / 2;
   const bracketSize = 2 ** Math.ceil(Math.log2(contestants.length));
   const roundLabel = contestants.length === 2 ? "결승" : `${bracketSize}강`;
 
@@ -138,7 +157,12 @@ const WorldCupGame = ({ worldCup }) => {
 
   const handleChoose = async (selectedCandidate) => {
     const nextWinners = [...roundWinners, selectedCandidate];
-    const isLastPair = pairIndex + 2 >= contestants.length;
+    const isLastPair = pairIndex + 2 >= pairedCandidateCount;
+
+    if (isLastPair && hasBye) {
+      nextWinners.push(contestants[contestants.length - 1]);
+    }
+
     const isChampion = isLastPair && nextWinners.length === 1;
 
     if (isChampion) {
@@ -162,7 +186,10 @@ const WorldCupGame = ({ worldCup }) => {
   };
 
   const handleRestart = () => {
-    setContestants(shuffleCandidates(worldCup.candidates));
+    setSelectedRound(null);
+    setRoundSelection("");
+    setIsRoundSelectOpen(false);
+    setContestants([]);
     setPairIndex(0);
     setRoundWinners([]);
     setChampion(null);
@@ -171,6 +198,89 @@ const WorldCupGame = ({ worldCup }) => {
     setResultStats([]);
     setStatsStatus("idle");
   };
+
+  const handleStartRound = () => {
+    const roundSize = selectedRoundOption;
+
+    setSelectedRound(roundSize);
+    setContestants(getInitialCandidates(worldCup, roundSize));
+    setPairIndex(0);
+    setRoundWinners([]);
+    setChampion(null);
+  };
+
+  if (!selectedRound) {
+    return (
+      <main className={styles.playPage}>
+        <div className={`container ${styles.inner}`}>
+          <section className={styles.roundSelector}>
+            <p className={styles.eyebrow}>SELECT TOURNAMENT SIZE</p>
+            <h1 className={styles.roundSelectorTitle}>{worldCup.title}</h1>
+            <p className={styles.roundSelectorDescription}>
+              진행할 라운드를 선택하면 후보가 무작위로 추첨돼요.
+            </p>
+
+            <div className={styles.roundControls}>
+              <span className={styles.roundSelectLabel}>라운드 선택</span>
+              <div
+                className={`${styles.roundSelectWrap} ${
+                  isRoundSelectOpen ? styles.roundSelectOpen : ""
+                }`}
+                onBlur={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget)) {
+                    setIsRoundSelectOpen(false);
+                  }
+                }}
+              >
+                <button
+                  type="button"
+                  className={styles.roundSelectButton}
+                  onClick={() => setIsRoundSelectOpen((isOpen) => !isOpen)}
+                  aria-haspopup="listbox"
+                  aria-expanded={isRoundSelectOpen}
+                >
+                  {selectedRoundOption}강
+                </button>
+
+                {isRoundSelectOpen && (
+                  <ul className={styles.roundSelectMenu} role="listbox">
+                    {[...availableRounds].reverse().map((roundSize) => (
+                      <li key={roundSize}>
+                        <button
+                          type="button"
+                          className={
+                            selectedRoundOption === roundSize
+                              ? styles.selectedRoundOption
+                              : ""
+                          }
+                          onClick={() => {
+                            setRoundSelection(String(roundSize));
+                            setIsRoundSelectOpen(false);
+                          }}
+                          role="option"
+                          aria-selected={selectedRoundOption === roundSize}
+                        >
+                          {roundSize}강
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <Button fullWidth onClick={handleStartRound}>
+                시작하기
+              </Button>
+            </div>
+
+            <p className={styles.roundCandidateCount}>
+              전체 후보 {worldCup.candidates.length}명
+            </p>
+          </section>
+        </div>
+      </main>
+    );
+  }
 
   if (champion) {
     const candidateStats = resultStats
@@ -348,6 +458,8 @@ const WorldCupGame = ({ worldCup }) => {
                 candidate={candidate}
                 className={`${styles.choiceImage} ${
                   usesExpandedImages ? styles.expandedChoiceImage : ""
+                } ${
+                  usesLargePortraitImages ? styles.largePortraitChoiceImage : ""
                 }`}
               />
               <span className={styles.choiceNumber}>PICK {index + 1}</span>

@@ -9,6 +9,140 @@
   min-width: 0;
 }
 
+.roundSelector {
+  width: 100%;
+  max-width: 760px;
+  margin: 48px auto 0;
+  padding: 52px;
+  border: 1px solid var(--color-white-10);
+  border-radius: 8px;
+  background-color: var(--color-surface-card);
+  text-align: center;
+}
+
+.roundSelectorDescription {
+  margin-top: 18px;
+  color: var(--color-white-58);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.roundSelectorTitle {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.2vw, 38px);
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.roundControls {
+  width: min(100%, 420px);
+  margin-top: 36px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.roundSelectLabel {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--color-white-62);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.roundSelectWrap {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.roundSelectWrap::after {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--color-white-65);
+  border-bottom: 2px solid var(--color-white-65);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+  content: "";
+}
+
+.roundSelectWrap.roundSelectOpen::after {
+  transform: translateY(-25%) rotate(225deg);
+}
+
+.roundSelectButton {
+  width: 100%;
+  height: 48px;
+  padding: 0 42px 0 16px;
+  border: 1px solid var(--color-white-14);
+  border-radius: 8px;
+  color: var(--color-white-80);
+  outline: 0;
+  background-color: var(--color-surface-muted);
+  font-family: var(--font-korean);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.roundSelectButton:hover {
+  border-color: var(--color-white-55);
+  background-color: var(--color-surface-fallback);
+}
+
+.roundSelectButton:focus,
+.roundSelectOpen .roundSelectButton {
+  border-color: var(--color-accent);
+}
+
+.roundSelectWrap:focus-within::after {
+  border-color: var(--color-accent);
+}
+
+.roundSelectMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  padding: 6px;
+  border: 1px solid var(--color-white-18);
+  border-radius: 8px;
+  background-color: var(--color-surface-card);
+  box-shadow: 0 12px 28px var(--color-black-28);
+}
+
+.roundSelectMenu button {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: var(--color-white-72);
+  background-color: transparent;
+  text-align: left;
+}
+
+.roundSelectMenu button:hover,
+.roundSelectMenu .selectedRoundOption {
+  color: var(--color-text-white);
+  background-color: var(--color-surface-muted);
+}
+
+.roundCandidateCount {
+  margin-top: 24px;
+  color: var(--color-white-48);
+  font-size: 13px;
+}
+
 .gameHeader {
   width: 100%;
 }
@@ -55,7 +189,7 @@
 
 .progress {
   margin-top: 24px;
-  color: rgb(255 255 255 / 58%);
+  color: var(--color-white-58);
   font-size: 16px;
   line-height: 1.8;
 }
@@ -75,7 +209,7 @@
   justify-content: flex-start;
   min-height: 320px;
   padding: 32px;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid var(--color-white-10);
   border-radius: 8px;
   color: var(--color-text-white);
   background-color: var(--color-surface-card);
@@ -117,6 +251,13 @@
   object-position: center;
 }
 
+.largePortraitChoiceImage {
+  height: 460px;
+  border-radius: 6px;
+  object-fit: cover;
+  object-position: center top;
+}
+
 .choiceCard strong {
   min-height: 2.8em;
   font-size: clamp(22px, 2.3vw, 32px);
@@ -125,7 +266,7 @@
 
 .choiceCard p {
   margin-top: 12px;
-  color: rgb(255 255 255 / 58%);
+  color: var(--color-white-58);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -142,20 +283,9 @@
   place-items: center;
   color: var(--color-text-white);
   background-color: var(--color-accent);
-  font-family: var(--font-condensed);
+  font-family: var(--font-display);
   font-size: 18px;
   transform: translate(-50%, -50%);
-}
-
-.resultCard {
-  width: 100%;
-  max-width: 760px;
-  margin: 48px auto 0;
-  padding: 52px;
-  border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: 8px;
-  background-color: var(--color-surface-card);
-  text-align: center;
 }
 
 .resultLayout {
@@ -348,7 +478,7 @@
 
 .resultDescription {
   margin-top: 18px;
-  color: rgb(255 255 255 / 58%);
+  color: var(--color-white-58);
   font-size: 15px;
   line-height: 1.7;
 }
@@ -356,7 +486,7 @@
 .championPanel {
   margin-top: 36px;
   padding: 34px 28px;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid var(--color-white-10);
   border-radius: 8px;
   background-color: var(--color-surface-dark);
 }
@@ -389,7 +519,7 @@
 
 .championDescription {
   margin-top: 10px;
-  color: rgb(255 255 255 / 58%);
+  color: var(--color-white-58);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -409,6 +539,19 @@
 }
 
 @media (max-width: 700px) {
+  .roundSelector {
+    margin-top: 36px;
+    padding: 40px 20px 28px;
+  }
+
+  .roundSelectorTitle {
+    font-size: clamp(25px, 7vw, 32px);
+  }
+
+  .roundControls {
+    margin-top: 28px;
+  }
+
   .title {
     font-size: clamp(25px, 8vw, 36px);
     line-height: 1.3;
@@ -434,17 +577,16 @@
     height: 210px;
   }
 
+  .largePortraitChoiceImage {
+    height: 320px;
+  }
+
   .vs {
     top: 50%;
     width: 46px;
     height: 46px;
     border-width: 4px;
     font-size: 15px;
-  }
-
-  .resultCard {
-    margin-top: 36px;
-    padding: 40px 20px 24px;
   }
 
   .resultLayout {
@@ -475,12 +617,6 @@
   .statsEmpty,
   .statsLoading {
     min-height: 180px;
-  }
-
-  .completeBadge {
-    width: 66px;
-    height: 66px;
-    margin-bottom: 24px;
   }
 
   .championPanel {

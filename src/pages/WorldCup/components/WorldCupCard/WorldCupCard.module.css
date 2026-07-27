@@ -54,7 +54,7 @@
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 12px;
-  min-height: 166px;
+  min-height: 190px;
   margin-top: 18px;
 }
 
@@ -63,10 +63,6 @@
   width: 112px;
   height: 112px;
   margin: 0 auto;
-}
-
-.thumbnailImageArea {
-  min-height: 190px;
 }
 
 .thumbnailImageArea .battleImage {
