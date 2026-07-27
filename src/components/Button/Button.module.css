@@ -59,17 +59,17 @@
 }
 
 .secondary {
-  border-color: rgb(255 255 255 / 10%);
-  background-color: rgb(255 255 255 / 10%);
+  border-color: var(--color-white-10);
+  background-color: var(--color-white-10);
 }
 
 .secondary:hover:not(:disabled):not([aria-disabled="true"]) {
-  border-color: rgb(255 255 255 / 16%);
-  background-color: rgb(255 255 255 / 16%);
+  border-color: var(--color-white-16);
+  background-color: var(--color-white-16);
 }
 
 .outline {
-  border-color: rgb(255 255 255 / 50%);
+  border-color: var(--color-white-50);
   color: var(--color-text-white);
   background-color: transparent;
 }
@@ -82,13 +82,13 @@
 
 .ghost {
   border-color: transparent;
-  color: rgb(255 255 255 / 76%);
+  color: var(--color-white-76);
   background-color: transparent;
 }
 
 .ghost:hover:not(:disabled):not([aria-disabled="true"]) {
   color: var(--color-text-white);
-  background-color: rgb(255 255 255 / 8%);
+  background-color: var(--color-white-08);
 }
 
 .button:disabled,
@@ -100,7 +100,7 @@
 .outline:disabled,
 .outline[aria-disabled="true"] {
   border-color: transparent;
-  color: rgb(255 255 255 / 55%);
+  color: var(--color-white-55);
   background-color: var(--color-surface-muted);
 }
 

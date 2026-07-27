@@ -33,7 +33,7 @@
   border-radius: 40px;
   border-color: transparent;
   background-color: var(--color-primary);
-  color: rgb(255 255 255 / 74%);
+  color: var(--color-white-74);
   font-size: 12px;
 }
 
@@ -48,7 +48,7 @@
   border-color: var(--color-text-secondary);
   background-color: var(--color-accent);
   color: var(--color-text-white);
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 6%);
+  box-shadow: 0 0 0 1px var(--color-white-06);
 }
 
 @media (max-width: 700px) {

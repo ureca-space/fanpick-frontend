@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/Button/Button.jsx";
 import EmptyState from "../../components/EmptyState/EmptyState.jsx";
 import PaginationControls from "../../components/PaginationControls/PaginationControls.jsx";
+import PredictionBadgeIcon from "../../components/PredictionBadgeIcon/PredictionBadgeIcon.jsx";
 import Skeleton from "../../components/Skeleton/Skeleton.jsx";
 import { getTeamInfo } from "../../constants/teamInfo.js";
 import {
@@ -10,6 +11,7 @@ import {
   fetchFavoriteTeamIds,
   getFavoriteTeamIds,
 } from "../../services/favoriteTeams.js";
+import { subscribeToMatchChanges } from "../../services/matchRealtime.js";
 import {
   createSettledPredictionSummary,
   fetchMatchPredictionStats,
@@ -18,7 +20,10 @@ import {
   resolvePredictionResult,
 } from "../../services/predictionApi.js";
 import { supabase } from "../../lib/supabase.js";
-import { getPredictionBadgeMeta } from "../../utils/predictionBadge.js";
+import {
+  getPredictionBadgeGuide,
+  getPredictionBadgeMeta,
+} from "../../utils/predictionBadge.js";
 import {
   canChangePredictionByBeginAt,
   createMatchBeginAt,
@@ -45,7 +50,10 @@ const ALLOWED_IMAGE_TYPES = {
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
 const FAVORITE_TEAMS_PAGE_SIZE = 6;
 const PICK_HISTORY_PAGE_SIZE = 4;
+const PREDICTION_REFRESH_DEBOUNCE_MS = 500;
+const PREDICTION_REFRESH_INTERVAL_MS = 60_000;
 const PREDICTION_SPORTS = ["soccer", "baseball", "esports"];
+const PREDICTION_BADGE_CONTEXTS = ["overall", ...PREDICTION_SPORTS];
 const SPORT_LABELS = {
   baseball: "BASEBALL",
   esports: "LOL",
@@ -82,7 +90,7 @@ const MyPageSkeleton = () => (
         </div>
 
         <div className={styles.profileBadges}>
-          {PREDICTION_SPORTS.map((sport) => (
+          {PREDICTION_BADGE_CONTEXTS.map((sport) => (
             <article
               key={sport}
               className={`${styles.profileBadge} ${styles.skeletonStaticCard}`}
@@ -93,6 +101,40 @@ const MyPageSkeleton = () => (
                 <Skeleton.Line className={styles.skeletonBadgeSport} />
                 <Skeleton.Line className={styles.skeletonBadgeTitle} />
                 <Skeleton.Line className={styles.skeletonBadgeText} />
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.badgeGuideSection}>
+        <div className={styles.sectionHeader}>
+          <Skeleton.Line className={styles.skeletonSectionTitle} />
+          <Skeleton.Line className={styles.skeletonSectionDescription} />
+        </div>
+
+        <div className={styles.badgeGuideGrid}>
+          {PREDICTION_BADGE_CONTEXTS.map((sport) => (
+            <article
+              key={sport}
+              className={`${styles.badgeGuideCard} ${styles.skeletonStaticCard}`}
+            >
+              <div className={styles.skeletonBadgeGuideHeader}>
+                <Skeleton.Circle className={styles.skeletonBadgeIcon} />
+
+                <div className={styles.skeletonBadgeInfo}>
+                  <Skeleton.Line className={styles.skeletonBadgeSport} />
+                  <Skeleton.Line className={styles.skeletonBadgeTitle} />
+                </div>
+              </div>
+
+              <div className={styles.skeletonBadgeGuideList}>
+                {Array.from({ length: 6 }, (_, index) => (
+                  <Skeleton.Line
+                    key={`${sport}-${index}`}
+                    className={styles.skeletonBadgeGuideItem}
+                  />
+                ))}
               </div>
             </article>
           ))}
@@ -532,6 +574,90 @@ const MyPage = () => {
     };
   }, [userInfo.id]);
 
+  useEffect(() => {
+    if (!userInfo.id) {
+      return undefined;
+    }
+
+    let isMounted = true;
+    let refreshTimerId = null;
+
+    const refreshPredictionData = async () => {
+      try {
+        const [nextPredictionRecords, nextPredictionStats] = await Promise.all([
+          fetchMyPredictions(userInfo.id),
+          fetchMatchPredictionStats(),
+        ]);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setPredictionRecords(nextPredictionRecords);
+        setMatchPredictionStats(nextPredictionStats);
+        setPredictionError("");
+      } catch (error) {
+        console.error("예측 기록 자동 갱신 오류:", error);
+
+        if (isMounted) {
+          setPredictionError("승부예측 정보를 불러오지 못했습니다.");
+        }
+      }
+    };
+
+    const schedulePredictionRefresh = () => {
+      if (refreshTimerId) {
+        globalThis.clearTimeout(refreshTimerId);
+      }
+
+      refreshTimerId = globalThis.setTimeout(
+        refreshPredictionData,
+        PREDICTION_REFRESH_DEBOUNCE_MS,
+      );
+    };
+
+    const unsubscribeMatches = subscribeToMatchChanges({
+      channelName: `my-page-matches-${userInfo.id}`,
+      onChange: schedulePredictionRefresh,
+      debounceMs: PREDICTION_REFRESH_DEBOUNCE_MS,
+    });
+    const predictionChannel = supabase
+      .channel(`my-page-predictions-${userInfo.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "predictions",
+          filter: `user_id=eq.${userInfo.id}`,
+        },
+        schedulePredictionRefresh,
+      )
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR") {
+          console.error("마이페이지 예측 실시간 구독 연결에 실패했습니다.");
+        }
+      });
+    const intervalId = globalThis.setInterval(
+      schedulePredictionRefresh,
+      PREDICTION_REFRESH_INTERVAL_MS,
+    );
+
+    window.addEventListener("focus", schedulePredictionRefresh);
+
+    return () => {
+      isMounted = false;
+      unsubscribeMatches();
+      supabase.removeChannel(predictionChannel);
+      globalThis.clearInterval(intervalId);
+      window.removeEventListener("focus", schedulePredictionRefresh);
+
+      if (refreshTimerId) {
+        globalThis.clearTimeout(refreshTimerId);
+      }
+    };
+  }, [userInfo.id]);
+
   const handleNicknameEditStart = () => {
     setNicknameInput(userInfo.nickname);
     setIsEditingNickname(true);
@@ -571,6 +697,23 @@ const MyPage = () => {
 
       if (error) {
         throw error;
+      }
+
+      // 커뮤니티에서도 최신 닉네임을 표시하도록 공개 프로필을 함께 수정
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            user_id: userInfo.id,
+            nickname: trimmedNickname,
+            avatar_url: userInfo.avatarUrl || null,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id" },
+        );
+
+      if (profileError) {
+        throw profileError;
       }
 
       setUserInfo((prev) => ({
@@ -671,6 +814,23 @@ const MyPage = () => {
         throw updateError;
       }
 
+      // 커뮤니티에서도 최신 프로필 사진을 표시하도록 공개 프로필을 함께 수정
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            user_id: user.id,
+            nickname: userInfo.nickname,
+            avatar_url: avatarUrl,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id" },
+        );
+
+      if (profileError) {
+        throw profileError;
+      }
+
       setUserInfo((prev) => ({
         ...prev,
         avatarUrl,
@@ -705,6 +865,28 @@ const MyPage = () => {
 
   const predictionSummary = createSettledPredictionSummary(predictionRecords);
   const sportStatistics = createSportStatistics(predictionRecords);
+  const badgeStatistics = [
+    {
+      sport: "overall",
+      total: predictionSummary.total,
+      correct: predictionSummary.correct,
+      accuracy: predictionSummary.accuracy,
+    },
+    ...sportStatistics,
+  ];
+  const badgeGuides = badgeStatistics.map((statistic) => ({
+    ...statistic,
+    currentBadge: getPredictionBadgeMeta(
+      statistic.sport,
+      statistic.total,
+      statistic.accuracy,
+    ),
+    tiers: getPredictionBadgeGuide(
+      statistic.sport,
+      statistic.total,
+      statistic.accuracy,
+    ),
+  }));
 
   const predictionStats = [
     {
@@ -885,31 +1067,16 @@ const MyPage = () => {
           </div>
 
           <div className={styles.profileBadges}>
-            {sportStatistics.map((statistic) => {
-              const badgeMeta = getPredictionBadgeMeta(
-                statistic.sport,
-                statistic.total,
-                statistic.accuracy,
-              );
-              const SportIcon = badgeMeta.SportIcon;
-              const TierIcon = badgeMeta.TierIcon;
+            {badgeGuides.map((guide) => {
+              const badgeMeta = guide.currentBadge;
 
               return (
                 <article
-                  key={statistic.sport}
+                  key={guide.sport}
                   className={styles.profileBadge}
                   aria-label={`${badgeMeta.sportName} ${badgeMeta.tierLabel} 배지 ${badgeMeta.name}`}
                 >
-                  <span
-                    className={styles.profileBadgeIcon}
-                    data-tier={badgeMeta.tier}
-                    aria-hidden="true"
-                  >
-                    <SportIcon />
-                    <span className={styles.profileBadgeTierIcon}>
-                      <TierIcon />
-                    </span>
-                  </span>
+                  <PredictionBadgeIcon badge={badgeMeta} />
 
                   <div>
                     <span className={styles.profileBadgeSport}>
@@ -921,9 +1088,98 @@ const MyPage = () => {
                     </strong>
 
                     <span className={styles.profileBadgeAccuracy}>
-                      예측 {statistic.total}회 · 적중률 {statistic.accuracy}%
+                      예측 {guide.total}회 · 적중률 {guide.accuracy}%
                     </span>
                   </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        <section
+          className={styles.badgeGuideSection}
+          aria-labelledby="badge-guide-title"
+        >
+          <div className={styles.sectionHeader}>
+            <h2 id="badge-guide-title" className={styles.sectionTitle}>
+              BADGE GUIDE
+            </h2>
+
+            <p className={styles.sectionDescription}>
+              전체와 종목별 배지 조건, 현재 진행도를 확인해 보세요.
+            </p>
+          </div>
+
+          <div className={styles.badgeGuideGrid}>
+            {badgeGuides.map((guide) => {
+              const renderBadgeTier = (tier) => {
+                const TierGuideIcon = tier.Icon;
+
+                return (
+                  <li
+                    key={`${guide.sport}-${tier.id}`}
+                    className={styles.badgeTierItem}
+                    data-status={tier.status}
+                  >
+                    <span
+                      className={styles.badgeTierIcon}
+                      data-tier={tier.id}
+                      aria-hidden="true"
+                    >
+                      <TierGuideIcon />
+                    </span>
+
+                    <div className={styles.badgeTierBody}>
+                      <div className={styles.badgeTierTop}>
+                        <strong>{tier.name}</strong>
+
+                        {tier.statusLabel && (
+                          <span className={styles.badgeTierStatus}>
+                            {tier.statusLabel}
+                          </span>
+                        )}
+                      </div>
+
+                      <p>{tier.condition}</p>
+
+                      <div className={styles.badgeTierProgress}>
+                        <span
+                          style={{
+                            width: `${tier.progressPercent}%`,
+                          }}
+                        />
+                      </div>
+
+                      <small>{tier.progressText}</small>
+                    </div>
+                  </li>
+                );
+              };
+
+              return (
+                <article key={guide.sport} className={styles.badgeGuideCard}>
+                  <div className={styles.badgeGuideHeader}>
+                    <PredictionBadgeIcon badge={guide.currentBadge} />
+
+                    <div className={styles.badgeGuideTitleGroup}>
+                      <span className={styles.badgeGuideSport}>
+                        {guide.currentBadge.sportLabel}
+                      </span>
+
+                      <strong className={styles.badgeGuideCurrent}>
+                        현재 {guide.currentBadge.name}
+                      </strong>
+
+                      <span className={styles.badgeGuideSummary}>
+                        예측 {guide.total}회 · 적중률 {guide.accuracy}%
+                      </span>
+                    </div>
+                  </div>
+
+                  <ol className={styles.badgeTierList}>
+                    {guide.tiers.map(renderBadgeTier)}
+                  </ol>
                 </article>
               );
             })}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import MatchFilter from "../../components/MatchFilter/MatchFilter";
 import Skeleton from "../../components/Skeleton/Skeleton";
 import SubNav from "../../components/SubNav/SubNav";
@@ -9,10 +9,21 @@ import {
   fetchFavoriteTeamIds,
   getFavoriteTeamIds,
 } from "../../services/favoriteTeams";
+import {
+  cancelCalendarMatchAlarm,
+  fetchCalendarMatchAlarm,
+  fetchCalendarMatchAlarmIds,
+  saveCalendarMatchAlarm,
+} from "../../services/calendarMatchAlarms";
+import {
+  fetchNotificationPreferences,
+  getDefaultMatchReminderSettings,
+} from "../../services/notificationPreferences";
 import { getTeamsByIds, TEAM_BY_ID } from "../Teams/data/teams";
 import CalendarFilter from "./components/CalendarFilter/CalendarFilter";
 import CalendarGrid from "./components/CalendarGrid.jsx";
 import CalendarHeader from "./components/CalendarHeader.jsx";
+import CalendarItemCard from "./components/CalendarItemCard";
 import MatchAlarmModal from "./components/MatchAlarmModal/MatchAlarmModal";
 import { fetchCalendarSchedule } from "./api/getSportSchedule";
 import styles from "./CalendarPage.module.css";
@@ -39,6 +50,20 @@ const getMonthRange = (date) => {
   ).padStart(2, "0")}-${String(lastDay.getDate()).padStart(2, "0")}`;
 
   return { fromDate, toDate };
+};
+
+const formatDateKey = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const formatSelectedDateLabel = (dateKey) => {
+  const [year, month, day] = String(dateKey ?? "").split("-");
+
+  return year && month && day ? `${year}.${month}.${day}` : "날짜 미정";
 };
 
 const normalizeTeamValue = (value) =>
@@ -124,12 +149,26 @@ const CalendarPage = () => {
   const [selectedSport, setSelectedSport] = useState("my");
   const [selectedTeamCode, setSelectedTeamCode] = useState("all");
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
+  const [selectedDate, setSelectedDate] = useState(() =>
+    formatDateKey(new Date()),
+  );
   const [matches, setMatches] = useState([]);
   const [favoriteTeamState, setFavoriteTeamState] = useState({
     userId: "",
     teamIds: [],
   });
   const [selectedAlarmMatch, setSelectedAlarmMatch] = useState(null);
+  const [selectedAlarmRecord, setSelectedAlarmRecord] = useState(null);
+  const [selectedAlarmRecordLoading, setSelectedAlarmRecordLoading] =
+    useState(false);
+  const [alarmMatchIds, setAlarmMatchIds] = useState([]);
+  const [alarmDefaultSettings, setAlarmDefaultSettings] = useState({
+    presetId: "60",
+    customAmount: "15",
+    customUnit: "minutes",
+  });
+  const [saveNotice, setSaveNotice] = useState(null);
+  const saveNoticeTimerRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -202,6 +241,9 @@ const CalendarPage = () => {
 
   useEffect(() => {
     if (!userId) {
+      setAlarmMatchIds([]);
+      setSelectedAlarmRecord(null);
+      setSelectedAlarmRecordLoading(false);
       return undefined;
     }
 
@@ -215,6 +257,37 @@ const CalendarPage = () => {
           userId,
           teamIds,
         });
+      }
+    };
+
+    const loadCalendarAlarmIds = async () => {
+      try {
+        const matchIds = await fetchCalendarMatchAlarmIds(userId);
+
+        if (isMounted) {
+          setAlarmMatchIds(matchIds);
+        }
+      } catch (alarmError) {
+        console.error("Failed to load calendar alarms.", alarmError);
+
+        if (isMounted) {
+          setAlarmMatchIds([]);
+        }
+      }
+    };
+
+    const loadNotificationPreferences = async () => {
+      try {
+        const preferences = await fetchNotificationPreferences(userId);
+
+        if (isMounted) {
+          setAlarmDefaultSettings(getDefaultMatchReminderSettings(preferences));
+        }
+      } catch (preferenceError) {
+        console.error(
+          "Failed to load notification preferences.",
+          preferenceError,
+        );
       }
     };
 
@@ -232,19 +305,67 @@ const CalendarPage = () => {
     };
 
     loadFavoriteTeamIds();
+    loadCalendarAlarmIds();
+    loadNotificationPreferences();
 
     window.addEventListener(FAVORITE_TEAMS_CHANGED_EVENT, syncFavoriteTeams);
     window.addEventListener("storage", syncFavoriteTeams);
 
     return () => {
       isMounted = false;
-      window.removeEventListener(
-        FAVORITE_TEAMS_CHANGED_EVENT,
-        syncFavoriteTeams,
-      );
+      window.removeEventListener(FAVORITE_TEAMS_CHANGED_EVENT, syncFavoriteTeams);
       window.removeEventListener("storage", syncFavoriteTeams);
     };
   }, [userId]);
+
+  useEffect(() => {
+    if (!userId || !selectedAlarmMatch?.id) {
+      setSelectedAlarmRecord(null);
+      setSelectedAlarmRecordLoading(false);
+      return undefined;
+    }
+
+    let isMounted = true;
+    setSelectedAlarmRecordLoading(true);
+    setSelectedAlarmRecord(null);
+
+    const loadSelectedAlarm = async () => {
+      try {
+        const alarm = await fetchCalendarMatchAlarm(
+          userId,
+          selectedAlarmMatch.id,
+        );
+
+        if (isMounted) {
+          setSelectedAlarmRecord(alarm);
+        }
+      } catch (alarmError) {
+        console.error("Failed to load selected calendar alarm.", alarmError);
+
+        if (isMounted) {
+          setSelectedAlarmRecord(null);
+        }
+      } finally {
+        if (isMounted) {
+          setSelectedAlarmRecordLoading(false);
+        }
+      }
+    };
+
+    loadSelectedAlarm();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedAlarmMatch?.id, userId]);
+
+  useEffect(() => {
+    return () => {
+      if (saveNoticeTimerRef.current) {
+        window.clearTimeout(saveNoticeTimerRef.current);
+      }
+    };
+  }, []);
 
   const teamOptions = useMemo(() => {
     if (!isSupportedSport) {
@@ -319,17 +440,22 @@ const CalendarPage = () => {
     () => groupMatchesByDate(visibleMatches),
     [visibleMatches],
   );
+  const selectedDateMatches = matchByDate[selectedDate] || [];
 
   const handlePrevMonth = () => {
-    setCurrentMonth(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1),
-    );
+    setCurrentMonth((prev) => {
+      const nextMonth = new Date(prev.getFullYear(), prev.getMonth() - 1, 1);
+      setSelectedDate(formatDateKey(nextMonth));
+      return nextMonth;
+    });
   };
 
   const handleNextMonth = () => {
-    setCurrentMonth(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1),
-    );
+    setCurrentMonth((prev) => {
+      const nextMonth = new Date(prev.getFullYear(), prev.getMonth() + 1, 1);
+      setSelectedDate(formatDateKey(nextMonth));
+      return nextMonth;
+    });
   };
 
   const handleSportChange = (sport) => {
@@ -353,6 +479,115 @@ const CalendarPage = () => {
 
   const handleCloseAlarmModal = () => {
     setSelectedAlarmMatch(null);
+    setSelectedAlarmRecord(null);
+  };
+
+  const handleSaveAlarm = async (alarmSettings) => {
+    if (!selectedAlarmMatch?.id) {
+      return;
+    }
+
+    if (saveNoticeTimerRef.current) {
+      window.clearTimeout(saveNoticeTimerRef.current);
+    }
+
+    try {
+      console.log("[calendar-alarm] save attempt", {
+        userId,
+        matchId: selectedAlarmMatch.id,
+        matchDate: selectedAlarmMatch.date,
+        matchTime: selectedAlarmMatch.time,
+        alarmSettings,
+      });
+
+      const savedAlarm = await saveCalendarMatchAlarm(userId, {
+        matchId: selectedAlarmMatch.id,
+        presetId: alarmSettings?.presetId ?? "60",
+        customAmount: alarmSettings?.customAmount ?? "15",
+        customUnit: alarmSettings?.customUnit ?? "minutes",
+        matchDate: selectedAlarmMatch.date,
+        matchTime: selectedAlarmMatch.time,
+      });
+
+      if (savedAlarm?.matchId) {
+        setAlarmMatchIds((prevIds) =>
+          prevIds.includes(String(savedAlarm.matchId))
+            ? prevIds
+            : [...prevIds, String(savedAlarm.matchId)],
+        );
+      }
+
+      console.log("[calendar-alarm] save success", savedAlarm);
+      setSaveNotice({
+        type: "success",
+        message: "알림이 저장됐어요.",
+      });
+      saveNoticeTimerRef.current = window.setTimeout(() => {
+        setSaveNotice(null);
+      }, 2500);
+      setSelectedAlarmMatch(null);
+      setSelectedAlarmRecord(null);
+    } catch (saveError) {
+      console.error("Failed to save calendar alarm.", saveError);
+      setSaveNotice({
+        type: "error",
+        message: "알림 저장에 실패했어요.",
+      });
+      saveNoticeTimerRef.current = window.setTimeout(() => {
+        setSaveNotice(null);
+      }, 2500);
+    }
+  };
+
+  const handleDeleteAlarm = async () => {
+    if (!selectedAlarmMatch?.id) {
+      return;
+    }
+
+    if (saveNoticeTimerRef.current) {
+      window.clearTimeout(saveNoticeTimerRef.current);
+    }
+
+    try {
+      console.log("[calendar-alarm] delete attempt", {
+        userId,
+        matchId: selectedAlarmMatch.id,
+      });
+
+      const canceledAlarm = await cancelCalendarMatchAlarm(
+        userId,
+        selectedAlarmMatch.id,
+      );
+
+      const matchIdToRemove = String(
+        canceledAlarm?.matchId ?? selectedAlarmMatch.id,
+      );
+
+      setAlarmMatchIds((prevIds) =>
+        prevIds.filter((matchId) => matchId !== matchIdToRemove),
+      );
+
+      console.log("[calendar-alarm] delete success", canceledAlarm);
+      setSaveNotice({
+        type: "success",
+        message: "알림이 해제됐어요.",
+      });
+      saveNoticeTimerRef.current = window.setTimeout(() => {
+        setSaveNotice(null);
+      }, 2500);
+
+      setSelectedAlarmMatch(null);
+      setSelectedAlarmRecord(null);
+    } catch (deleteError) {
+      console.error("Failed to delete calendar alarm.", deleteError);
+      setSaveNotice({
+        type: "error",
+        message: "알림 해제에 실패했어요.",
+      });
+      saveNoticeTimerRef.current = window.setTimeout(() => {
+        setSaveNotice(null);
+      }, 2500);
+    }
   };
 
   return (
@@ -435,16 +670,75 @@ const CalendarPage = () => {
               year={year}
               month={month}
               matchByDate={matchByDate}
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
               onMatchClick={handleOpenAlarmModal}
+              alarmMatchIds={alarmMatchIds}
             />
           )}
+
+          {!combinedLoading ? (
+            <section className={styles.mobileSelectedDay}>
+              <div className={styles.mobileSelectedDayHeader}>
+                <div>
+                  <span className={styles.mobileSelectedDate}>
+                    {formatSelectedDateLabel(selectedDate)}
+                  </span>
+                  <h2 className={styles.mobileSelectedTitle}>MATCHES</h2>
+                </div>
+                <span className={styles.mobileSelectedCount}>
+                  {selectedDateMatches.length} MATCHES
+                </span>
+              </div>
+
+              {selectedDateMatches.length > 0 ? (
+                <div className={styles.mobileSelectedList}>
+                  {selectedDateMatches.map((match) => (
+                    <CalendarItemCard
+                      key={match.id}
+                      match={match}
+                      variant="agenda"
+                      onClick={handleOpenAlarmModal}
+                      isAlarmSet={alarmMatchIds.includes(String(match.id))}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className={styles.mobileSelectedEmpty}>
+                  선택한 날짜의 경기가 없습니다.
+                </p>
+              )}
+            </section>
+          ) : null}
         </div>
       </main>
+
+      {saveNotice ? (
+        <div
+          className={[
+            styles.saveNotice,
+            saveNotice.type === "success"
+              ? styles.saveNoticeSuccess
+              : styles.saveNoticeError,
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          role="status"
+          aria-live="polite"
+        >
+          {saveNotice.message}
+        </div>
+      ) : null}
 
       <MatchAlarmModal
         match={selectedAlarmMatch}
         isOpen={Boolean(selectedAlarmMatch)}
         onClose={handleCloseAlarmModal}
+        onConfirm={handleSaveAlarm}
+        onDelete={handleDeleteAlarm}
+        defaultReminderSettings={alarmDefaultSettings}
+        existingAlarm={selectedAlarmRecord}
+        isAlarmLoading={selectedAlarmRecordLoading}
       />
     </>
   );

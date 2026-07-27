@@ -49,24 +49,45 @@ const getLatestSeasonRows = (rows = []) => {
     : [];
 };
 
-const getKLeagueTeamCode = (teamId) => {
-  const normalizedTeamId = String(teamId ?? "").trim().toUpperCase();
+const getKLeagueTeamCode = (value) => {
+  const normalizedValue = String(value ?? "").trim().toUpperCase();
 
-  if (!normalizedTeamId) {
+  if (!normalizedValue) {
     return "";
   }
 
-  return normalizedTeamId.startsWith("K")
-    ? normalizedTeamId
-    : `K${normalizedTeamId.padStart(2, "0")}`;
+  if (/^K\d+$/.test(normalizedValue)) {
+    return normalizedValue.replace(/^K(\d)$/, "K0$1");
+  }
+
+  if (/^\d+$/.test(normalizedValue)) {
+    return `K${normalizedValue.padStart(2, "0")}`;
+  }
+
+  return "";
 };
 
 const getTeamCodeCandidates = (row) => {
-  const candidates = [row.team_code, row.team_id, row.team_short_name, row.team_name];
+  const candidates = [
+    row.team_code,
+    row.team_id,
+    row.team_short_name,
+    row.team_name,
+  ].filter(Boolean);
 
-  return row.sport_id === "soccer"
-    ? candidates.map(getKLeagueTeamCode)
-    : candidates;
+  if (row.sport_id !== "soccer") {
+    return candidates;
+  }
+
+  return [
+    ...new Set(
+      candidates.flatMap((candidate) => {
+        const teamCode = getKLeagueTeamCode(candidate);
+
+        return teamCode ? [teamCode, candidate] : [candidate];
+      }),
+    ),
+  ];
 };
 
 const getTeamRecordLogoUrl = (row) => {

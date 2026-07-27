@@ -80,7 +80,7 @@
 
 .sortButtons button {
   padding: 4px 0;
-  color: rgb(255 255 255 / 65%);
+  color: var(--color-white-65);
   background: transparent;
   font-size: 13px;
 }
@@ -102,16 +102,21 @@
 
 .postRow {
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) 100px 66px 62px;
+  grid-template-columns: minmax(260px, 1fr) 100px 66px 62px 52px;
   align-items: center;
   width: 100%;
   min-height: 58px;
   padding: 0 20px;
-  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  border-bottom: 1px solid var(--color-white-10);
   color: var(--color-text-white);
   background: transparent;
   font-size: 13px;
   text-align: center;
+}
+
+.postRow > :nth-child(3) {
+  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .postRow.threeColumnRow {
@@ -119,12 +124,12 @@
 }
 
 .postTable > a.postRow:hover {
-  background: rgb(255 255 255 / 4%);
+  background: var(--color-white-04);
 }
 
 .tableHeader {
   min-height: 46px;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid var(--color-white-10);
   border-radius: 8px;
   font-size: 12px;
 }
@@ -139,6 +144,12 @@
   gap: 6px;
   min-width: 0;
   overflow: hidden;
+  white-space: nowrap;
+}
+
+.postTitleText {
+  min-width: 0;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -147,14 +158,15 @@
   flex: 0 0 auto;
   padding: 3px 6px;
   border-radius: 5px;
-  color: rgb(255 255 255 / 70%);
-  background: rgb(255 255 255 / 8%);
+  color: var(--color-white-70);
+  background: var(--color-white-08);
   font-size: 10px;
   font-weight: 600;
   line-height: 1;
 }
 
 .postTitle b {
+  flex: 0 0 auto;
   margin-left: 4px;
   color: var(--color-accent);
 }
@@ -178,7 +190,7 @@
 }
 
 .myCommentContent span {
-  color: rgb(255 255 255 / 55%);
+  color: var(--color-white-55);
   font-size: 11px;
 }
 
@@ -196,7 +208,7 @@
   height: 28px;
   place-items: center;
   border-radius: 6px;
-  color: rgb(255 255 255 / 78%);
+  color: var(--color-white-78);
   background: transparent;
   font-size: 13px;
 }
@@ -219,7 +231,7 @@
 }
 
 .pagination button:disabled:hover {
-  color: rgb(255 255 255 / 78%);
+  color: var(--color-white-78);
   background: transparent;
 }
 
@@ -313,19 +325,20 @@
     grid-template-columns: minmax(170px, 1fr) 70px 52px;
   }
 
-  .postRow > :nth-child(4) {
+  .postRow > :nth-child(4),
+  .postRow > :nth-child(5) {
     display: none;
   }
 }
 
 @media (max-width: 480px) {
   .postRow {
-    grid-template-columns: minmax(0, 1fr) 52px;
+    grid-template-columns: minmax(0, 1fr) max-content;
     min-height: 54px;
   }
 
   .postRow.threeColumnRow {
-    grid-template-columns: minmax(0, 1fr) 52px;
+    grid-template-columns: minmax(0, 1fr) max-content;
   }
 
   .postTable {
@@ -333,7 +346,8 @@
   }
 
   .postRow > :nth-child(2),
-  .postRow > :nth-child(4) {
+  .postRow > :nth-child(4),
+  .postRow > :nth-child(5) {
     display: none;
   }
 

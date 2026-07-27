@@ -3,21 +3,30 @@
   min-width: 0;
   gap: 22px;
   padding: 24px;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid var(--color-white-10);
   border-radius: 8px;
   background: rgb(24 26 42 / 62%);
 }
 
 .matchCard[data-focus-result="win"] {
-  border-color: rgb(227 27 54 / 34%);
+  border-color: var(--color-accent-34);
 }
 
 .matchCard[data-focus-result="loss"] {
-  border-color: rgb(148 163 184 / 22%);
+  border-color: var(--color-status-neutral-border);
 }
 
 .matchCard[data-focus-result="draw"] {
   border-color: rgb(245 158 11 / 34%);
+}
+
+.matchCard[data-focus-result="live"] {
+  border-color: rgb(56 189 248 / 30%);
+}
+
+.matchCard[data-focus-result="resultPending"] {
+  border-color: var(--color-status-neutral-border);
+  border-style: dashed;
 }
 
 .matchCard[data-focus-result="cancelled"],
@@ -34,13 +43,13 @@
 }
 
 .matchTop span {
-  color: rgb(255 255 255 / 65%);
+  color: var(--color-white-65);
   font-family: var(--font-display);
   font-size: 12px;
 }
 
 .matchDate {
-  color: rgb(255 255 255 / 72%);
+  color: var(--color-white-72);
   font-size: 13px;
 }
 
@@ -51,7 +60,7 @@
   padding: 4px 8px;
   border-radius: 999px;
   color: var(--color-text-white);
-  background-color: rgb(255 255 255 / 14%);
+  background-color: var(--color-white-14);
   font-size: 10px;
   font-weight: 900;
   line-height: 1;
@@ -62,17 +71,25 @@
 }
 
 .focusResultBadge[data-result="loss"] {
-  color: rgb(255 255 255 / 68%);
-  background-color: rgb(255 255 255 / 10%);
+  color: var(--color-white-68);
+  background-color: var(--color-white-10);
 }
 
 .focusResultBadge[data-result="draw"] {
-  background-color: rgb(245 158 11 / 92%);
+  background-color: var(--color-status-warning);
+}
+
+.focusResultBadge[data-result="live"] {
+  background-color: var(--color-status-info);
+}
+
+.focusResultBadge[data-result="resultPending"] {
+  background-color: var(--color-status-neutral);
 }
 
 .focusResultBadge[data-result="cancelled"],
 .focusResultBadge[data-result="postponed"] {
-  background-color: rgb(100 116 139 / 92%);
+  background-color: var(--color-status-neutral);
 }
 
 .matchScore {
@@ -166,6 +183,10 @@
   font-size: 24px;
 }
 
+.mobileScoreRow {
+  display: none;
+}
+
 .predictionRates {
   display: grid;
   gap: 8px;
@@ -175,7 +196,7 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  color: rgb(255 255 255 / 72%);
+  color: var(--color-white-72);
   font-size: 12px;
 }
 
@@ -208,7 +229,7 @@
 }
 
 .participants {
-  color: rgb(255 255 255 / 55%);
+  color: var(--color-white-55);
   font-size: 12px;
   font-weight: 700;
 }
@@ -224,22 +245,36 @@
     padding: 18px;
   }
 
+  .matchTop {
+    align-items: flex-start;
+  }
+
+  .matchDate {
+    flex-shrink: 0;
+  }
+
   .matchScore {
-    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .matchScore > strong {
+    font-size: 18px;
   }
 
   .matchTeam {
-    grid-template-columns: 30px minmax(0, 1fr);
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    gap: 6px;
   }
 
   .rightTeam {
-    grid-template-columns: minmax(0, 1fr) 30px;
+    grid-template-columns: minmax(0, 1fr) 28px;
+    justify-self: stretch;
   }
 
   .teamLogo {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
   }
 
   .teamName {
@@ -247,13 +282,24 @@
   }
 
   .teamScore {
-    grid-column: 1 / -1;
-    font-size: 22px;
+    display: none;
   }
 
-  .rightTeam .teamScore {
-    grid-column: 1 / -1;
-    justify-self: end;
+  .mobileScoreRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: -10px;
+    color: var(--color-text-white);
+    font-family: var(--font-display);
+    font-size: 26px;
+    line-height: 1;
+  }
+
+  .mobileScoreRow span {
+    color: var(--color-accent);
+    font-size: 20px;
   }
 
   .rightTeam .teamVisual {

@@ -1,3 +1,7 @@
+import {
+  isLiveMatchStatus,
+  isResultPendingMatchStatus,
+} from "../../utils/matchStatus";
 import styles from "./PredictionResultInsight.module.css";
 
 const normalizeTeamCode = (teamCode) => teamCode?.trim().toUpperCase() ?? "";
@@ -37,6 +41,14 @@ const getWinnerSide = (match) => {
     return match.status;
   }
 
+  if (isLiveMatchStatus(match?.status)) {
+    return "live";
+  }
+
+  if (isResultPendingMatchStatus(match?.status)) {
+    return "resultPending";
+  }
+
   const { awayScore, homeScore } = parseScore(match.score);
 
   if (awayScore === null || homeScore === null) {
@@ -74,7 +86,12 @@ const getMyPredictionResult = (match, winnerSide) => {
     return null;
   }
 
-  if (winnerSide === "cancelled" || winnerSide === "postponed") {
+  if (
+    winnerSide === "cancelled" ||
+    winnerSide === "postponed" ||
+    winnerSide === "live" ||
+    winnerSide === "resultPending"
+  ) {
     return winnerSide;
   }
 
@@ -100,6 +117,8 @@ const RESULT_LABELS = {
   correct: "예측 성공",
   incorrect: "예측 실패",
   pending: "정산 대기",
+  live: "경기중",
+  resultPending: "결과 확인중",
   cancelled: "경기 취소",
   postponed: "경기 연기",
   void: "무승부 무효",
@@ -151,18 +170,26 @@ const PredictionResultInsight = ({ className = "", match }) => {
             ? "경기취소"
             : winnerSide === "postponed"
               ? "경기연기"
-              : winnerSide === "draw"
-                ? "무승부"
-                : getTeamName(winnerTeam)}
+              : winnerSide === "live"
+                ? "경기중"
+                : winnerSide === "resultPending"
+                  ? "결과 확인중"
+                  : winnerSide === "draw"
+                    ? "무승부"
+                    : getTeamName(winnerTeam)}
         </strong>
         <b>
           {winnerSide === "cancelled"
             ? "취소"
             : winnerSide === "postponed"
               ? "연기"
-              : winnerSide === "draw"
-                ? "무효"
-                : "승리"}
+              : winnerSide === "live"
+                ? "진행"
+                : winnerSide === "resultPending"
+                  ? "확인중"
+                  : winnerSide === "draw"
+                    ? "무효"
+                    : "승리"}
         </b>
       </div>
 

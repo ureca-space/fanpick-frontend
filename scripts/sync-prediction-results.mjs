@@ -1,9 +1,69 @@
 import { createSupabaseAdminClient } from "./team-standings-utils.mjs";
 
-const SCORE_SETTLE_DELAY_MS = 8 * 60 * 60 * 1000;
 const STORED_RESULTS = new Set(["correct", "incorrect"]);
+const FINISHED_MATCH_STATUSES = new Set([
+  "complete",
+  "completed",
+  "ended",
+  "final",
+  "finished",
+]);
+const LIVE_MATCH_STATUSES = new Set([
+  "live",
+  "ongoing",
+  "in_progress",
+  "playing",
+  "running",
+]);
+const LIVE_WINDOW_HOURS_BY_SPORT = {
+  baseball: 6,
+  esports: 4,
+  soccer: 3,
+};
+const FINISHED_PROTECTION_MINUTES_BY_SPORT = {
+  baseball: 180,
+  esports: 90,
+  soccer: 110,
+};
+const DEFAULT_LIVE_WINDOW_HOURS = 4;
+const DEFAULT_FINISHED_PROTECTION_MINUTES = 120;
+const DEFAULT_MATCH_TIME = "23:59";
 
 const normalizeTeamCode = (teamCode) => String(teamCode ?? "").trim().toUpperCase();
+const normalizeSport = (sport) => String(sport ?? "").trim().toLowerCase();
+const normalizeStatus = (status) => String(status ?? "").trim().toLowerCase();
+const isLiveMatchStatus = (status) =>
+  LIVE_MATCH_STATUSES.has(normalizeStatus(status));
+const isFinishedMatchStatus = (status) =>
+  FINISHED_MATCH_STATUSES.has(normalizeStatus(status));
+
+const getLiveWindowMs = (sport) => {
+  const normalizedSport = normalizeSport(sport);
+  const hours =
+    LIVE_WINDOW_HOURS_BY_SPORT[normalizedSport] ?? DEFAULT_LIVE_WINDOW_HOURS;
+
+  return hours * 60 * 60 * 1000;
+};
+
+const getFinishedProtectionMs = (sport) => {
+  const normalizedSport = normalizeSport(sport);
+  const minutes =
+    FINISHED_PROTECTION_MINUTES_BY_SPORT[normalizedSport] ??
+    DEFAULT_FINISHED_PROTECTION_MINUTES;
+
+  return minutes * 60 * 1000;
+};
+
+const createMatchDateTime = (dateKey, timeValue) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateKey ?? ""))) {
+    return null;
+  }
+
+  const matchTime = String(timeValue ?? DEFAULT_MATCH_TIME).slice(0, 5);
+  const timestamp = Date.parse(`${dateKey}T${matchTime}:00+09:00`);
+
+  return Number.isFinite(timestamp) ? timestamp : null;
+};
 
 const parseScore = (score) => {
   if (!score) {
@@ -21,24 +81,18 @@ const parseScore = (score) => {
   };
 };
 
-const createMatchTimeValue = (match) => {
-  if (!match?.match_date) {
-    return null;
+const isLikelyUnsettledFinishedScore = (match) => {
+  const { awayScore, homeScore } = parseScore(match?.score);
+
+  if (awayScore === null || homeScore === null) {
+    return true;
   }
 
-  const [year, month, day] = String(match.match_date).split("-").map(Number);
-  const [hourText, minuteText] = String(match.match_time ?? "00:00").split(":");
-  const hour = Number(hourText);
-  const minute = Number(minuteText);
-  const matchTime = new Date(
-    year,
-    month - 1,
-    day,
-    Number.isFinite(hour) ? hour : 0,
-    Number.isFinite(minute) ? minute : 0,
-  ).getTime();
-
-  return Number.isFinite(matchTime) ? matchTime : null;
+  return (
+    normalizeSport(match?.sport) === "baseball" &&
+    awayScore === 0 &&
+    homeScore === 0
+  );
 };
 
 const hasResolvedScore = (match) => {
@@ -48,14 +102,27 @@ const hasResolvedScore = (match) => {
     return false;
   }
 
-  if (match?.status === "finished") {
-    return true;
+  if (isLiveMatchStatus(match?.status)) {
+    return false;
   }
 
-  const matchTime = createMatchTimeValue(match);
+  if (!isFinishedMatchStatus(match?.status)) {
+    return false;
+  }
+
+  const matchDateTime = createMatchDateTime(match?.match_date, match?.match_time);
+
+  if (
+    matchDateTime !== null &&
+    Date.now() < matchDateTime + getLiveWindowMs(match?.sport) &&
+    isLikelyUnsettledFinishedScore(match)
+  ) {
+    return false;
+  }
 
   return (
-    matchTime !== null && Date.now() - matchTime >= SCORE_SETTLE_DELAY_MS
+    matchDateTime === null ||
+    Date.now() >= matchDateTime + getFinishedProtectionMs(match?.sport)
   );
 };
 
@@ -103,6 +170,7 @@ const fetchPendingPredictions = async (supabase) => {
         result,
         matches (
           id,
+          sport,
           match_date,
           match_time,
           away_team_code,
@@ -112,7 +180,7 @@ const fetchPendingPredictions = async (supabase) => {
         )
       `,
     )
-    .or("result.is.null,result.eq.pending,result.eq.void");
+    .or("result.is.null,result.neq.cancelled");
 
   if (error) {
     throw new Error(`예측 목록 조회 실패: ${error.message}`);
@@ -139,10 +207,14 @@ const main = async () => {
   const pendingPredictions = await fetchPendingPredictions(supabase);
   const resolvedPredictionResults = pendingPredictions.map((prediction) => ({
     id: prediction.id,
+    currentResult: prediction.result,
     result: resolvePredictionResult(prediction),
   }));
   const resolvedPredictions = resolvedPredictionResults.filter(
-    (prediction) => prediction.id && STORED_RESULTS.has(prediction.result),
+    (prediction) =>
+      prediction.id &&
+      STORED_RESULTS.has(prediction.result) &&
+      prediction.currentResult !== prediction.result,
   );
   const skippedCounts = resolvedPredictionResults.reduce(
     (counts, prediction) => {
