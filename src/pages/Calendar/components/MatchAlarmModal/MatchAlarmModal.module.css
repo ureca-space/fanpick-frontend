@@ -336,6 +336,41 @@
   line-height: 1.5;
 }
 
+.previewMessage {
+  color: rgb(255 255 255 / 66%);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.previewButton {
+  width: fit-content;
+  min-height: 40px;
+  margin-top: 4px;
+  padding: 0 14px;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 10px;
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 8%);
+  font-size: 13px;
+  font-weight: 800;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.previewButton:hover {
+  border-color: rgb(255 255 255 / 48%);
+  background-color: rgb(255 255 255 / 14%);
+  transform: translateY(-1px);
+}
+
+.previewStatus {
+  color: rgb(255 255 255 / 62%);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .buttonArea {
   display: flex;
   gap: 12px;
@@ -409,6 +444,7 @@
 .cancelButton:focus-visible,
 .deleteButton:focus-visible,
 .confirmButton:focus-visible,
+.previewButton:focus-visible,
 .presetOption:focus-within,
 .numberInput:focus-visible,
 .selectInput:focus-visible {

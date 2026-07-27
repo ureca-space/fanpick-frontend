@@ -19,6 +19,7 @@ import {
   fetchNotificationPreferences,
   getDefaultMatchReminderSettings,
 } from "../../services/notificationPreferences";
+import { ensurePushSubscription } from "../../services/pushNotifications";
 import { getTeamsByIds, TEAM_BY_ID } from "../Teams/data/teams";
 import CalendarFilter from "./components/CalendarFilter/CalendarFilter";
 import CalendarGrid from "./components/CalendarGrid.jsx";
@@ -514,11 +515,23 @@ const CalendarPage = () => {
     }
 
     try {
+      await ensurePushSubscription(userId);
+
       console.log("[calendar-alarm] save attempt", {
         userId,
         matchId: selectedAlarmMatch.id,
         matchDate: selectedAlarmMatch.date,
         matchTime: selectedAlarmMatch.time,
+        matchTitle: [
+          selectedAlarmMatch.homeTeam?.shortName ||
+            selectedAlarmMatch.homeTeam?.name,
+          selectedAlarmMatch.awayTeam?.shortName ||
+            selectedAlarmMatch.awayTeam?.name,
+        ]
+          .filter(Boolean)
+          .join(" vs "),
+        sportLabel: selectedAlarmMatch.sportLabel,
+        league: selectedAlarmMatch.league,
         alarmSettings,
       });
 
@@ -529,6 +542,16 @@ const CalendarPage = () => {
         customUnit: alarmSettings?.customUnit ?? "minutes",
         matchDate: selectedAlarmMatch.date,
         matchTime: selectedAlarmMatch.time,
+        matchTitle: [
+          selectedAlarmMatch.homeTeam?.shortName ||
+            selectedAlarmMatch.homeTeam?.name,
+          selectedAlarmMatch.awayTeam?.shortName ||
+            selectedAlarmMatch.awayTeam?.name,
+        ]
+          .filter(Boolean)
+          .join(" vs "),
+        sportLabel: selectedAlarmMatch.sportLabel,
+        league: selectedAlarmMatch.league,
       });
 
       if (savedAlarm?.matchId) {
@@ -553,7 +576,7 @@ const CalendarPage = () => {
       console.error("Failed to save calendar alarm.", saveError);
       setSaveNotice({
         type: "error",
-        message: "알림 저장에 실패했어요.",
+        message: saveError?.message || "알림 저장에 실패했어요.",
       });
       saveNoticeTimerRef.current = window.setTimeout(() => {
         setSaveNotice(null);

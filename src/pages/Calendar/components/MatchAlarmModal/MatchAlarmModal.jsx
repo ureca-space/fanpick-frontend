@@ -80,6 +80,7 @@ const MatchAlarmModal = ({
   const [selectedPresetId, setSelectedPresetId] = useState("60");
   const [customAmount, setCustomAmount] = useState("15");
   const [customUnit, setCustomUnit] = useState("minutes");
+  const [previewStatus, setPreviewStatus] = useState("");
 
   useEffect(() => {
     if (!isOpen) {
@@ -143,6 +144,40 @@ const MatchAlarmModal = ({
   const hasExistingAlarm = Boolean(existingAlarm?.id);
   const actionsDisabled = isAlarmLoading;
   const saveDisabled = actionsDisabled || !canSaveAlarm;
+
+  const handleShowNotificationPreview = async () => {
+    if (!("Notification" in window)) {
+      setPreviewStatus("이 브라우저는 시스템 알림 미리보기를 지원하지 않아요.");
+      return;
+    }
+
+    try {
+      const permission =
+        Notification.permission === "default"
+          ? await Notification.requestPermission()
+          : Notification.permission;
+
+      if (permission !== "granted") {
+        setPreviewStatus("브라우저 설정에서 알림 권한을 허용해 주세요.");
+        return;
+      }
+
+      const notification = new Notification("FanPick 경기 알림", {
+        body: `${matchTitle} 경기가 곧 시작해요!\n${formatScheduleLabel(match)}`,
+        icon: "/fanpick_mascot.svg",
+        tag: `fanpick-match-preview-${match.id}`,
+      });
+
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+      setPreviewStatus("실제 알림 형태로 미리보기를 보냈어요.");
+    } catch (error) {
+      console.error("Failed to show notification preview.", error);
+      setPreviewStatus("알림 미리보기를 표시하지 못했어요.");
+    }
+  };
 
   if (!isOpen || !match) {
     return null;
@@ -367,6 +402,21 @@ const MatchAlarmModal = ({
         <div className={styles.previewCard}>
           <span className={styles.previewLabel}>미리보기</span>
           <strong className={styles.previewValue}>{previewLabel}</strong>
+          <span className={styles.previewMessage}>
+            FanPick 경기 알림 · {matchTitle} 경기가 곧 시작해요!
+          </span>
+          <button
+            className={styles.previewButton}
+            type="button"
+            onClick={handleShowNotificationPreview}
+          >
+            실제 알림 미리보기
+          </button>
+          {previewStatus ? (
+            <span className={styles.previewStatus} role="status">
+              {previewStatus}
+            </span>
+          ) : null}
         </div>
 
         <div className={styles.buttonArea}>

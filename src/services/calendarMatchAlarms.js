@@ -51,7 +51,9 @@ const buildMatchDateTime = (matchDate, matchTime) => {
 
     return normalizedTime;
   })();
-  const matchDateTime = new Date(`${matchDate}T${timeValue}`);
+  // FanPick 경기 일정은 한국 표준시 기준이므로 사용자의 기기 시간대와
+  // 무관하게 동일한 UTC 발송 시각을 계산한다.
+  const matchDateTime = new Date(`${matchDate}T${timeValue}+09:00`);
 
   return Number.isNaN(matchDateTime.getTime()) ? null : matchDateTime;
 };
@@ -112,7 +114,17 @@ export const fetchCalendarMatchAlarm = async (userId, matchId) => {
 
 export const saveCalendarMatchAlarm = async (
   userId,
-  { matchId, presetId, customAmount, customUnit, matchDate, matchTime },
+  {
+    matchId,
+    presetId,
+    customAmount,
+    customUnit,
+    matchDate,
+    matchTime,
+    matchTitle,
+    sportLabel,
+    league,
+  },
 ) => {
   if (!userId || !matchId) {
     return null;
@@ -137,6 +149,10 @@ export const saveCalendarMatchAlarm = async (
     offsetMinutes,
     matchDate,
     matchTime,
+    matchTitle,
+    sportLabel,
+    league,
+    url: `/calendar?match=${encodeURIComponent(String(matchId))}`,
   };
 
   const existingNotificationQuery = await supabase
