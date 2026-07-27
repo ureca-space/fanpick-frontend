@@ -21,6 +21,9 @@ const VALID_WORLD_CUP_IDS = new Set([
 
 const isVideoSource = (src) => /\.mp4(?:$|\?)/i.test(src);
 
+const shuffleCandidates = (candidates) =>
+  [...candidates].sort(() => Math.random() - 0.5);
+
 const CandidateMedia = ({ candidate, className, alt = "" }) => {
   if (!candidate.image) {
     return null;
@@ -60,7 +63,9 @@ const WorldCupGame = ({ worldCup }) => {
     "baseball-situation",
     "lol-thumbnail",
   ].includes(worldCup.id);
-  const [contestants, setContestants] = useState(worldCup.candidates);
+  const [contestants, setContestants] = useState(() =>
+    shuffleCandidates(worldCup.candidates),
+  );
   const [pairIndex, setPairIndex] = useState(0);
   const [roundWinners, setRoundWinners] = useState([]);
   const [champion, setChampion] = useState(null);
@@ -157,7 +162,7 @@ const WorldCupGame = ({ worldCup }) => {
   };
 
   const handleRestart = () => {
-    setContestants(worldCup.candidates);
+    setContestants(shuffleCandidates(worldCup.candidates));
     setPairIndex(0);
     setRoundWinners([]);
     setChampion(null);
