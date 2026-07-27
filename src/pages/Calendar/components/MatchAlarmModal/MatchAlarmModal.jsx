@@ -9,9 +9,24 @@ const PRESET_OPTIONS = [
 ];
 
 const CUSTOM_UNITS = [
-  { id: "minutes", label: "분 전", multiplier: 1 },
-  { id: "hours", label: "시간 전", multiplier: 60 },
+  { id: "minutes", label: "분", multiplier: 1 },
+  { id: "hours", label: "시간", multiplier: 60 },
 ];
+
+const getReminderSettingsFromAlarm = (alarm, fallbackSettings) => {
+  const payload = alarm?.payload ?? {};
+
+  return {
+    presetId: String(payload.presetId ?? fallbackSettings?.presetId ?? "60"),
+    customAmount: String(
+      payload.customAmount ?? fallbackSettings?.customAmount ?? "15",
+    ),
+    customUnit:
+      payload.customUnit === "hours"
+        ? "hours"
+        : fallbackSettings?.customUnit ?? "minutes",
+  };
+};
 
 const formatScheduleLabel = (match) => {
   const datePart = match?.date ? match.date.replaceAll("-", ".") : "날짜 미정";
@@ -23,11 +38,9 @@ const formatScheduleLabel = (match) => {
 const buildPreviewLabel = ({ selectedPresetId, customAmount, customUnit }) => {
   if (selectedPresetId === "custom") {
     const amount = customAmount || 0;
-    const unitLabel = CUSTOM_UNITS.find(
-      (unit) => unit.id === customUnit,
-    )?.label;
+    const unitLabel = CUSTOM_UNITS.find((unit) => unit.id === customUnit)?.label;
 
-    return `경기 시작 ${amount}${unitLabel} 알림`;
+    return `경기 시작 ${amount}${unitLabel} 전 알림`;
   }
 
   const presetLabel =
@@ -37,7 +50,16 @@ const buildPreviewLabel = ({ selectedPresetId, customAmount, customUnit }) => {
   return `경기 시작 ${presetLabel} 알림`;
 };
 
-const MatchAlarmModal = ({ match, isOpen, onClose }) => {
+const MatchAlarmModal = ({
+  match,
+  isOpen,
+  onClose,
+  onConfirm,
+  onDelete,
+  defaultReminderSettings,
+  existingAlarm,
+  isAlarmLoading = false,
+}) => {
   const titleId = useId();
   const descriptionId = useId();
   const [selectedPresetId, setSelectedPresetId] = useState("60");
@@ -67,14 +89,24 @@ const MatchAlarmModal = ({ match, isOpen, onClose }) => {
   }, [isOpen, onClose]);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || isAlarmLoading) {
       return;
     }
 
-    setSelectedPresetId("60");
-    setCustomAmount("15");
-    setCustomUnit("minutes");
-  }, [isOpen, match?.id]);
+    const nextSettings = existingAlarm
+      ? getReminderSettingsFromAlarm(existingAlarm, defaultReminderSettings)
+      : defaultReminderSettings;
+
+    setSelectedPresetId(nextSettings?.presetId || "60");
+    setCustomAmount(nextSettings?.customAmount || "15");
+    setCustomUnit(nextSettings?.customUnit || "minutes");
+  }, [
+    defaultReminderSettings,
+    existingAlarm,
+    isAlarmLoading,
+    isOpen,
+    match?.id,
+  ]);
 
   const matchTitle = useMemo(() => {
     const homeName = match?.homeTeam?.shortName || match?.homeTeam?.name || "-";
@@ -88,6 +120,8 @@ const MatchAlarmModal = ({ match, isOpen, onClose }) => {
     customAmount,
     customUnit,
   });
+  const hasExistingAlarm = Boolean(existingAlarm?.id);
+  const actionsDisabled = isAlarmLoading;
 
   if (!isOpen || !match) {
     return null;
@@ -129,8 +163,20 @@ const MatchAlarmModal = ({ match, isOpen, onClose }) => {
         </div>
 
         <p id={descriptionId} className={styles.description}>
-          {matchTitle} 경기를 기준으로 알림 시간을 미리 맞춰볼 수 있어요.
+          {matchTitle} 경기 시작 전에 알림을 받을 시간을 설정해 주세요.
         </p>
+
+        <div className={styles.statusRow}>
+          {isAlarmLoading ? (
+            <span className={styles.statusBadge}>기존 알림을 확인 중이에요.</span>
+          ) : hasExistingAlarm ? (
+            <span className={`${styles.statusBadge} ${styles.statusBadgeSuccess}`}>
+              이미 이 경기에 알림이 설정되어 있어요.
+            </span>
+          ) : (
+            <span className={styles.statusBadge}>아직 설정된 알림이 없어요.</span>
+          )}
+        </div>
 
         <article className={styles.matchCard}>
           <div className={styles.matchInfo}>
@@ -157,6 +203,7 @@ const MatchAlarmModal = ({ match, isOpen, onClose }) => {
                   value={option.id}
                   checked={selectedPresetId === option.id}
                   onChange={() => setSelectedPresetId(option.id)}
+                  disabled={actionsDisabled}
                 />
                 <span>{option.label}</span>
               </label>
@@ -168,6 +215,7 @@ const MatchAlarmModal = ({ match, isOpen, onClose }) => {
                 value="custom"
                 checked={selectedPresetId === "custom"}
                 onChange={() => setSelectedPresetId("custom")}
+                disabled={actionsDisabled}
               />
               <span>직접 설정</span>
             </label>
@@ -185,7 +233,7 @@ const MatchAlarmModal = ({ match, isOpen, onClose }) => {
                 min="1"
                 value={customAmount}
                 onChange={(event) => setCustomAmount(event.target.value)}
-                disabled={selectedPresetId !== "custom"}
+                disabled={selectedPresetId !== "custom" || actionsDisabled}
               />
             </div>
 
@@ -198,7 +246,7 @@ const MatchAlarmModal = ({ match, isOpen, onClose }) => {
                 className={styles.selectInput}
                 value={customUnit}
                 onChange={(event) => setCustomUnit(event.target.value)}
-                disabled={selectedPresetId !== "custom"}
+                disabled={selectedPresetId !== "custom" || actionsDisabled}
               >
                 {CUSTOM_UNITS.map((unit) => (
                   <option
@@ -224,15 +272,35 @@ const MatchAlarmModal = ({ match, isOpen, onClose }) => {
             className={styles.cancelButton}
             type="button"
             onClick={onClose}
+            disabled={actionsDisabled}
           >
             닫기
           </button>
+
+          {hasExistingAlarm ? (
+            <button
+              className={styles.deleteButton}
+              type="button"
+              onClick={() => onDelete?.()}
+              disabled={actionsDisabled}
+            >
+              알림 해제
+            </button>
+          ) : null}
+
           <button
             className={styles.confirmButton}
             type="button"
-            onClick={onClose}
+            onClick={() =>
+              onConfirm?.({
+                presetId: selectedPresetId,
+                customAmount,
+                customUnit,
+              })
+            }
+            disabled={actionsDisabled}
           >
-            저장하기
+            {hasExistingAlarm ? "알림 수정" : "알림 저장"}
           </button>
         </div>
       </section>

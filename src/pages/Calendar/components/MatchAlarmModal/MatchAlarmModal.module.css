@@ -83,6 +83,28 @@
   word-break: keep-all;
 }
 
+.statusRow {
+  margin-top: 14px;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 999px;
+  color: rgb(255 255 255 / 76%);
+  background-color: rgb(255 255 255 / 5%);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.statusBadgeSuccess {
+  border-color: rgb(227 27 54 / 35%);
+  color: rgb(255 211 217);
+  background-color: rgb(227 27 54 / 12%);
+}
+
 .matchCard,
 .controlGroup,
 .previewCard {
@@ -301,8 +323,33 @@
   transform: translateY(-1px);
 }
 
+.deleteButton {
+  flex: 1;
+  height: 48px;
+  padding: 0 18px;
+  border: 1px solid rgb(227 27 54 / 55%);
+  border-radius: 12px;
+  color: rgb(255 224 228);
+  background-color: rgb(227 27 54 / 14%);
+  font-size: 14px;
+  font-weight: 800;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.deleteButton:hover {
+  border-color: rgb(227 27 54 / 82%);
+  color: var(--color-text-white);
+  background-color: rgb(227 27 54 / 24%);
+  transform: translateY(-1px);
+}
+
 .closeButton:focus-visible,
 .cancelButton:focus-visible,
+.deleteButton:focus-visible,
 .confirmButton:focus-visible,
 .presetOption:focus-within,
 .numberInput:focus-visible,
