@@ -23,8 +23,9 @@ const WorldCupGame = ({ worldCup }) => {
 
   const currentPair = contestants.slice(pairIndex, pairIndex + 2);
   const matchNumber = pairIndex / 2 + 1;
-  const totalMatches = contestants.length / 2;
-  const roundLabel = contestants.length === 2 ? "결승" : `${contestants.length}강`;
+  const totalMatches = Math.ceil(contestants.length / 2);
+  const bracketSize = 2 ** Math.ceil(Math.log2(contestants.length));
+  const roundLabel = contestants.length === 2 ? "결승" : `${bracketSize}강`;
 
   const handleChoose = (selectedCandidate) => {
     const nextWinners = [...roundWinners, selectedCandidate];
@@ -70,6 +71,7 @@ const WorldCupGame = ({ worldCup }) => {
                 <img
                   className={styles.championImage}
                   src={champion.image}
+                  referrerPolicy="no-referrer"
                   alt={`${champion.title} 선수`}
                 />
               )}
@@ -114,6 +116,7 @@ const WorldCupGame = ({ worldCup }) => {
                 <img
                   className={styles.choiceImage}
                   src={candidate.image}
+                  referrerPolicy="no-referrer"
                   alt=""
                 />
               )}

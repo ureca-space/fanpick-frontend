@@ -6,7 +6,14 @@ const BattleImage = ({ src, label }) => {
     return <span className={styles.imageFallback}>{label}</span>;
   }
 
-  return <img className={styles.battleImage} src={src} alt="" />;
+  return (
+    <img
+      className={styles.battleImage}
+      src={src}
+      referrerPolicy="no-referrer"
+      alt=""
+    />
+  );
 };
 
 const WorldCupCard = ({ worldCup, onStart }) => {
@@ -18,7 +25,12 @@ const WorldCupCard = ({ worldCup, onStart }) => {
           <span className={styles.roundBadge}>{worldCup.round}</span>
         </div>
 
-        <div className={styles.imageArea} aria-hidden="true">
+        <div
+          className={`${styles.imageArea} ${
+            worldCup.id === "lol-thumbnail" ? styles.thumbnailImageArea : ""
+          }`}
+          aria-hidden="true"
+        >
           <BattleImage
             src={worldCup.leftImage}
             label={worldCup.category.slice(0, 1)}
