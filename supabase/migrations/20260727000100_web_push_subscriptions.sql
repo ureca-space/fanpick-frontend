@@ -51,3 +51,11 @@ alter table public.scheduled_notifications
   add column if not exists retry_count integer not null default 0,
   add column if not exists last_error text,
   add column if not exists processed_at timestamptz;
+
+grant select, update
+  on table public.scheduled_notifications
+  to service_role;
+
+grant select, delete
+  on table public.push_subscriptions
+  to service_role;
