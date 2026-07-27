@@ -1,9 +1,25 @@
 import Button from "../../../../components/Button/Button";
 import styles from "./WorldCupCard.module.css";
 
+const isVideoSource = (src) => /\.mp4(?:$|\?)/i.test(src);
+
 const BattleImage = ({ src, label }) => {
   if (!src) {
     return <span className={styles.imageFallback}>{label}</span>;
+  }
+
+  if (isVideoSource(src)) {
+    return (
+      <video
+        className={styles.battleImage}
+        src={src}
+        referrerPolicy="no-referrer"
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+    );
   }
 
   return (
@@ -27,7 +43,9 @@ const WorldCupCard = ({ worldCup, onStart }) => {
 
         <div
           className={`${styles.imageArea} ${
-            worldCup.id === "lol-thumbnail" ? styles.thumbnailImageArea : ""
+            ["baseball-funny", "lol-thumbnail"].includes(worldCup.id)
+              ? styles.thumbnailImageArea
+              : ""
           }`}
           aria-hidden="true"
         >
