@@ -1,0 +1,501 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 0%, rgb(227 27 54 / 16%), transparent 30%),
+    rgb(1 7 18 / 78%);
+  animation: fadeIn 0.18s ease;
+}
+
+.dialog {
+  width: min(100%, 560px);
+  max-height: min(100%, 760px);
+  overflow: auto;
+  padding: 28px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 22px;
+  color: var(--color-text-white);
+  background:
+    radial-gradient(circle at 50% 0%, rgb(227 27 54 / 14%), transparent 44%),
+    linear-gradient(180deg, rgb(14 18 32 / 98%), rgb(8 11 21 / 98%));
+  box-shadow: 0 30px 90px rgb(0 0 0 / 55%);
+  animation: slideUp 0.22s ease;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.kicker {
+  margin-bottom: 8px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.title {
+  color: var(--color-text-white);
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.closeButton {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 50%;
+  color: rgb(255 255 255 / 72%);
+  background-color: rgb(255 255 255 / 4%);
+  font-size: 24px;
+  line-height: 1;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.closeButton:hover {
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 10%);
+  transform: scale(1.02);
+}
+
+.description {
+  margin-top: 12px;
+  color: rgb(255 255 255 / 66%);
+  font-size: 14px;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.statusRow {
+  margin-top: 14px;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 999px;
+  color: rgb(255 255 255 / 76%);
+  background-color: rgb(255 255 255 / 5%);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.statusBadgeSuccess {
+  border-color: rgb(227 27 54 / 35%);
+  color: rgb(255 211 217);
+  background-color: rgb(227 27 54 / 12%);
+}
+
+.selectionGroup {
+  display: grid;
+  gap: 8px;
+}
+
+.currentSelectionBadge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 7px 12px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 999px;
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 10%);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.statusBadgeError {
+  border-color: rgb(227 27 54 / 45%);
+  color: rgb(255 223 227);
+  background-color: rgb(227 27 54 / 14%);
+}
+
+.unavailableCard {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid rgb(227 27 54 / 24%);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgb(227 27 54 / 10%), rgb(255 255 255 / 4%));
+}
+
+.unavailableTitle {
+  color: rgb(255 214 220);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.unavailableText {
+  color: rgb(255 255 255 / 66%);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.matchCard,
+.controlGroup,
+.previewCard {
+  margin-top: 18px;
+}
+
+.matchCard {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 18px;
+  background-color: rgb(255 255 255 / 5%);
+}
+
+.matchInfo {
+  display: grid;
+  gap: 6px;
+}
+
+.matchLabel {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.matchMeta,
+.matchDetails {
+  color: rgb(255 255 255 / 60%);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.matchDetails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+}
+
+.controlGroup {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 18px;
+  background-color: rgb(255 255 255 / 4%);
+}
+
+.sectionTitle {
+  color: var(--color-text-white);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.presetGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.presetOption {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 14px;
+  background-color: rgb(255 255 255 / 5%);
+  color: rgb(255 255 255 / 82%);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.presetOption:hover {
+  border-color: rgb(255 255 255 / 24%);
+  background-color: rgb(255 255 255 / 8%);
+  transform: translateY(-1px);
+}
+
+.presetOptionSelected {
+  border-color: rgb(255 255 255 / 76%);
+  background-color: rgb(255 255 255 / 16%);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 18%) inset,
+    0 10px 24px rgb(0 0 0 / 12%);
+}
+
+.presetOption input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.presetOption input:checked + span {
+  color: var(--color-text-white);
+}
+
+.presetOption input:checked + span::before {
+  position: absolute;
+  inset: -1px;
+  content: "";
+}
+
+.presetOptionSelected span {
+  color: var(--color-text-white);
+}
+
+.presetOption span {
+  position: relative;
+  z-index: 1;
+}
+
+.customArea {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.customInputGroup {
+  display: grid;
+  gap: 8px;
+}
+
+.fieldLabel {
+  color: rgb(255 255 255 / 68%);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.numberInput,
+.selectInput {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 12px;
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 6%);
+  font: inherit;
+}
+
+.numberInput:focus,
+.selectInput:focus {
+  outline: 2px solid rgb(227 27 54 / 45%);
+  outline-offset: 2px;
+}
+
+.numberInput:disabled,
+.selectInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.previewCard {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgb(227 27 54 / 12%), rgb(255 255 255 / 4%));
+}
+
+.previewLabel {
+  color: rgb(255 255 255 / 56%);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.previewValue {
+  color: var(--color-text-white);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.previewMessage {
+  color: rgb(255 255 255 / 66%);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.previewButton {
+  width: fit-content;
+  min-height: 40px;
+  margin-top: 4px;
+  padding: 0 14px;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 10px;
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 8%);
+  font-size: 13px;
+  font-weight: 800;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.previewButton:hover {
+  border-color: rgb(255 255 255 / 48%);
+  background-color: rgb(255 255 255 / 14%);
+  transform: translateY(-1px);
+}
+
+.previewStatus {
+  color: rgb(255 255 255 / 62%);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.buttonArea {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.cancelButton,
+.confirmButton {
+  flex: 1;
+  height: 48px;
+  padding: 0 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.cancelButton {
+  border: 1px solid rgb(255 255 255 / 18%);
+  color: rgb(255 255 255 / 78%);
+  background-color: transparent;
+}
+
+.cancelButton:hover {
+  border-color: rgb(255 255 255 / 38%);
+  color: var(--color-text-white);
+  background-color: rgb(255 255 255 / 7%);
+}
+
+.confirmButton {
+  border: 1px solid var(--color-accent);
+  color: var(--color-text-white);
+  background-color: var(--color-accent);
+}
+
+.confirmButton:hover {
+  border-color: var(--color-accent-hover);
+  background-color: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
+.deleteButton {
+  flex: 1;
+  height: 48px;
+  padding: 0 18px;
+  border: 1px solid rgb(227 27 54 / 55%);
+  border-radius: 12px;
+  color: rgb(255 224 228);
+  background-color: rgb(227 27 54 / 14%);
+  font-size: 14px;
+  font-weight: 800;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.deleteButton:hover {
+  border-color: rgb(227 27 54 / 82%);
+  color: var(--color-text-white);
+  background-color: rgb(227 27 54 / 24%);
+  transform: translateY(-1px);
+}
+
+.closeButton:focus-visible,
+.cancelButton:focus-visible,
+.deleteButton:focus-visible,
+.confirmButton:focus-visible,
+.previewButton:focus-visible,
+.presetOption:focus-within,
+.numberInput:focus-visible,
+.selectInput:focus-visible {
+  outline: 2px solid var(--color-text-white);
+  outline-offset: 2px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .backdrop {
+    padding: 18px;
+  }
+
+  .dialog {
+    padding: 22px;
+    border-radius: 18px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .presetGrid,
+  .customArea,
+  .buttonArea {
+    grid-template-columns: 1fr;
+  }
+
+  .buttonArea {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+}
