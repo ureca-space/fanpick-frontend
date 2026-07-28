@@ -275,6 +275,36 @@
   border-radius: 6px;
 }
 
+.searchArea {
+  width: min(100%, 420px);
+  margin: 0 0 24px auto;
+}
+
+.searchResult {
+  margin: -8px 0 18px;
+  color: var(--color-white-55);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.searchResult strong {
+  color: var(--color-text-white);
+  font-weight: 700;
+}
+
+.searchResult span {
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .searchArea {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+}
+
 @media (max-width: 1300px) {
   .layout {
     grid-template-columns: 190px minmax(0, 1fr) 240px;

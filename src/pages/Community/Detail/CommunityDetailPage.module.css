@@ -175,6 +175,24 @@
   overflow-wrap: anywhere;
 }
 
+.postImageArea {
+  width: 100%;
+  margin-top: 32px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.postImage {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 720px;
+  margin: 0 auto;
+  border-radius: 8px;
+  object-fit: contain;
+  background-color: var(--color-surface-dark);
+}
+
 .postReactionArea {
   display: flex;
   justify-content: flex-end;
@@ -647,6 +665,15 @@
 
   .articleContent {
     min-height: 260px;
+  }
+
+  .postImageArea {
+    margin-top: 24px;
+  }
+
+  .postImage {
+    width: 100%;
+    max-height: 520px;
   }
 
   .commentMeta {

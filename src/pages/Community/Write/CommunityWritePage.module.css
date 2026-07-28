@@ -99,9 +99,11 @@
 .selectMenu button {
   width: 100%;
   padding: 10px 12px;
+  border: 0;
   border-radius: 6px;
   color: var(--color-white-72);
   background: transparent;
+  cursor: pointer;
   text-align: left;
 }
 
@@ -121,6 +123,7 @@
   outline: 0;
   color: var(--color-text-white);
   background: transparent;
+  font-family: var(--font-korean);
 }
 
 .titleInput {
@@ -134,6 +137,7 @@
   min-height: 520px;
   padding: 38px 48px;
   resize: vertical;
+  font-size: 15px;
   line-height: 1.7;
 }
 
@@ -147,6 +151,114 @@
   background: var(--color-white-02);
 }
 
+/* 이미지 첨부 영역 */
+.imageSection {
+  padding: 28px 48px;
+  border-bottom: 1px solid var(--color-white-10);
+}
+
+.imageSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.imageSectionHeader strong {
+  display: block;
+  color: var(--color-text-white);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.imageSectionHeader p {
+  margin-top: 6px;
+  color: var(--color-white-55);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.imageSelectButton {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 112px;
+  height: 42px;
+  padding: 0 18px;
+  border: 1px solid var(--color-white-18);
+  border-radius: 6px;
+  color: var(--color-text-white);
+  background: var(--color-surface-muted);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.imageSelectButton:hover {
+  border-color: var(--color-accent);
+  background: var(--color-surface-fallback);
+}
+
+.imageInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.imagePreviewArea {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid var(--color-white-10);
+  border-radius: 8px;
+  background: var(--color-surface-muted);
+}
+
+.imagePreview {
+  display: block;
+  width: min(100%, 520px);
+  max-height: 360px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: var(--color-surface-dark);
+}
+
+.imageRemoveButton {
+  flex-shrink: 0;
+  min-width: 90px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--color-white-18);
+  border-radius: 6px;
+  color: var(--color-white-72);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.imageRemoveButton:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text-white);
+  background: var(--color-white-02);
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;
@@ -154,10 +266,21 @@
   padding: 24px 44px;
 }
 
+.loadingMessage {
+  width: min(100%, 760px);
+  padding: 80px 24px;
+  border: 1px solid var(--color-white-10);
+  border-radius: 8px;
+  color: var(--color-white-65);
+  background: var(--color-surface-card);
+  text-align: center;
+}
+
 @media (max-width: 700px) {
   .editorHeader {
     align-items: stretch;
     flex-direction: column;
+    gap: 18px;
     padding: 28px 24px 18px;
   }
 
@@ -178,6 +301,33 @@
   .contentInput {
     min-height: 400px;
     padding: 28px 24px;
+  }
+
+  .imageSection {
+    padding: 24px;
+  }
+
+  .imageSectionHeader {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .imageSelectButton {
+    width: 100%;
+  }
+
+  .imagePreviewArea {
+    flex-direction: column;
+  }
+
+  .imagePreview {
+    width: 100%;
+    max-height: 300px;
+  }
+
+  .imageRemoveButton {
+    width: 100%;
   }
 
   .actions {

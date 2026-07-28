@@ -21,6 +21,7 @@ const CommunitySidebars = ({
       activeFilter={activeFilter}
       onFilterChange={onFilterChange}
     />
+
     <CommunityPopularPanel
       isLoading={isPopularLoading}
       linkState={popularLinkState}
@@ -29,12 +30,10 @@ const CommunitySidebars = ({
   </>
 );
 
-export const CommunityCategoryPanel = ({
-  activeFilter,
-  onFilterChange,
-}) => {
+export const CommunityCategoryPanel = ({ activeFilter, onFilterChange }) => {
   const navigate = useNavigate();
   const { isAuthLoading, isLoggedIn } = useAuth();
+
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
 
   const handleWriteClick = (event) => {
@@ -55,6 +54,7 @@ export const CommunityCategoryPanel = ({
 
   const handleMoveToLogin = () => {
     closeLoginDialog();
+
     navigate("/login", {
       state: {
         from: {
@@ -72,22 +72,28 @@ export const CommunityCategoryPanel = ({
         </Button>
 
         <nav className={styles.categoryNav} aria-label="게시판 카테고리">
-          {BOARD_FILTERS.map((item, index) =>
-            onFilterChange ? (
-              <button
-                type="button"
-                key={item.id}
-                className={[
-                  activeFilter === item.id ? styles.activeCategory : "",
-                  index === 4 ? styles.categoryStart : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                onClick={() => onFilterChange(item.id)}
-              >
-                {item.label}
-              </button>
-            ) : (
+          {BOARD_FILTERS.map((item) => {
+            const isMyCategoryStart = item.id === "my-posts";
+
+            if (onFilterChange) {
+              return (
+                <button
+                  type="button"
+                  key={item.id}
+                  className={[
+                    activeFilter === item.id ? styles.activeCategory : "",
+                    isMyCategoryStart ? styles.categoryStart : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  onClick={() => onFilterChange(item.id)}
+                >
+                  {item.label}
+                </button>
+              );
+            }
+
+            return (
               <Link
                 key={item.id}
                 to={
@@ -95,12 +101,12 @@ export const CommunityCategoryPanel = ({
                     ? "/community"
                     : `/community?filter=${item.id}`
                 }
-                className={index === 4 ? styles.categoryStart : ""}
+                className={isMyCategoryStart ? styles.categoryStart : ""}
               >
                 {item.label}
               </Link>
-            ),
-          )}
+            );
+          })}
         </nav>
       </aside>
 
@@ -125,6 +131,7 @@ export const CommunityPopularPanel = ({
 }) => (
   <aside className={[styles.popularPanel, className].filter(Boolean).join(" ")}>
     <h2>커뮤니티 인기글</h2>
+
     <ul>
       {isLoading
         ? Array.from({ length: 10 }, (_, index) => (
@@ -140,6 +147,7 @@ export const CommunityPopularPanel = ({
                     ? `${post.title.slice(0, 16)}...`
                     : post.title}
                 </span>
+
                 <b>({Number(post.commentCount ?? 0).toLocaleString()})</b>
               </Link>
             </li>

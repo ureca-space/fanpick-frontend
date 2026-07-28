@@ -7,15 +7,16 @@ import {
 } from "react-icons/fi";
 import { Link, useSearchParams } from "react-router-dom";
 import EmptyState from "../../components/EmptyState/EmptyState";
+import SearchInput from "../../components/SearchInput/SearchInput";
 import Skeleton from "../../components/Skeleton/Skeleton";
 import useAuth from "../../contexts/useAuth";
+import useRelativeTimeClock from "../../hooks/useRelativeTimeClock";
 import {
   fetchCommunityPosts,
   fetchMyCommunityComments,
 } from "../../services/communityApi";
 import { subscribeToCommunityChanges } from "../../services/communityRealtime";
 import { formatRelativeTime } from "../../utils/formatRelativeTime";
-import useRelativeTimeClock from "../../hooks/useRelativeTimeClock";
 import {
   CommunityCategoryPanel,
   CommunityPopularPanel,
@@ -26,17 +27,21 @@ import styles from "./CommunityPage.module.css";
 
 const PAGE_SIZE = 10;
 const MAX_VISIBLE_PAGE_COUNT = 5;
+
 const CATEGORY_LABELS = Object.fromEntries(
   CATEGORIES.map((item) => [item.id, item.label]),
 );
+
 const formatAuthorName = (name = "") =>
   name.length > 4 ? `${name.slice(0, 3)}...` : name;
+
 const formatPostTitle = (title = "") =>
   title.length > 34 ? `${title.slice(0, 34)}...` : title;
 
 const getVisiblePageNumbers = (currentPage, pageCount) => {
   const visibleCount = Math.min(MAX_VISIBLE_PAGE_COUNT, pageCount);
   const halfVisibleCount = Math.floor(visibleCount / 2);
+
   const startPage = Math.min(
     Math.max(1, currentPage - halfVisibleCount),
     pageCount - visibleCount + 1,
@@ -78,23 +83,30 @@ const CommunityPaginationSkeleton = () => (
 const CommunityPage = () => {
   const { user } = useAuth();
   const userId = user?.id;
+
   const [searchParams, setSearchParams] = useSearchParams();
-  const requestedFilter = searchParams.get("filter");
-  const requestedPage = Number(searchParams.get("page"));
-  const category = BOARD_FILTERS.some(
-    (item) => item.id === requestedFilter,
-  )
-    ? requestedFilter
-    : "all";
-  const currentPage =
-    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const [posts, setPosts] = useState([]);
   const [myComments, setMyComments] = useState([]);
   const [sortBy, setSortBy] = useState("latest");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+
   const currentTime = useRelativeTimeClock();
   const contentStartRef = useRef(null);
+
+  const requestedFilter = searchParams.get("filter");
+  const requestedPage = Number(searchParams.get("page"));
+
+  const searchKeyword = searchParams.get("keyword") || "";
+  const normalizedKeyword = searchKeyword.trim().toLowerCase();
+  const hasSearchKeyword = normalizedKeyword !== "";
+
+  const category = BOARD_FILTERS.some((item) => item.id === requestedFilter)
+    ? requestedFilter
+    : "all";
+
+  const currentPage =
+    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
 
   const loadPosts = useCallback(
     async ({ showLoading = true } = {}) => {
@@ -104,6 +116,7 @@ const CommunityPage = () => {
         }
 
         setErrorMessage("");
+
         const [postData, commentData] = await Promise.all([
           fetchCommunityPosts(),
           fetchMyCommunityComments(userId),
@@ -143,6 +156,7 @@ const CommunityPage = () => {
   }, [loadPosts]);
 
   const selectedCategory = BOARD_FILTERS.find((item) => item.id === category);
+
   const filteredPosts = useMemo(() => {
     let nextPosts = [...posts];
 
@@ -155,7 +169,9 @@ const CommunityPage = () => {
         .map((comment) => {
           const post = postsById.get(comment.post_id);
 
-          if (!post) return null;
+          if (!post) {
+            return null;
+          }
 
           return {
             ...post,
@@ -172,42 +188,89 @@ const CommunityPage = () => {
       nextPosts = posts.filter((post) => post.category === category);
     }
 
+    if (normalizedKeyword) {
+      nextPosts = nextPosts.filter((post) => {
+        const searchableText = [post.title, post.postTitle, post.author_name]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchableText.includes(normalizedKeyword);
+      });
+    }
+
     return nextPosts.sort((a, b) => {
       if (sortBy === "popular") {
-        return b.view_count - a.view_count;
+        return (b.view_count ?? 0) - (a.view_count ?? 0);
       }
 
       if (sortBy === "support") {
-        return b.supportCount - a.supportCount;
+        return (b.supportCount ?? 0) - (a.supportCount ?? 0);
       }
 
       return new Date(b.created_at) - new Date(a.created_at);
     });
-  }, [category, myComments, posts, sortBy, userId]);
+  }, [category, myComments, normalizedKeyword, posts, sortBy, userId]);
 
   const popularPosts = useMemo(
-    () => [...posts].sort((a, b) => b.view_count - a.view_count).slice(0, 10),
+    () =>
+      [...posts]
+        .sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0))
+        .slice(0, 10),
     [posts],
   );
+
   const pageCount = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE));
+
   const activePage = Math.min(currentPage, pageCount);
+
   const visiblePosts = filteredPosts.slice(
     (activePage - 1) * PAGE_SIZE,
     activePage * PAGE_SIZE,
   );
+
   const visiblePageNumbers = getVisiblePageNumbers(activePage, pageCount);
+
   const isFirstPage = activePage === 1;
   const isLastPage = activePage === pageCount;
 
   const changeCategory = (nextCategory) => {
-    setSearchParams(nextCategory === "all" ? {} : { filter: nextCategory });
+    const nextSearchParams = new URLSearchParams(searchParams);
+
+    if (nextCategory === "all") {
+      nextSearchParams.delete("filter");
+    } else {
+      nextSearchParams.set("filter", nextCategory);
+    }
+
+    nextSearchParams.delete("page");
+    setSearchParams(nextSearchParams);
   };
 
   const changeSort = (nextSort) => {
     setSortBy(nextSort);
+
     const nextSearchParams = new URLSearchParams(searchParams);
+
     nextSearchParams.delete("page");
     setSearchParams(nextSearchParams);
+  };
+
+  const handleSearchChange = (keyword) => {
+    const nextSearchParams = new URLSearchParams(searchParams);
+    const trimmedKeyword = keyword.trim();
+
+    if (trimmedKeyword) {
+      nextSearchParams.set("keyword", keyword);
+    } else {
+      nextSearchParams.delete("keyword");
+    }
+
+    nextSearchParams.delete("page");
+
+    setSearchParams(nextSearchParams, {
+      replace: true,
+    });
   };
 
   const changePage = (pageNumber) => {
@@ -220,8 +283,11 @@ const CommunityPage = () => {
     }
 
     setSearchParams(nextSearchParams);
+
     window.requestAnimationFrame(() => {
-      if (!contentStartRef.current) return;
+      if (!contentStartRef.current) {
+        return;
+      }
 
       const headerHeight =
         parseFloat(
@@ -229,9 +295,11 @@ const CommunityPage = () => {
             "--header-height",
           ),
         ) || 0;
+
       const contentGap = window.matchMedia("(max-width: 1100px)").matches
         ? 32
         : 48;
+
       const subNavHeight = window.matchMedia("(max-width: 900px)").matches
         ? 66
         : 74;
@@ -246,6 +314,34 @@ const CommunityPage = () => {
           contentGap,
       });
     });
+  };
+
+  const getEmptyStateTitle = () => {
+    if (hasSearchKeyword) {
+      return "검색 조건에 맞는 게시글이 없습니다.";
+    }
+
+    if (category === "my-posts") {
+      return "작성한 게시글이 없습니다.";
+    }
+
+    if (category === "my-comments") {
+      return "댓글을 작성한 게시글이 없습니다.";
+    }
+
+    return "등록된 게시글이 없습니다.";
+  };
+
+  const getEmptyStateDescription = () => {
+    if (hasSearchKeyword) {
+      return "게시글 제목이나 작성자 이름을 다시 검색해 보세요.";
+    }
+
+    if (category === "all") {
+      return "첫 번째 이야기를 남겨보세요.";
+    }
+
+    return undefined;
   };
 
   return (
@@ -264,6 +360,7 @@ const CommunityPage = () => {
               activeFilter={category}
               onFilterChange={changeCategory}
             />
+
             <CommunityPopularPanel
               className={styles.desktopPopularPanel}
               isLoading={isLoading}
@@ -276,6 +373,7 @@ const CommunityPage = () => {
             <main className={styles.board}>
               <div className={styles.boardHeader}>
                 <h2>{selectedCategory?.label ?? "전체 게시글"}</h2>
+
                 <div className={styles.sortButtons} aria-label="게시글 정렬">
                   <button
                     type="button"
@@ -284,6 +382,7 @@ const CommunityPage = () => {
                   >
                     최신순
                   </button>
+
                   <button
                     type="button"
                     className={sortBy === "popular" ? styles.activeSort : ""}
@@ -291,6 +390,7 @@ const CommunityPage = () => {
                   >
                     인기순
                   </button>
+
                   <button
                     type="button"
                     className={sortBy === "support" ? styles.activeSort : ""}
@@ -301,29 +401,44 @@ const CommunityPage = () => {
                 </div>
               </div>
 
+              <div className={styles.searchArea}>
+                <SearchInput
+                  value={searchKeyword}
+                  onChange={handleSearchChange}
+                  placeholder="게시글 제목 또는 작성자를 검색해보세요"
+                  ariaLabel="게시글 제목 또는 작성자 검색"
+                  debounceDelay={500}
+                />
+              </div>
+
+              {!isLoading &&
+                !errorMessage &&
+                hasSearchKeyword &&
+                filteredPosts.length > 0 && (
+                  <p className={styles.searchResult} aria-live="polite">
+                    <strong>{searchKeyword.trim()}</strong> 검색 결과{" "}
+                    <span>{filteredPosts.length}개</span>
+                  </p>
+                )}
+
               {isLoading && (
                 <>
                   <CommunityTableSkeleton />
                   <CommunityPaginationSkeleton />
                 </>
               )}
-              {!isLoading && errorMessage && <EmptyState title={errorMessage} />}
+
+              {!isLoading && errorMessage && (
+                <EmptyState title={errorMessage} />
+              )}
+
               {!isLoading && !errorMessage && filteredPosts.length === 0 && (
                 <EmptyState
-                  title={
-                    category === "my-posts"
-                      ? "작성한 게시글이 없습니다."
-                      : category === "my-comments"
-                        ? "댓글을 작성한 게시글이 없습니다."
-                        : "등록된 게시글이 없습니다."
-                  }
-                  description={
-                    category === "all"
-                      ? "첫 번째 이야기를 남겨보세요."
-                      : undefined
-                  }
+                  title={getEmptyStateTitle()}
+                  description={getEmptyStateDescription()}
                 />
               )}
+
               {!isLoading && !errorMessage && filteredPosts.length > 0 && (
                 <>
                   <div className={styles.postTable}>
@@ -339,13 +454,18 @@ const CommunityPage = () => {
                       <span>
                         {category === "my-comments" ? "댓글 / 게시글" : "제목"}
                       </span>
+
                       <span>
                         {category === "my-comments" ? "종목" : "작성자"}
                       </span>
+
                       <span>작성일</span>
+
                       {category !== "my-comments" && <span>조회수</span>}
+
                       {category !== "my-comments" && <span>응원</span>}
                     </div>
+
                     {visiblePosts.map((post) => (
                       <Link
                         to={`/community/${post.destinationId ?? post.id}`}
@@ -375,25 +495,33 @@ const CommunityPage = () => {
                                 {CATEGORY_LABELS[post.category]}
                               </small>
                             )}
+
                             <span className={styles.postTitleText}>
                               {formatPostTitle(post.title)}
                             </span>
+
                             <b>({post.commentCount})</b>
                           </span>
                         )}
+
                         <span title={post.author_name}>
                           {post.isMyComment
                             ? CATEGORY_LABELS[post.category]
                             : formatAuthorName(post.author_name)}
                         </span>
+
                         <span>
                           {formatRelativeTime(post.created_at, currentTime)}
                         </span>
+
                         {!post.isMyComment && (
-                          <span>{post.view_count.toLocaleString()}</span>
+                          <span>{(post.view_count ?? 0).toLocaleString()}</span>
                         )}
+
                         {!post.isMyComment && (
-                          <span>{post.supportCount.toLocaleString()}</span>
+                          <span>
+                            {(post.supportCount ?? 0).toLocaleString()}
+                          </span>
                         )}
                       </Link>
                     ))}
@@ -408,6 +536,7 @@ const CommunityPage = () => {
                     >
                       <FiChevronsLeft aria-hidden="true" />
                     </button>
+
                     <button
                       type="button"
                       onClick={() => changePage(activePage - 1)}
@@ -416,6 +545,7 @@ const CommunityPage = () => {
                     >
                       <FiChevronLeft aria-hidden="true" />
                     </button>
+
                     {visiblePageNumbers.map((pageNumber) => (
                       <button
                         type="button"
@@ -431,6 +561,7 @@ const CommunityPage = () => {
                         {pageNumber}
                       </button>
                     ))}
+
                     <button
                       type="button"
                       onClick={() => changePage(activePage + 1)}
@@ -439,6 +570,7 @@ const CommunityPage = () => {
                     >
                       <FiChevronRight aria-hidden="true" />
                     </button>
+
                     <button
                       type="button"
                       onClick={() => changePage(pageCount)}
