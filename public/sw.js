@@ -22,7 +22,7 @@ self.addEventListener("notificationclick", (event) => {
   ).href;
 
   event.waitUntil(
-    clients
+    self.clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then(async (clientList) => {
         const existingClient = clientList.find(
@@ -34,7 +34,7 @@ self.addEventListener("notificationclick", (event) => {
           return existingClient.focus();
         }
 
-        return clients.openWindow(targetUrl);
+        return self.clients.openWindow(targetUrl);
       }),
   );
 });

@@ -533,7 +533,7 @@ const LCK_TEAM_CANDIDATES = [
 const LCK_PLAYER_CANDIDATES = createPlayerCandidates(LCK_TEAMS, "LCK");
 
 export const WORLD_CUP_FILTERS = [
-  { id: "all", label: "전체" },
+  { id: "all", label: "ALL" },
   { id: "baseball", label: "BASEBALL" },
   { id: "soccer", label: "SOCCER" },
   { id: "esports", label: "LOL" },

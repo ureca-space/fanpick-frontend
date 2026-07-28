@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 12px;
   width: 100%;
   margin: 0;
@@ -98,27 +98,28 @@
 }
 
 .itemTeams {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  width: 100%;
   min-width: 0;
 }
 
 .teamGroup {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: flex-start;
+  gap: 0;
   min-width: 0;
 }
 
+.teamGroup:last-child {
+  justify-content: flex-end;
+}
+
 .teamName {
-  overflow: hidden;
-  color: var(--color-white-82);
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: none;
 }
 
 .teamLogo,
@@ -266,6 +267,7 @@
   }
 
   .itemTeams {
+    display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 4px;
@@ -276,10 +278,6 @@
     width: 20px;
     height: 20px;
     font-size: 0.65rem;
-  }
-
-  .teamName {
-    display: none;
   }
 
   .matchTooltip {

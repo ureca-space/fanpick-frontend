@@ -1,84 +1,41 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useAuth from "../../../../contexts/useAuth";
+import Button from "../../../../components/Button/Button";
 import FanPickDialog from "../../../../components/FanPickDialog/FanPickDialog";
 import MatchFilter from "../../../../components/MatchFilter/MatchFilter";
+import useAuth from "../../../../contexts/useAuth";
+import {
+  WORLD_CUP_FILTERS,
+  WORLD_CUPS,
+} from "../../../WorldCup/data/worldCupData";
+import WorldCupMedia from "../../../WorldCup/components/WorldCupMedia/WorldCupMedia";
 import styles from "./WorldCupSection.module.css";
 
-const FILTERS = [
-  { id: "soccer", label: "SOCCER" },
-  { id: "baseball", label: "BASEBALL" },
-  { id: "esports", label: "LOL" },
-];
+const FILTERS = WORLD_CUP_FILTERS.filter((filter) => filter.id !== "all");
 
-const WORLD_CUPS = {
-  soccer: {
-    leftPlayer: {
-      name: "손흥민",
-      team: "KOREA",
-      image: "/images/worldcup/soccer/son.jpg",
-    },
-    rightPlayer: {
-      name: "킬리안 음바페",
-      team: "FRANCE",
-      image: "/images/worldcup/soccer/mbappe.jpg",
-    },
-  },
+const getPreviewWorldCup = (filterId) =>
+  WORLD_CUPS.find((worldCup) => worldCup.playId === filterId) ?? WORLD_CUPS[0];
 
-  baseball: {
-    leftPlayer: {
-      name: "이정후",
-      team: "SAN FRANCISCO",
-      image: "/images/worldcup/baseball/lee-jung-hoo.jpg",
-    },
-    rightPlayer: {
-      name: "오타니 쇼헤이",
-      team: "LOS ANGELES",
-      image: "/images/worldcup/baseball/ohtani.jpg",
-    },
-  },
-
-  esports: {
-    leftPlayer: {
-      name: "Chovy",
-      team: "GEN.G",
-      image: "/images/worldcup/lol/chovy.jpg",
-    },
-    rightPlayer: {
-      name: "Faker",
-      team: "T1",
-      image: "/images/worldcup/lol/faker.jpg",
-    },
-  },
-};
-
-const PlayerPreview = ({ player }) => {
-  const [imageError, setImageError] = useState(false);
-
+const PlayerPreview = ({ candidate }) => {
   return (
     <div className={styles.playerCard}>
       <div className={styles.playerImageArea}>
-        {!imageError ? (
-          <img
-            className={styles.playerImage}
-            src={player.image}
-            alt={`${player.name} 선수`}
-            loading="lazy"
-            draggable="false"
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <div className={styles.imagePlaceholder} aria-hidden="true">
-            <span className={styles.placeholderText}>PLAYER</span>
-          </div>
-        )}
+        <WorldCupMedia
+          src={candidate.image}
+          alt={`${candidate.title} 후보`}
+          className={styles.playerImage}
+          fallbackClassName={styles.imagePlaceholder}
+          fallbackLabel={candidate.title}
+          loading="lazy"
+          draggable="false"
+        />
 
         <div className={styles.imageGradient} aria-hidden="true" />
 
         <div className={styles.playerInfo}>
-          <span className={styles.playerTeam}>{player.team}</span>
+          <span className={styles.playerTeam}>{candidate.description}</span>
 
-          <strong className={styles.playerName}>{player.name}</strong>
+          <strong className={styles.playerName}>{candidate.title}</strong>
         </div>
       </div>
     </div>
@@ -89,11 +46,12 @@ const WorldCupSection = () => {
   const navigate = useNavigate();
   const { isLoggedIn, isAuthLoading } = useAuth();
 
-  const [activeFilter, setActiveFilter] = useState("soccer");
+  const [activeFilter, setActiveFilter] = useState("baseball");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingWorldCupPath, setPendingWorldCupPath] = useState("");
 
-  const currentWorldCup = WORLD_CUPS[activeFilter];
+  const currentWorldCup = getPreviewWorldCup(activeFilter);
+  const previewCandidates = currentWorldCup.candidates.slice(0, 2);
 
   const handleStartWorldCup = () => {
     if (isAuthLoading) return;
@@ -154,32 +112,36 @@ const WorldCupSection = () => {
 
           <div className={styles.worldCupCard}>
             <div className={styles.matchup}>
-              <PlayerPreview
-                key={currentWorldCup.leftPlayer.image}
-                player={currentWorldCup.leftPlayer}
-              />
+              {previewCandidates[0] && (
+                <PlayerPreview
+                  key={previewCandidates[0].id}
+                  candidate={previewCandidates[0]}
+                />
+              )}
 
               <div className={styles.vsArea} aria-hidden="true">
                 <span className={styles.vsBadge}>VS</span>
               </div>
 
-              <PlayerPreview
-                key={currentWorldCup.rightPlayer.image}
-                player={currentWorldCup.rightPlayer}
-              />
+              {previewCandidates[1] && (
+                <PlayerPreview
+                  key={previewCandidates[1].id}
+                  candidate={previewCandidates[1]}
+                />
+              )}
             </div>
 
             <div className={styles.cardBottom}>
-              <p className={styles.previewText}>대표 선수 미리보기입니다.</p>
+              <p className={styles.previewText}>{currentWorldCup.title}</p>
 
-              <button
-                type="button"
+              <Button
                 className={styles.startButton}
+                variant="outline"
                 onClick={handleStartWorldCup}
                 disabled={isAuthLoading}
               >
                 시작하기
-              </button>
+              </Button>
             </div>
           </div>
         </div>

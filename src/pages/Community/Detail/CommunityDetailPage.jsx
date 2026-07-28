@@ -1,22 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FiEye, FiThumbsDown, FiThumbsUp } from "react-icons/fi";
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Button from "../../../components/Button/Button";
 import EmptyState from "../../../components/EmptyState/EmptyState";
 import FanPickDialog from "../../../components/FanPickDialog/FanPickDialog";
+import LinkifiedText from "../../../components/LinkifiedText/LinkifiedText";
 import Skeleton from "../../../components/Skeleton/Skeleton";
 import useAuth from "../../../contexts/useAuth";
+import useRelativeTimeClock from "../../../hooks/useRelativeTimeClock";
 import {
   createCommunityComment,
   deleteCommunityComment,
   deleteCommunityPost,
-  fetchCommunityComments,
   fetchCommunityCommentReactions,
+  fetchCommunityComments,
   fetchCommunityPost,
   fetchCommunityPostReactions,
   fetchCommunityPosts,
@@ -29,7 +26,6 @@ import {
 } from "../../../services/communityApi";
 import { subscribeToCommunityChanges } from "../../../services/communityRealtime";
 import { formatRelativeTime } from "../../../utils/formatRelativeTime";
-import useRelativeTimeClock from "../../../hooks/useRelativeTimeClock";
 import { getPredictionBadgeMeta } from "../../../utils/predictionBadge";
 import CommunitySidebars from "../components/CommunitySidebars/CommunitySidebars";
 import { CATEGORIES } from "../communityConstants";
@@ -40,10 +36,13 @@ const CATEGORY_LABELS = Object.fromEntries(
 );
 
 const CATEGORY_SPORT = {
+  free: "overall",
   lck: "esports",
   baseball: "baseball",
   soccer: "soccer",
 };
+
+const PREDICTION_SPORTS = ["soccer", "baseball", "esports"];
 
 const EMPTY_REACTION = {
   likeCount: 0,
@@ -52,35 +51,84 @@ const EMPTY_REACTION = {
 };
 
 const updateReactionSummary = (summary, nextReaction) => {
-  const nextSummary = { ...EMPTY_REACTION, ...summary };
+  const nextSummary = {
+    ...EMPTY_REACTION,
+    ...summary,
+  };
 
-  if (nextSummary.myReaction === "like") nextSummary.likeCount -= 1;
-  if (nextSummary.myReaction === "dislike") nextSummary.dislikeCount -= 1;
-  if (nextReaction === "like") nextSummary.likeCount += 1;
-  if (nextReaction === "dislike") nextSummary.dislikeCount += 1;
+  if (nextSummary.myReaction === "like") {
+    nextSummary.likeCount -= 1;
+  }
+
+  if (nextSummary.myReaction === "dislike") {
+    nextSummary.dislikeCount -= 1;
+  }
+
+  if (nextReaction === "like") {
+    nextSummary.likeCount += 1;
+  }
+
+  if (nextReaction === "dislike") {
+    nextSummary.dislikeCount += 1;
+  }
 
   nextSummary.myReaction = nextReaction;
+
   return nextSummary;
 };
 
 const PredictionBadge = ({
   userId,
-  fallbackSport,
-  sportStats,
+  fallbackSport = "overall",
+  sportStats = [],
 }) => {
   if (!userId) return null;
 
-  const stats = sportStats.find(
-    (item) =>
-      item.user_id === userId && item.sport === fallbackSport,
-  );
-  const totalCount = Number(stats?.total_count ?? 0);
-  const accuracyRate = Number(stats?.accuracy_rate ?? 0);
-  const badge = getPredictionBadgeMeta(
-    fallbackSport,
-    totalCount,
-    accuracyRate,
-  );
+  const userStats = sportStats.filter((item) => item.user_id === userId);
+
+  let totalCount = 0;
+  let accuracyRate = 0;
+
+  if (fallbackSport === "overall") {
+    const explicitOverallStats = userStats.find(
+      (item) => item.sport === "overall",
+    );
+
+    if (explicitOverallStats) {
+      totalCount = Number(explicitOverallStats.total_count ?? 0);
+      accuracyRate = Number(explicitOverallStats.accuracy_rate ?? 0);
+    } else {
+      const sportSummaries = userStats.filter((item) =>
+        PREDICTION_SPORTS.includes(item.sport),
+      );
+
+      totalCount = sportSummaries.reduce(
+        (sum, item) => sum + Number(item.total_count ?? 0),
+        0,
+      );
+
+      const correctCount = sportSummaries.reduce((sum, item) => {
+        if (item.correct_count !== null && item.correct_count !== undefined) {
+          return sum + Number(item.correct_count);
+        }
+
+        const itemTotalCount = Number(item.total_count ?? 0);
+        const itemAccuracyRate = Number(item.accuracy_rate ?? 0);
+
+        return sum + itemTotalCount * (itemAccuracyRate / 100);
+      }, 0);
+
+      accuracyRate =
+        totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+    }
+  } else {
+    const stats = userStats.find((item) => item.sport === fallbackSport);
+
+    totalCount = Number(stats?.total_count ?? 0);
+    accuracyRate = Number(stats?.accuracy_rate ?? 0);
+  }
+
+  const badge = getPredictionBadgeMeta(fallbackSport, totalCount, accuracyRate);
 
   return <span className={styles.predictionBadge}>{badge.name}</span>;
 };
@@ -110,6 +158,7 @@ const normalizePost = (post) => ({
   avatarUrl: post.author_avatar_url,
   createdAt: post.created_at,
   views: Number(post.view_count ?? 0),
+  imageUrl: post.image_url ?? "",
 });
 
 const normalizeComments = (rows) => {
@@ -124,12 +173,17 @@ const normalizeComments = (rows) => {
     updatedAt: row.updated_at,
     replies: [],
   });
+
   const roots = rows.filter((row) => !row.parent_id).map(normalize);
+
   const rootMap = new Map(roots.map((comment) => [comment.id, comment]));
 
-  rows.filter((row) => row.parent_id).forEach((row) => {
-    rootMap.get(row.parent_id)?.replies.push(normalize(row));
-  });
+  rows
+    .filter((row) => row.parent_id)
+    .forEach((row) => {
+      rootMap.get(row.parent_id)?.replies.push(normalize(row));
+    });
+
   return roots;
 };
 
@@ -137,11 +191,7 @@ const ProfileAvatar = ({ avatarUrl, className, name }) => {
   const profileName = String(name || "FanPick");
 
   return avatarUrl ? (
-    <img
-      className={className}
-      src={avatarUrl}
-      alt={`${profileName} 프로필`}
-    />
+    <img className={className} src={avatarUrl} alt={`${profileName} 프로필`} />
   ) : (
     <span className={className} aria-hidden="true">
       {profileName.trim().charAt(0).toUpperCase() || "F"}
@@ -167,8 +217,10 @@ const ReactionButtons = ({ disabled, onReact, summary = EMPTY_REACTION }) => (
         <span>응원</span>
         <FiThumbsUp aria-hidden="true" />
       </button>
+
       <b className={styles.reactionCount}>{summary.likeCount}</b>
     </span>
+
     <span className={styles.reactionOption}>
       <button
         type="button"
@@ -185,6 +237,7 @@ const ReactionButtons = ({ disabled, onReact, summary = EMPTY_REACTION }) => (
         <span>반대</span>
         <FiThumbsDown aria-hidden="true" />
       </button>
+
       <b className={styles.reactionCount}>{summary.dislikeCount}</b>
     </span>
   </div>
@@ -198,6 +251,7 @@ const CommunityDetailSkeleton = () => (
       <main className={styles.mainArea}>
         <div className={styles.pageControls}>
           <Skeleton.Box className={styles.skeletonControl} />
+
           <div>
             <Skeleton.Box className={styles.skeletonControl} />
             <Skeleton.Box className={styles.skeletonControl} />
@@ -208,8 +262,10 @@ const CommunityDetailSkeleton = () => (
           <div className={styles.articleHeader}>
             <Skeleton.Line className={styles.skeletonCategory} />
             <Skeleton.Line className={styles.skeletonTitle} />
+
             <div className={styles.authorInfo}>
               <Skeleton.Circle className={styles.skeletonAvatar} />
+
               <div>
                 <Skeleton.Line className={styles.skeletonAuthor} />
                 <Skeleton.Line className={styles.skeletonMeta} />
@@ -231,11 +287,14 @@ const CommunityDetailSkeleton = () => (
 
           <div className={styles.commentSection}>
             <Skeleton.Line className={styles.skeletonCommentTitle} />
+
             <Skeleton.Box className={styles.skeletonCommentBox} />
+
             <div className={styles.skeletonCommentList}>
               {Array.from({ length: 4 }, (_, index) => (
                 <div className={styles.skeletonCommentItem} key={index}>
                   <Skeleton.Circle className={styles.skeletonSmallAvatar} />
+
                   <div>
                     <Skeleton.Line className={styles.skeletonAuthor} />
                     <Skeleton.Line className={styles.skeletonCommentLine} />
@@ -255,7 +314,9 @@ const CommunityDetailPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+
   const userId = user?.id;
+
   const [comment, setComment] = useState("");
   const [post, setPost] = useState(null);
   const [previousPost, setPreviousPost] = useState(null);
@@ -275,14 +336,18 @@ const CommunityDetailPage = () => {
   const [editedContent, setEditedContent] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
+
   const currentTime = useRelativeTimeClock();
   const increasedPostIdRef = useRef(null);
 
   const currentAvatarUrl = user?.user_metadata?.avatar_url || "";
+
   const communityListSearch = location.state?.communityListSearch;
+
   const communityListPath = communityListSearch
     ? `/community?${communityListSearch}`
     : "/community";
+
   const communityListState = communityListSearch
     ? { communityListSearch }
     : undefined;
@@ -301,91 +366,99 @@ const CommunityDetailPage = () => {
     return new Date(a.createdAt) - new Date(b.createdAt);
   });
 
-  const loadDetail = useCallback(async ({ showLoading = true } = {}) => {
-    const shouldIncreaseView =
-      increasedPostIdRef.current !== String(postId);
-
-    if (shouldIncreaseView) {
-      increasedPostIdRef.current = String(postId);
-    }
-
-    try {
-      if (showLoading) {
-        setIsLoading(true);
-      }
-
-      setErrorMessage("");
-      const [postData, postList, commentRows] = await Promise.all([
-        fetchCommunityPost(postId),
-        fetchCommunityPosts(),
-        fetchCommunityComments(postId),
-      ]);
-      const normalizedPosts = postList.map(normalizePost);
-      const currentIndex = normalizedPosts.findIndex(
-        (item) => String(item.id) === String(postId),
-      );
-
-      const normalizedPost = normalizePost(postData);
-
-      setPost(normalizedPost);
-      setPreviousPost(normalizedPosts[currentIndex - 1] ?? null);
-      setNextPost(normalizedPosts[currentIndex + 1] ?? null);
-      setPopularPosts(
-        [...normalizedPosts].sort((a, b) => b.views - a.views).slice(0, 10),
-      );
-      setComments(normalizeComments(commentRows));
-
-      try {
-        const [postReactionRows, commentReactionRows] = await Promise.all([
-          fetchCommunityPostReactions([postId], userId),
-          fetchCommunityCommentReactions(
-            commentRows.map((item) => item.id),
-            userId,
-          ),
-        ]);
-
-        setPostReaction(postReactionRows[postId] ?? EMPTY_REACTION);
-        setCommentReactions(commentReactionRows);
-      } catch (reactionError) {
-        console.error("커뮤니티 반응 조회 오류:", reactionError);
-        setPostReaction(EMPTY_REACTION);
-        setCommentReactions({});
-      }
-
-      try {
-        const authorIds = [
-          postData.user_id,
-          userId,
-          ...commentRows.map((item) => item.user_id),
-        ];
-        setSportStats(
-          await fetchCommunityPredictionStats(authorIds),
-        );
-      } catch (badgeError) {
-        console.error("커뮤니티 배지 조회 오류:", badgeError);
-        setSportStats([]);
-      }
+  const loadDetail = useCallback(
+    async ({ showLoading = true } = {}) => {
+      const shouldIncreaseView = increasedPostIdRef.current !== String(postId);
 
       if (shouldIncreaseView) {
+        increasedPostIdRef.current = String(postId);
+      }
+
+      try {
+        if (showLoading) {
+          setIsLoading(true);
+        }
+
+        setErrorMessage("");
+
+        const [postData, postList, commentRows] = await Promise.all([
+          fetchCommunityPost(postId),
+          fetchCommunityPosts(),
+          fetchCommunityComments(postId),
+        ]);
+
+        const normalizedPosts = postList.map(normalizePost);
+
+        const currentIndex = normalizedPosts.findIndex(
+          (item) => String(item.id) === String(postId),
+        );
+
+        const normalizedPost = normalizePost(postData);
+
+        setPost(normalizedPost);
+        setPreviousPost(normalizedPosts[currentIndex - 1] ?? null);
+        setNextPost(normalizedPosts[currentIndex + 1] ?? null);
+
+        setPopularPosts(
+          [...normalizedPosts].sort((a, b) => b.views - a.views).slice(0, 10),
+        );
+
+        setComments(normalizeComments(commentRows));
+
         try {
-          const increasedViewCount = await increaseCommunityPostView(postId);
-          setPost((currentPost) => ({
-            ...currentPost,
-            views: increasedViewCount ?? normalizedPost.views + 1,
-          }));
-        } catch (viewError) {
-          console.error("게시글 조회수 증가 오류:", viewError);
+          const [postReactionRows, commentReactionRows] = await Promise.all([
+            fetchCommunityPostReactions([postId], userId),
+            fetchCommunityCommentReactions(
+              commentRows.map((item) => item.id),
+              userId,
+            ),
+          ]);
+
+          setPostReaction(postReactionRows[postId] ?? EMPTY_REACTION);
+          setCommentReactions(commentReactionRows);
+        } catch (reactionError) {
+          console.error("커뮤니티 반응 조회 오류:", reactionError);
+
+          setPostReaction(EMPTY_REACTION);
+          setCommentReactions({});
+        }
+
+        try {
+          const authorIds = [
+            postData.user_id,
+            userId,
+            ...commentRows.map((item) => item.user_id),
+          ];
+
+          setSportStats(await fetchCommunityPredictionStats(authorIds));
+        } catch (badgeError) {
+          console.error("커뮤니티 배지 조회 오류:", badgeError);
+          setSportStats([]);
+        }
+
+        if (shouldIncreaseView) {
+          try {
+            const increasedViewCount = await increaseCommunityPostView(postId);
+
+            setPost((currentPost) => ({
+              ...currentPost,
+              views: increasedViewCount ?? normalizedPost.views + 1,
+            }));
+          } catch (viewError) {
+            console.error("게시글 조회수 증가 오류:", viewError);
+          }
+        }
+      } catch (error) {
+        console.error("커뮤니티 상세 조회 오류:", error);
+        setErrorMessage("게시글을 불러오지 못했습니다.");
+      } finally {
+        if (showLoading) {
+          setIsLoading(false);
         }
       }
-    } catch (error) {
-      console.error("커뮤니티 상세 조회 오류:", error);
-      setErrorMessage("게시글을 불러오지 못했습니다.");
-    } finally {
-      if (showLoading) {
-        setIsLoading(false);
-      }
-    }
-  }, [postId, userId]);
+    },
+    [postId, userId],
+  );
 
   useEffect(() => {
     const timerId = window.setTimeout(() => {
@@ -397,10 +470,24 @@ const CommunityDetailPage = () => {
     };
   }, [loadDetail]);
 
+  useEffect(() => {
+    const unsubscribe = subscribeToCommunityChanges({
+      channelName: `community-detail-${postId}`,
+      postId,
+      onChange: () =>
+        loadDetail({
+          showLoading: false,
+        }),
+    });
+
+    return unsubscribe;
+  }, [loadDetail, postId]);
+
   const requireLogin = () => {
     if (user) return true;
 
     setIsLoginDialogOpen(true);
+
     return false;
   };
 
@@ -409,11 +496,13 @@ const CommunityDetailPage = () => {
 
     try {
       setPendingReactionKey("post");
+
       const nextReaction = await toggleCommunityPostReaction({
         postId,
         userId,
         reaction,
       });
+
       setPostReaction((current) =>
         updateReactionSummary(current, nextReaction),
       );
@@ -432,17 +521,16 @@ const CommunityDetailPage = () => {
 
     try {
       setPendingReactionKey(reactionKey);
+
       const nextReaction = await toggleCommunityCommentReaction({
         commentId,
         userId,
         reaction,
       });
+
       setCommentReactions((current) => ({
         ...current,
-        [commentId]: updateReactionSummary(
-          current[commentId],
-          nextReaction,
-        ),
+        [commentId]: updateReactionSummary(current[commentId], nextReaction),
       }));
     } catch (error) {
       console.error("댓글 반응 저장 오류:", error);
@@ -452,18 +540,9 @@ const CommunityDetailPage = () => {
     }
   };
 
-  useEffect(() => {
-    const unsubscribe = subscribeToCommunityChanges({
-      channelName: `community-detail-${postId}`,
-      postId,
-      onChange: () => loadDetail({ showLoading: false }),
-    });
-
-    return unsubscribe;
-  }, [loadDetail, postId]);
-
   const submitComment = async (event) => {
     event.preventDefault();
+
     if (!user || !comment.trim()) return;
 
     try {
@@ -472,10 +551,12 @@ const CommunityDetailPage = () => {
         postId: Number(postId),
         content: comment.trim(),
       });
+
       setComments((currentComments) => [
         ...currentComments,
         ...normalizeComments([savedComment]),
       ]);
+
       setComment("");
     } catch (error) {
       console.error("댓글 저장 오류:", error);
@@ -485,6 +566,7 @@ const CommunityDetailPage = () => {
 
   const submitReply = async (event, commentId) => {
     event.preventDefault();
+
     if (!user || !reply.trim()) return;
 
     try {
@@ -494,16 +576,25 @@ const CommunityDetailPage = () => {
         parentId: commentId,
         content: reply.trim(),
       });
+
       const normalizedReply = normalizeComments([
-        { ...savedReply, parent_id: null },
+        {
+          ...savedReply,
+          parent_id: null,
+        },
       ])[0];
+
       setComments((currentComments) =>
         currentComments.map((item) =>
           item.id === commentId
-            ? { ...item, replies: [...item.replies, normalizedReply] }
+            ? {
+                ...item,
+                replies: [...item.replies, normalizedReply],
+              }
             : item,
         ),
       );
+
       setReply("");
       setReplyingTo(null);
     } catch (error) {
@@ -527,6 +618,7 @@ const CommunityDetailPage = () => {
 
     try {
       await updateCommunityComment(commentId, editedContent.trim());
+
       setComments((currentComments) =>
         currentComments.map((item) =>
           item.id === commentId
@@ -538,6 +630,7 @@ const CommunityDetailPage = () => {
             : item,
         ),
       );
+
       cancelEdit();
     } catch (error) {
       console.error("댓글 수정 오류:", error);
@@ -546,7 +639,11 @@ const CommunityDetailPage = () => {
   };
 
   const deleteComment = (commentId) => {
-    setDeleteTarget({ type: "comment", commentId, name: "댓글" });
+    setDeleteTarget({
+      type: "comment",
+      commentId,
+      name: "댓글",
+    });
   };
 
   const saveReply = async (commentId, replyId) => {
@@ -554,6 +651,7 @@ const CommunityDetailPage = () => {
 
     try {
       await updateCommunityComment(replyId, editedContent.trim());
+
       setComments((currentComments) =>
         currentComments.map((item) =>
           item.id === commentId
@@ -572,6 +670,7 @@ const CommunityDetailPage = () => {
             : item,
         ),
       );
+
       cancelEdit();
     } catch (error) {
       console.error("답글 수정 오류:", error);
@@ -580,11 +679,19 @@ const CommunityDetailPage = () => {
   };
 
   const deleteReply = (commentId, replyId) => {
-    setDeleteTarget({ type: "reply", commentId, replyId, name: "답글" });
+    setDeleteTarget({
+      type: "reply",
+      commentId,
+      replyId,
+      name: "답글",
+    });
   };
 
   const handleDeletePost = () => {
-    setDeleteTarget({ type: "post", name: "게시글" });
+    setDeleteTarget({
+      type: "post",
+      name: "게시글",
+    });
   };
 
   const confirmDelete = async () => {
@@ -593,12 +700,17 @@ const CommunityDetailPage = () => {
     try {
       if (deleteTarget.type === "post") {
         await deleteCommunityPost(postId);
-        navigate("/community", { replace: true });
+
+        navigate("/community", {
+          replace: true,
+        });
+
         return;
       }
 
       if (deleteTarget.type === "comment") {
         await softDeleteCommunityComment(deleteTarget.commentId);
+
         setComments((currentComments) =>
           currentComments.map((item) =>
             item.id === deleteTarget.commentId
@@ -616,6 +728,7 @@ const CommunityDetailPage = () => {
 
       if (deleteTarget.type === "reply") {
         await deleteCommunityComment(deleteTarget.replyId);
+
         setComments((currentComments) =>
           currentComments.map((item) =>
             item.id === deleteTarget.commentId
@@ -670,6 +783,7 @@ const CommunityDetailPage = () => {
                   이전글
                 </Button>
               )}
+
               {nextPost && (
                 <Button
                   size="sm"
@@ -686,6 +800,7 @@ const CommunityDetailPage = () => {
           <article className={styles.article}>
             <header className={styles.articleHeader}>
               <strong>{CATEGORY_LABELS[post.category]}</strong>
+
               <h1>{post.title}</h1>
 
               <div className={styles.authorInfo}>
@@ -694,22 +809,27 @@ const CommunityDetailPage = () => {
                   className={styles.avatar}
                   name={post.author}
                 />
+
                 <div>
                   <span className={styles.nicknameWithBadge}>
                     <b>{post.author}</b>
+
                     <PredictionBadge
                       userId={post.user_id}
                       fallbackSport={CATEGORY_SPORT[post.category]}
                       sportStats={sportStats}
                     />
                   </span>
+
                   <span className={styles.authorMeta}>
                     <small>
                       {formatRelativeTime(post.createdAt, currentTime)}
                     </small>
+
                     <span className={styles.metaDivider} aria-hidden="true">
                       ·
                     </span>
+
                     <span
                       className={styles.viewCount}
                       aria-label={`조회수 ${post.views}`}
@@ -717,9 +837,11 @@ const CommunityDetailPage = () => {
                       <FiEye aria-hidden="true" />
                       {post.views}
                     </span>
+
                     {post.user_id === userId && (
                       <span className={styles.postActions}>
                         <Link to={`/community/${post.id}/edit`}>수정</Link>
+
                         <button type="button" onClick={handleDeletePost}>
                           삭제
                         </button>
@@ -731,7 +853,21 @@ const CommunityDetailPage = () => {
             </header>
 
             <div className={styles.articleContent}>
-              <p>{post.content}</p>
+              <p>
+                <LinkifiedText text={post.content} />
+              </p>
+
+              {post.imageUrl && (
+                <div className={styles.postImageArea}>
+                  <img
+                    className={styles.postImage}
+                    src={post.imageUrl}
+                    alt={`${post.title} 첨부 이미지`}
+                    loading="lazy"
+                  />
+                </div>
+              )}
+
               <div className={styles.postReactionArea}>
                 <ReactionButtons
                   disabled={pendingReactionKey === "post"}
@@ -744,6 +880,7 @@ const CommunityDetailPage = () => {
             <section className={styles.commentSection}>
               <div className={styles.commentHeader}>
                 <h2>댓글 {comments.length}</h2>
+
                 <div className={styles.commentSort}>
                   <button
                     type="button"
@@ -754,6 +891,7 @@ const CommunityDetailPage = () => {
                   >
                     등록순
                   </button>
+
                   <button
                     type="button"
                     className={
@@ -772,6 +910,7 @@ const CommunityDetailPage = () => {
                   className={styles.smallAvatar}
                   name={user?.user_metadata?.nickname}
                 />
+
                 <textarea
                   value={comment}
                   onChange={(event) => setComment(event.target.value)}
@@ -784,6 +923,7 @@ const CommunityDetailPage = () => {
                   aria-label="댓글 내용"
                   disabled={!user}
                 />
+
                 <button type="submit" disabled={!user || !comment.trim()}>
                   등록
                 </button>
@@ -799,10 +939,12 @@ const CommunityDetailPage = () => {
                         name={item.author}
                       />
                     )}
+
                     <div className={styles.commentBody}>
                       {!item.isDeleted && (
                         <span className={styles.nicknameWithBadge}>
                           <b>{item.author}</b>
+
                           <PredictionBadge
                             userId={item.userId}
                             fallbackSport={CATEGORY_SPORT[post.category]}
@@ -810,6 +952,7 @@ const CommunityDetailPage = () => {
                           />
                         </span>
                       )}
+
                       {item.isDeleted ? (
                         <p className={styles.deletedComment}>
                           삭제된 댓글입니다.
@@ -824,10 +967,12 @@ const CommunityDetailPage = () => {
                             aria-label="댓글 수정 내용"
                             autoFocus
                           />
+
                           <div>
                             <button type="button" onClick={cancelEdit}>
                               취소
                             </button>
+
                             <button
                               type="button"
                               disabled={!editedContent.trim()}
@@ -838,8 +983,11 @@ const CommunityDetailPage = () => {
                           </div>
                         </div>
                       ) : (
-                        <p>{item.content}</p>
+                        <p>
+                          <LinkifiedText text={item.content} />
+                        </p>
                       )}
+
                       {!item.isDeleted && (
                         <div className={styles.commentMeta}>
                           <small>
@@ -849,6 +997,7 @@ const CommunityDetailPage = () => {
                               currentTime,
                             )}
                           </small>
+
                           {user && (
                             <button
                               type="button"
@@ -856,12 +1005,14 @@ const CommunityDetailPage = () => {
                                 setReplyingTo(
                                   replyingTo === item.id ? null : item.id,
                                 );
+
                                 setReply("");
                               }}
                             >
                               {replyingTo === item.id ? "취소" : "답글 쓰기"}
                             </button>
                           )}
+
                           {item.userId === userId && (
                             <>
                               <button
@@ -872,6 +1023,7 @@ const CommunityDetailPage = () => {
                               >
                                 수정
                               </button>
+
                               <button
                                 type="button"
                                 onClick={() => deleteComment(item.id)}
@@ -880,6 +1032,7 @@ const CommunityDetailPage = () => {
                               </button>
                             </>
                           )}
+
                           <ReactionButtons
                             disabled={
                               pendingReactionKey === `comment-${item.id}`
@@ -907,6 +1060,7 @@ const CommunityDetailPage = () => {
                             aria-label="답글 내용"
                             autoFocus
                           />
+
                           <div className={styles.replyActions}>
                             <button
                               type="button"
@@ -918,6 +1072,7 @@ const CommunityDetailPage = () => {
                             >
                               취소
                             </button>
+
                             <button type="submit" disabled={!reply.trim()}>
                               등록
                             </button>
@@ -932,15 +1087,18 @@ const CommunityDetailPage = () => {
                             className={styles.smallAvatar}
                             name={replyItem.author}
                           />
+
                           <div>
                             <span className={styles.nicknameWithBadge}>
                               <b>{replyItem.author}</b>
+
                               <PredictionBadge
                                 userId={replyItem.userId}
                                 fallbackSport={CATEGORY_SPORT[post.category]}
                                 sportStats={sportStats}
                               />
                             </span>
+
                             {editingItem ===
                             `reply-${item.id}-${replyItem.id}` ? (
                               <div className={styles.editArea}>
@@ -952,10 +1110,12 @@ const CommunityDetailPage = () => {
                                   aria-label="답글 수정 내용"
                                   autoFocus
                                 />
+
                                 <div>
                                   <button type="button" onClick={cancelEdit}>
                                     취소
                                   </button>
+
                                   <button
                                     type="button"
                                     disabled={!editedContent.trim()}
@@ -968,8 +1128,11 @@ const CommunityDetailPage = () => {
                                 </div>
                               </div>
                             ) : (
-                              <p>{replyItem.content}</p>
+                              <p>
+                                <LinkifiedText text={replyItem.content} />
+                              </p>
                             )}
+
                             <div className={styles.commentMeta}>
                               <small>
                                 {formatCommentTime(
@@ -978,6 +1141,7 @@ const CommunityDetailPage = () => {
                                   currentTime,
                                 )}
                               </small>
+
                               {replyItem.userId === userId && (
                                 <>
                                   <button
@@ -991,6 +1155,7 @@ const CommunityDetailPage = () => {
                                   >
                                     수정
                                   </button>
+
                                   <button
                                     type="button"
                                     onClick={() =>
@@ -1001,6 +1166,7 @@ const CommunityDetailPage = () => {
                                   </button>
                                 </>
                               )}
+
                               <ReactionButtons
                                 disabled={
                                   pendingReactionKey ===
@@ -1011,10 +1177,7 @@ const CommunityDetailPage = () => {
                                   EMPTY_REACTION
                                 }
                                 onReact={(reaction) =>
-                                  handleCommentReaction(
-                                    replyItem.id,
-                                    reaction,
-                                  )
+                                  handleCommentReaction(replyItem.id, reaction)
                                 }
                               />
                             </div>
@@ -1028,7 +1191,6 @@ const CommunityDetailPage = () => {
             </section>
           </article>
         </main>
-
       </div>
 
       <FanPickDialog
@@ -1041,6 +1203,7 @@ const CommunityDetailPage = () => {
         onConfirm={confirmDelete}
         lockBodyScroll={false}
       />
+
       <FanPickDialog
         isOpen={isLoginDialogOpen}
         title="로그인이 필요합니다"
@@ -1050,6 +1213,7 @@ const CommunityDetailPage = () => {
         onClose={() => setIsLoginDialogOpen(false)}
         onConfirm={() => {
           setIsLoginDialogOpen(false);
+
           navigate("/login", {
             state: {
               from: location,

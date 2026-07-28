@@ -8,6 +8,7 @@ import SearchInput from "../../components/SearchInput/SearchInput";
 import SubNav from "../../components/SubNav/SubNav";
 import WeekDateSelector from "../../components/WeekDateSelector/WeekDateSelector";
 import { MATCH_CENTER_SUB_NAV_ITEMS } from "../../constants/matchCenterNav";
+import { getTeamInfo as getSharedTeamInfo } from "../../constants/teamInfo";
 import useAuth from "../../contexts/useAuth";
 import { supabase } from "../../lib/supabase";
 import {
@@ -24,9 +25,11 @@ import {
   createMatchBeginAt,
 } from "../../utils/predictionDeadline";
 import {
+  CLOSED_MATCH_STATUSES,
   isLiveMatchStatus,
   isResultPendingMatchStatus,
   normalizeMatchTimingStatus,
+  parseMatchScore,
 } from "../../utils/matchStatus";
 import { createPredictionLocation } from "../../utils/predictionPath";
 import MyPredictionCard, {
@@ -49,103 +52,6 @@ const FILTERS = [
 const PREDICTION_SPORTS = FILTERS.filter((filter) => filter.id !== "all").map(
   (filter) => filter.id,
 );
-const CLOSED_MATCH_STATUSES = new Set(["cancelled", "postponed"]);
-
-// - MatchSchedulePage의 팀 코드와 동일한 KBO/LCK 팀 정보
-const KBO_TEAMS = {
-  DOOSAN: { name: "두산 베어스", logo: "/logos/doosan.png" },
-  NC: { name: "NC 다이노스", logo: "/logos/nc.png" },
-  LG: { name: "LG 트윈스", logo: "/logos/lg.png" },
-  KIA: { name: "KIA 타이거즈", logo: "/logos/kia.png" },
-  SAMSUNG: { name: "삼성 라이온즈", logo: "/logos/samsung.png" },
-  LOTTE: { name: "롯데 자이언츠", logo: "/logos/lotte.png" },
-  HANWHA: { name: "한화 이글스", logo: "/logos/hanwha.png" },
-  SSG: { name: "SSG 랜더스", logo: "/logos/ssg.png" },
-  KIWOOM: { name: "키움 히어로즈", logo: "/logos/kiwoom.png" },
-  KT: { name: "KT 위즈", logo: "/logos/kt.png" },
-};
-
-const KLEAGUE_LOGO_URL = "https://www.kleague.com/assets/images/emblem";
-
-// - MatchSchedulePage와 동일한 K리그 팀 정보
-const KLEAGUE_TEAMS = {
-  K01: { name: "울산 HD FC", shortName: "울산" },
-  K02: { name: "수원 삼성 블루윙즈", shortName: "수원" },
-  K03: { name: "포항 스틸러스", shortName: "포항" },
-  K04: { name: "제주SK FC", shortName: "제주" },
-  K05: { name: "전북 현대 모터스", shortName: "전북" },
-  K06: { name: "부산 아이파크", shortName: "부산" },
-  K07: { name: "전남 드래곤즈", shortName: "전남" },
-  K08: { name: "성남 FC", shortName: "성남" },
-  K09: { name: "FC 서울", shortName: "서울" },
-  K10: { name: "대전 하나시티즌", shortName: "대전" },
-  K17: { name: "대구 FC", shortName: "대구" },
-  K18: { name: "인천 유나이티드", shortName: "인천" },
-  K20: { name: "경남 FC", shortName: "경남" },
-  K21: { name: "강원 FC", shortName: "강원" },
-  K22: { name: "광주 FC", shortName: "광주" },
-  K26: { name: "부천 FC 1995", shortName: "부천" },
-  K27: { name: "FC 안양", shortName: "안양" },
-  K29: { name: "수원 FC", shortName: "수원FC" },
-  K31: { name: "서울 이랜드 FC", shortName: "서울E" },
-  K32: { name: "안산 그리너스 FC", shortName: "안산" },
-  K34: { name: "충남아산 FC", shortName: "충남아산" },
-  K35: { name: "김천 상무", shortName: "김천" },
-  K36: { name: "김포 FC", shortName: "김포" },
-  K37: { name: "충북청주 FC", shortName: "충북청주" },
-  K38: { name: "천안 시티 FC", shortName: "천안" },
-  K39: { name: "화성 FC", shortName: "화성" },
-  K40: { name: "파주프런티어FC", shortName: "파주" },
-  K41: { name: "김해FC2008", shortName: "김해" },
-  K42: { name: "용인FC", shortName: "용인" },
-};
-
-Object.entries(KLEAGUE_TEAMS).forEach(([code, team]) => {
-  team.logo = `${KLEAGUE_LOGO_URL}/emblem_${code}.png`;
-});
-
-const LCK_TEAMS = {
-  T1: {
-    name: "T1",
-    logo: "https://cdn-api.pandascore.co/images/team/image/126061/t_oscq04.png",
-  },
-  GEN: {
-    name: "Gen.G",
-    logo: "https://cdn-api.pandascore.co/images/team/image/2882/699px_gen.g_esports_2026_allmode.png",
-  },
-  HLE: {
-    name: "한화생명 e스포츠",
-    logo: "https://cdn-api.pandascore.co/images/team/image/2883/hanwha-life-esports-1s04vbu0.png",
-  },
-  DK: {
-    name: "Dplus KIA",
-    logo: "https://cdn-api.pandascore.co/images/team/image/132531/800px_dplus_lightmode.png",
-  },
-  KT: {
-    name: "KT Rolster",
-    logo: "https://cdn-api.pandascore.co/images/team/image/63/kt_rolsterlogo_profile.png",
-  },
-  KRX: {
-    name: "Kiwoom DRX",
-    logo: "https://cdn-api.pandascore.co/images/team/image/126370/220px_dr_xlogo_square.png",
-  },
-  NS: {
-    name: "농심 레드포스",
-    logo: "https://cdn-api.pandascore.co/images/team/image/128217/nongshim_red_forcelogo_square.png",
-  },
-  BFX: {
-    name: "BNK FEARX",
-    logo: "https://cdn-api.pandascore.co/images/team/image/134115/663px_fear_x_icon_lightmode.png",
-  },
-  DNS: {
-    name: "DN SOOPers",
-    logo: "https://cdn-api.pandascore.co/images/team/image/136063/dn_soo_perslogo_profile.png",
-  },
-  BRO: {
-    name: "HANJIN BRION",
-    logo: "https://cdn-api.pandascore.co/images/team/image/128218/628px_brion_2023_lightmode.png",
-  },
-};
 
 const padNumber = (number) => String(number).padStart(2, "0");
 
@@ -185,33 +91,15 @@ const getMonday = (date) => {
   return currentDate;
 };
 
-const getTeamInfo = (teamCode, sport) => {
-  const code = teamCode?.trim().toUpperCase() ?? "";
-  const teams =
-    sport === "esports"
-      ? LCK_TEAMS
-      : sport === "soccer"
-        ? KLEAGUE_TEAMS
-        : KBO_TEAMS;
-  const team = teams[code];
+const getPredictionTeamInfo = (teamCode, sport) => {
+  const code = String(teamCode ?? "").trim().toUpperCase();
+  const team = getSharedTeamInfo(teamCode, sport);
 
   return {
     id: code,
     name: team?.name ?? teamCode ?? "미정",
     shortName: (team?.shortName ?? code) || "-",
     logo: team?.logo ?? "",
-  };
-};
-
-// - matches 테이블의 "원정점수:홈점수" 형식 분리
-const parseScore = (score) => {
-  if (!score) return { homeScore: null, awayScore: null };
-
-  const [awayScore, homeScore] = score.split(":").map(Number);
-
-  return {
-    homeScore: Number.isFinite(homeScore) ? homeScore : null,
-    awayScore: Number.isFinite(awayScore) ? awayScore : null,
   };
 };
 
@@ -226,7 +114,7 @@ const normalizeSupabaseMatch = (match) => {
     sport,
     status: match.status,
   });
-  const { homeScore, awayScore } = parseScore(timingStatus.score);
+  const { homeScore, awayScore } = parseMatchScore(timingStatus.score);
   const normalizedMatch = {
     ...match,
     score: timingStatus.score,
@@ -250,8 +138,8 @@ const normalizeSupabaseMatch = (match) => {
     score: timingStatus.score,
     participants: 0,
     homeRate: 50,
-    homeTeam: getTeamInfo(match.home_team_code, sport),
-    awayTeam: getTeamInfo(match.away_team_code, sport),
+    homeTeam: getPredictionTeamInfo(match.home_team_code, sport),
+    awayTeam: getPredictionTeamInfo(match.away_team_code, sport),
     homeScore,
     awayScore,
     isFinished:
@@ -337,6 +225,26 @@ const PredictionPage = () => {
     from: null,
     isOpen: false,
   });
+  const [noticeDialogState, setNoticeDialogState] = useState({
+    description: "",
+    isOpen: false,
+    title: "",
+  });
+
+  const openNoticeDialog = useCallback((title, description) => {
+    setNoticeDialogState({
+      description,
+      isOpen: true,
+      title,
+    });
+  }, []);
+
+  const closeNoticeDialog = useCallback(() => {
+    setNoticeDialogState((previous) => ({
+      ...previous,
+      isOpen: false,
+    }));
+  }, []);
 
   const openLoginDialog = useCallback((description, from) => {
     setLoginDialogState({
@@ -620,7 +528,10 @@ const PredictionPage = () => {
         hasExistingPrediction &&
         !canChangePredictionByBeginAt(match.beginAt)
       ) {
-        alert("경기 시작 30분 전부터는 투표를 변경할 수 없습니다.");
+        openNoticeDialog(
+          "투표 변경 마감",
+          "경기 시작 30분 전부터는 투표를 변경할 수 없습니다.",
+        );
         return;
       }
 
@@ -651,7 +562,12 @@ const PredictionPage = () => {
 
         if (error) {
           console.error("예측 취소 오류:", error);
-          alert(`예측을 취소하지 못했습니다.\n${error.message}`);
+          openNoticeDialog(
+            "예측 취소 실패",
+            error.message
+              ? `예측을 취소하지 못했습니다. ${error.message}`
+              : "예측을 취소하지 못했습니다.",
+          );
           return;
         }
 
@@ -691,7 +607,12 @@ const PredictionPage = () => {
 
       if (error) {
         console.error("예측 저장 오류:", error);
-        alert(`예측을 저장하지 못했습니다.\n${error.message}`);
+        openNoticeDialog(
+          "예측 저장 실패",
+          error.message
+            ? `예측을 저장하지 못했습니다. ${error.message}`
+            : "예측을 저장하지 못했습니다.",
+        );
         return;
       }
 
@@ -707,7 +628,7 @@ const PredictionPage = () => {
       // - 저장 직후 서버에서 최신 참여자 수와 투표 비율 다시 받기
       await refreshPredictionStats();
     },
-    [openLoginDialog, predictions, savingMatchId, user],
+    [openLoginDialog, openNoticeDialog, predictions, savingMatchId, user],
   );
 
   useEffect(() => {
@@ -1108,6 +1029,15 @@ const PredictionPage = () => {
         cancelText="취소"
         onClose={closeLoginDialog}
         onConfirm={handleMoveToLogin}
+      />
+
+      <FanPickDialog
+        isOpen={noticeDialogState.isOpen}
+        title={noticeDialogState.title}
+        description={noticeDialogState.description}
+        confirmText="확인"
+        onClose={closeNoticeDialog}
+        onConfirm={closeNoticeDialog}
       />
     </>
   );

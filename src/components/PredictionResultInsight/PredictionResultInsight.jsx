@@ -1,26 +1,11 @@
 import {
   isLiveMatchStatus,
   isResultPendingMatchStatus,
+  parseMatchScore,
 } from "../../utils/matchStatus";
 import styles from "./PredictionResultInsight.module.css";
 
 const normalizeTeamCode = (teamCode) => teamCode?.trim().toUpperCase() ?? "";
-
-const parseScore = (score) => {
-  if (!score) {
-    return {
-      awayScore: null,
-      homeScore: null,
-    };
-  }
-
-  const [awayScore, homeScore] = String(score).split(":").map(Number);
-
-  return {
-    awayScore: Number.isFinite(awayScore) ? awayScore : null,
-    homeScore: Number.isFinite(homeScore) ? homeScore : null,
-  };
-};
 
 const getTeamName = (team) => team?.name ?? team?.shortName ?? "-";
 
@@ -49,7 +34,7 @@ const getWinnerSide = (match) => {
     return "resultPending";
   }
 
-  const { awayScore, homeScore } = parseScore(match.score);
+  const { awayScore, homeScore } = parseMatchScore(match.score);
 
   if (awayScore === null || homeScore === null) {
     return "";

@@ -1,19 +1,23 @@
 .matchCard {
   scroll-margin-top: 120px;
-  padding: 38px 46px 28px;
+  padding: 30px 46px 28px;
   border: 1px solid var(--color-white-08);
   border-radius: 8px;
   background-color: var(--color-surface-card);
 }
 
-.targetMatchCard {
-  border-color: var(--color-accent);
-  box-shadow:
-    0 0 0 1px rgb(227 27 54 / 35%),
-    0 0 0 6px rgb(227 27 54 / 9%);
+.matchCard[data-variant="today"] {
+  padding-top: 38px;
 }
 
-.targetMatchCard:focus {
+.matchCard[data-target="true"] {
+  border-color: var(--color-accent);
+  box-shadow:
+    0 0 0 1px var(--color-accent-34),
+    0 0 0 6px var(--color-accent-08);
+}
+
+.matchCard[data-target="true"]:focus {
   outline: none;
 }
 
@@ -51,7 +55,7 @@
   font-size: 22px;
 }
 
-.matchHeading span {
+.statusBadge {
   padding: 5px 10px;
   border-radius: 999px;
   color: var(--color-text-white);
@@ -62,23 +66,32 @@
   line-height: 1;
 }
 
-.matchHeading span.finished {
+.statusBadge[data-tone="finished"] {
   background-color: var(--color-white-16);
 }
 
-.matchHeading span.live {
+.statusBadge[data-tone="live"] {
   background-color: var(--color-status-info);
 }
 
-.matchHeading span.resultPending {
+.statusBadge[data-tone="resultPending"],
+.statusBadge[data-tone="cancelled"] {
   background-color: var(--color-status-neutral);
 }
 
-.matchHeading span.cancelled {
-  background-color: var(--color-status-neutral);
+.statusBadge[data-tone="correct"] {
+  background-color: var(--color-primary-light);
 }
 
-.teams {
+.statusBadge[data-tone="void"] {
+  background-color: var(--color-status-warning);
+}
+
+.statusBadge[data-tone="incorrect"] {
+  background-color: var(--color-prediction-away);
+}
+
+.teamBoard {
   display: grid;
   grid-template-columns: 1fr 1fr;
   overflow: hidden;
@@ -87,32 +100,33 @@
   background-color: var(--color-white-04);
 }
 
-.finishedTeams {
+.teamBoard[data-closed="true"] {
   border-color: var(--color-white-12);
   background-color: var(--color-white-05);
 }
 
-.finishedTeams .teamButton {
+.teamBoard[data-closed="true"] .teamCell {
   color: var(--color-white-56);
 }
 
-.finishedTeams .teamButton + .teamButton {
+.teamBoard[data-closed="true"] .teamCell + .teamCell {
   border-left-color: var(--color-white-12);
 }
 
-.cancelledTeams {
+.teamBoard[data-cancelled="true"] {
   border-color: var(--color-status-neutral-border);
   border-style: dashed;
 }
 
-.cancelledTeams .teamButton {
+.teamBoard[data-cancelled="true"] .teamCell {
   color: var(--color-white-52);
 }
 
-.teamButton {
+.teamCell {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   min-width: 0;
   height: 92px;
   padding: 0 28px;
@@ -120,52 +134,89 @@
   color: var(--color-text-white);
   background-color: transparent;
   font-size: 17px;
+}
+
+button.teamCell {
   transition:
     border-color 0.2s ease,
     color 0.2s ease,
     background-color 0.2s ease;
 }
 
-.teamButton:not(:disabled):hover {
+button.teamCell:not(:disabled):hover {
   background-color: var(--color-white-05);
 }
 
-.teamButton:disabled {
+button.teamCell:disabled {
   cursor: default;
 }
 
-.teamButton + .teamButton {
+.teamCell + .teamCell {
   border-left: 1px solid var(--color-white-10);
 }
 
-.teamButton:first-child {
+.teamCell:first-child {
   border-radius: 7px 0 0 7px;
 }
 
-.teamButton:last-child {
+.teamCell:last-child {
   border-radius: 0 7px 7px 0;
 }
 
-.teamButton.selected {
+.teamCell[data-selected="true"] {
   border-color: var(--color-accent);
   color: var(--color-text-white);
   background-color: var(--color-accent-16);
-  box-shadow: inset 0 0 0 1px rgb(227 27 54 / 35%);
+  box-shadow: inset 0 0 0 1px var(--color-accent-34);
 }
 
-.teamButton.selected .teamText strong {
+.teamCell[data-selected="true"] .teamText strong {
   color: var(--color-text-white);
 }
 
-.cancelledTeams .teamButton.selected {
+.teamBoard[data-tone="correct"] .teamCell[data-selected="true"] {
+  border-color: var(--color-primary-light);
+  background-color: var(--color-primary-light);
+  box-shadow: inset 0 0 0 1px var(--color-white-16);
+}
+
+.teamBoard[data-tone="incorrect"] .teamCell[data-selected="true"] {
+  border-color: var(--color-prediction-away);
+  background-color: var(--color-prediction-away-soft);
+  box-shadow: inset 0 0 0 1px var(--color-prediction-away-border);
+}
+
+.teamBoard[data-tone="incorrect"] .myPickBadge {
+  background-color: var(--color-prediction-away);
+}
+
+.teamBoard[data-tone="void"] .teamCell[data-selected="true"] {
+  border-color: var(--color-status-warning-border-strong);
+  background-color: var(--color-status-warning-soft);
+  box-shadow: inset 0 0 0 1px var(--color-status-warning-border-inner);
+}
+
+.teamBoard[data-tone="cancelled"] .teamCell[data-selected="true"],
+.teamBoard[data-tone="resultPending"] .teamCell[data-selected="true"] {
   border-color: var(--color-status-neutral-border-strong);
   border-style: dashed;
   background-color: var(--color-status-neutral-soft);
   box-shadow: inset 0 0 0 1px var(--color-status-neutral-border-inner);
 }
 
-.cancelledTeams .teamButton.selected .myPickBadge {
+.teamBoard[data-tone="cancelled"] .myPickBadge,
+.teamBoard[data-tone="resultPending"] .myPickBadge {
   background-color: var(--color-status-neutral);
+}
+
+.teamBoard[data-tone="live"] .teamCell[data-selected="true"] {
+  border-color: var(--color-status-info-border-strong);
+  background-color: var(--color-status-info-soft);
+  box-shadow: inset 0 0 0 1px var(--color-status-info-border-inner);
+}
+
+.teamBoard[data-tone="live"] .myPickBadge {
+  background-color: var(--color-status-info);
 }
 
 .teamIdentity {
@@ -206,7 +257,7 @@
   line-height: 1;
 }
 
-.teamButton b {
+.teamCell > b {
   font-size: 26px;
 }
 
@@ -226,7 +277,7 @@
   align-self: flex-end;
 }
 
-.matchCard > small {
+.participants {
   display: block;
   margin-top: 16px;
   color: var(--color-white-54);
@@ -278,6 +329,11 @@
   margin-top: 5px;
 }
 
+.skeletonScore {
+  width: 34px;
+  height: 34px;
+}
+
 .skeletonParticipants {
   width: 82px;
   height: 11px;
@@ -285,7 +341,8 @@
 }
 
 @media (max-width: 700px) {
-  .matchCard {
+  .matchCard,
+  .matchCard[data-variant="today"] {
     padding: 24px 18px 20px;
   }
 
@@ -318,16 +375,16 @@
     line-height: 1.35;
   }
 
-  .matchHeading span {
+  .statusBadge {
     flex-shrink: 0;
     margin-top: 2px;
   }
 
-  .teams {
+  .teamBoard {
     grid-template-columns: 1fr;
   }
 
-  .teamButton {
+  .teamCell {
     display: grid;
     grid-template-columns: minmax(0, 1fr) max-content;
     gap: 12px;
@@ -338,23 +395,23 @@
     text-align: left;
   }
 
-  .teamButton + .teamButton {
+  .teamCell + .teamCell {
     border-top: 1px solid var(--color-white-10);
     border-left: 0;
   }
 
-  .teamButton:first-child {
+  .teamCell:first-child {
     border-radius: 7px 7px 0 0;
   }
 
-  .teamButton:last-child {
+  .teamCell:last-child {
     border-radius: 0 0 7px 7px;
   }
 
-  .teamButton b {
+  .teamCell > b {
+    justify-self: end;
     font-size: 20px;
     line-height: 1;
-    justify-self: end;
   }
 
   .awayTeam {
@@ -382,13 +439,18 @@
     grid-column: 2;
   }
 
+  .teamText strong {
+    font-size: 15px;
+  }
+
   .skeletonTeamName {
     width: 92px;
   }
 }
 
 @media (max-width: 420px) {
-  .matchCard {
+  .matchCard,
+  .matchCard[data-variant="today"] {
     padding: 22px 16px 18px;
   }
 
@@ -396,25 +458,21 @@
     font-size: 18px;
   }
 
-  .matchHeading span {
+  .statusBadge {
     padding: 5px 8px;
     font-size: 10px;
   }
 
-  .teamButton {
+  .teamCell {
     min-height: 70px;
     padding: 13px 14px;
-  }
-
-  .teamText strong {
-    font-size: 15px;
   }
 
   .teamText small {
     font-size: 12px;
   }
 
-  .teamButton b {
+  .teamCell > b {
     font-size: 19px;
   }
 }

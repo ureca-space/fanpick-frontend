@@ -1,38 +1,15 @@
 import Button from "../../../../components/Button/Button";
+import WorldCupMedia from "../WorldCupMedia/WorldCupMedia";
 import styles from "./WorldCupCard.module.css";
 
-const isVideoSource = (src) => /\.mp4(?:$|\?)/i.test(src);
-
-const BattleImage = ({ src, label }) => {
-  if (!src) {
-    return <span className={styles.imageFallback}>{label}</span>;
-  }
-
-  if (isVideoSource(src)) {
-    return (
-      <video
-        className={styles.battleImage}
-        src={src}
-        referrerPolicy="no-referrer"
-        autoPlay
-        loop
-        muted
-        playsInline
-      />
-    );
-  }
-
-  return (
-    <img
-      className={styles.battleImage}
-      src={src}
-      referrerPolicy="no-referrer"
-      alt=""
-    />
-  );
-};
+const THUMBNAIL_WORLD_CUP_IDS = ["baseball-funny", "lol-thumbnail", "lol-team"];
 
 const WorldCupCard = ({ worldCup, onStart }) => {
+  const fallbackLabel = worldCup.category.slice(0, 1);
+
+  const isThumbnailWorldCup = THUMBNAIL_WORLD_CUP_IDS.includes(worldCup.id);
+  const isSoccerSkillWorldCup = worldCup.id === "soccer-player-skill";
+
   return (
     <article className={styles.worldCupCard}>
       <div className={styles.cardContent}>
@@ -43,25 +20,35 @@ const WorldCupCard = ({ worldCup, onStart }) => {
 
         <div
           className={`${styles.imageArea} ${
-            ["baseball-funny", "lol-thumbnail", "lol-team"].includes(
-              worldCup.id,
-            )
-              ? styles.thumbnailImageArea
-              : ""
+            isThumbnailWorldCup ? styles.thumbnailImageArea : ""
           }`}
           aria-hidden="true"
         >
-          <BattleImage
-            src={worldCup.leftImage}
-            label={worldCup.category.slice(0, 1)}
-          />
+          <div className={styles.imageSlot}>
+            <WorldCupMedia
+              src={worldCup.leftImage}
+              className={styles.battleImage}
+              fallbackClassName={styles.imageFallback}
+              fallbackLabel={fallbackLabel}
+              draggable={false}
+              loading="lazy"
+            />
+          </div>
 
           <span className={styles.vs}>VS</span>
 
-          <BattleImage
-            src={worldCup.rightImage}
-            label={worldCup.category.slice(0, 1)}
-          />
+          <div className={styles.imageSlot}>
+            <WorldCupMedia
+              src={worldCup.rightImage}
+              className={`${styles.battleImage} ${
+                isSoccerSkillWorldCup ? styles.croppedPlayerImage : ""
+              }`}
+              fallbackClassName={styles.imageFallback}
+              fallbackLabel={fallbackLabel}
+              draggable={false}
+              loading="lazy"
+            />
+          </div>
         </div>
 
         <strong className={styles.cardTitle}>{worldCup.title}</strong>

@@ -1,5 +1,104 @@
 import { supabase } from "../lib/supabase";
 
+const COMMUNITY_IMAGE_BUCKET = "community-images";
+const MAX_COMMUNITY_IMAGE_SIZE = 5 * 1024 * 1024;
+
+const ALLOWED_COMMUNITY_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+];
+
+const IMAGE_EXTENSION_BY_TYPE = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+};
+
+const validateCommunityImage = (file) => {
+  if (!file) return;
+
+  if (!ALLOWED_COMMUNITY_IMAGE_TYPES.includes(file.type)) {
+    throw new Error("JPG, PNG, WEBP, GIF 이미지만 첨부할 수 있습니다.");
+  }
+
+  if (file.size > MAX_COMMUNITY_IMAGE_SIZE) {
+    throw new Error("이미지는 최대 5MB까지 첨부할 수 있습니다.");
+  }
+};
+
+const createCommunityImagePath = (userId, file) => {
+  const extension =
+    IMAGE_EXTENSION_BY_TYPE[file.type] ||
+    file.name.split(".").pop()?.toLowerCase() ||
+    "jpg";
+
+  const randomId =
+    globalThis.crypto?.randomUUID?.() ??
+    `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+  return `${userId}/${randomId}.${extension}`;
+};
+
+export const uploadCommunityPostImage = async ({ userId, file }) => {
+  if (!userId) {
+    throw new Error("로그인이 필요합니다.");
+  }
+
+  if (!file) {
+    return null;
+  }
+
+  validateCommunityImage(file);
+
+  const imagePath = createCommunityImagePath(userId, file);
+
+  const { error: uploadError } = await supabase.storage
+    .from(COMMUNITY_IMAGE_BUCKET)
+    .upload(imagePath, file, {
+      cacheControl: "3600",
+      contentType: file.type,
+      upsert: false,
+    });
+
+  if (uploadError) {
+    throw uploadError;
+  }
+
+  const { data } = supabase.storage
+    .from(COMMUNITY_IMAGE_BUCKET)
+    .getPublicUrl(imagePath);
+
+  if (!data?.publicUrl) {
+    try {
+      await supabase.storage.from(COMMUNITY_IMAGE_BUCKET).remove([imagePath]);
+    } catch (removeError) {
+      console.error("URL 생성 실패 이미지 정리 오류:", removeError);
+    }
+
+    throw new Error("이미지 URL을 생성하지 못했습니다.");
+  }
+
+  return {
+    imageUrl: data.publicUrl,
+    imagePath,
+  };
+};
+
+export const deleteCommunityPostImage = async (imagePath) => {
+  if (!imagePath) return;
+
+  const { error } = await supabase.storage
+    .from(COMMUNITY_IMAGE_BUCKET)
+    .remove([imagePath]);
+
+  if (error) {
+    throw error;
+  }
+};
+
 // 게시글·댓글에 저장된 user_id로 최신 공개 프로필을 연결
 const attachLatestProfiles = async (rows = []) => {
   const userIds = [...new Set(rows.map((row) => row.user_id).filter(Boolean))];
@@ -37,17 +136,27 @@ const attachLatestProfiles = async (rows = []) => {
 const createReactionSummaries = (rows, targetKey, userId) =>
   (rows ?? []).reduce((summaries, row) => {
     const targetId = row[targetKey];
+
     const current = summaries[targetId] ?? {
       likeCount: 0,
       dislikeCount: 0,
       myReaction: null,
     };
 
-    if (row.reaction === "like") current.likeCount += 1;
-    if (row.reaction === "dislike") current.dislikeCount += 1;
-    if (row.user_id === userId) current.myReaction = row.reaction;
+    if (row.reaction === "like") {
+      current.likeCount += 1;
+    }
+
+    if (row.reaction === "dislike") {
+      current.dislikeCount += 1;
+    }
+
+    if (row.user_id === userId) {
+      current.myReaction = row.reaction;
+    }
 
     summaries[targetId] = current;
+
     return summaries;
   }, {});
 
@@ -95,6 +204,7 @@ const toggleReaction = async ({
       .eq("user_id", userId);
 
     if (deleteError) throw deleteError;
+
     return null;
   }
 
@@ -105,10 +215,13 @@ const toggleReaction = async ({
       reaction,
       updated_at: new Date().toISOString(),
     },
-    { onConflict: `${targetKey},user_id` },
+    {
+      onConflict: `${targetKey},user_id`,
+    },
   );
 
   if (upsertError) throw upsertError;
+
   return reaction;
 };
 
@@ -122,7 +235,9 @@ export const fetchCommunityPosts = async () => {
       .from("community_posts")
       .select("*")
       .order("created_at", { ascending: false }),
+
     supabase.from("community_comments").select("post_id"),
+
     supabase
       .from("community_post_reactions")
       .select("post_id, reaction")
@@ -135,12 +250,16 @@ export const fetchCommunityPosts = async () => {
 
   const commentCounts = (comments ?? []).reduce((counts, comment) => {
     counts[comment.post_id] = (counts[comment.post_id] ?? 0) + 1;
+
     return counts;
   }, {});
+
   const supportCounts = (reactions ?? []).reduce((counts, reaction) => {
     counts[reaction.post_id] = (counts[reaction.post_id] ?? 0) + 1;
+
     return counts;
   }, {});
+
   const postsWithCommentCount = (posts ?? []).map((post) => ({
     ...post,
     commentCount: commentCounts[post.id] ?? 0,
@@ -174,6 +293,7 @@ export const fetchCommunityPost = async (postId) => {
   if (error) throw error;
 
   const [post] = await attachLatestProfiles([data]);
+
   return post;
 };
 
@@ -182,48 +302,153 @@ export const createCommunityPost = async ({
   category,
   title,
   content,
+  imageFile = null,
 }) => {
-  const { data, error } = await supabase
-    .from("community_posts")
-    .insert({
-      user_id: user.id,
-      category,
-      title,
-      content,
-      author_name: user.user_metadata?.nickname || "FanPick 사용자",
-      author_avatar_url: user.user_metadata?.avatar_url || null,
-    })
-    .select("id")
-    .single();
+  if (!user?.id) {
+    throw new Error("로그인이 필요합니다.");
+  }
 
-  if (error) throw error;
-  return data;
+  let uploadedImage = null;
+
+  try {
+    if (imageFile) {
+      uploadedImage = await uploadCommunityPostImage({
+        userId: user.id,
+        file: imageFile,
+      });
+    }
+
+    const { data, error } = await supabase
+      .from("community_posts")
+      .insert({
+        user_id: user.id,
+        category,
+        title,
+        content,
+        image_url: uploadedImage?.imageUrl ?? null,
+        image_path: uploadedImage?.imagePath ?? null,
+        author_name: user.user_metadata?.nickname || "FanPick 사용자",
+        author_avatar_url: user.user_metadata?.avatar_url || null,
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    if (uploadedImage?.imagePath) {
+      try {
+        await deleteCommunityPostImage(uploadedImage.imagePath);
+      } catch (deleteError) {
+        console.error("게시글 이미지 롤백 오류:", deleteError);
+      }
+    }
+
+    throw error;
+  }
 };
 
 export const updateCommunityPost = async (
   postId,
-  { category, title, content },
+  { category, title, content, imageFile = null, removeImage = false },
 ) => {
-  const { error } = await supabase
+  const { data: currentPost, error: fetchError } = await supabase
     .from("community_posts")
-    .update({
-      category,
-      title,
-      content,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", postId);
+    .select("user_id, image_url, image_path")
+    .eq("id", postId)
+    .single();
 
-  if (error) throw error;
+  if (fetchError) {
+    throw fetchError;
+  }
+
+  let uploadedImage = null;
+  let nextImageUrl = currentPost.image_url;
+  let nextImagePath = currentPost.image_path;
+
+  try {
+    if (imageFile) {
+      uploadedImage = await uploadCommunityPostImage({
+        userId: currentPost.user_id,
+        file: imageFile,
+      });
+
+      nextImageUrl = uploadedImage.imageUrl;
+      nextImagePath = uploadedImage.imagePath;
+    } else if (removeImage) {
+      nextImageUrl = null;
+      nextImagePath = null;
+    }
+
+    const { error: updateError } = await supabase
+      .from("community_posts")
+      .update({
+        category,
+        title,
+        content,
+        image_url: nextImageUrl,
+        image_path: nextImagePath,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", postId);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    const shouldDeletePreviousImage =
+      currentPost.image_path && currentPost.image_path !== nextImagePath;
+
+    if (shouldDeletePreviousImage) {
+      try {
+        await deleteCommunityPostImage(currentPost.image_path);
+      } catch (deleteError) {
+        console.error("기존 게시글 이미지 삭제 오류:", deleteError);
+      }
+    }
+  } catch (error) {
+    if (uploadedImage?.imagePath) {
+      try {
+        await deleteCommunityPostImage(uploadedImage.imagePath);
+      } catch (deleteError) {
+        console.error("새 게시글 이미지 롤백 오류:", deleteError);
+      }
+    }
+
+    throw error;
+  }
 };
 
 export const deleteCommunityPost = async (postId) => {
-  const { error } = await supabase
+  const { data: post, error: fetchError } = await supabase
+    .from("community_posts")
+    .select("image_path")
+    .eq("id", postId)
+    .single();
+
+  if (fetchError) {
+    throw fetchError;
+  }
+
+  const { error: deleteError } = await supabase
     .from("community_posts")
     .delete()
     .eq("id", postId);
 
-  if (error) throw error;
+  if (deleteError) {
+    throw deleteError;
+  }
+
+  if (post.image_path) {
+    try {
+      await deleteCommunityPostImage(post.image_path);
+    } catch (imageDeleteError) {
+      console.error("게시글 첨부 이미지 삭제 오류:", imageDeleteError);
+    }
+  }
 };
 
 export const fetchCommunityComments = async (postId) => {
@@ -258,13 +483,17 @@ export const createCommunityComment = async ({
     .single();
 
   if (error) throw error;
+
   return data;
 };
 
 export const updateCommunityComment = async (commentId, content) => {
   const { error } = await supabase
     .from("community_comments")
-    .update({ content, updated_at: new Date().toISOString() })
+    .update({
+      content,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", commentId);
 
   if (error) throw error;
@@ -318,11 +547,7 @@ export const fetchCommunityCommentReactions = (commentIds, userId) =>
     userId,
   });
 
-export const toggleCommunityPostReaction = ({
-  postId,
-  userId,
-  reaction,
-}) =>
+export const toggleCommunityPostReaction = ({ postId, userId, reaction }) =>
   toggleReaction({
     table: "community_post_reactions",
     targetKey: "post_id",
