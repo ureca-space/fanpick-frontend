@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useState } from "react";
+import { FiX } from "react-icons/fi";
 import styles from "./MatchAlarmModal.module.css";
 
 const PRESET_OPTIONS = [
@@ -35,21 +36,6 @@ const formatScheduleLabel = (match) => {
   return `${datePart} · ${timePart}`;
 };
 
-const buildPreviewLabel = ({ selectedPresetId, customAmount, customUnit }) => {
-  if (selectedPresetId === "custom") {
-    const amount = customAmount || 0;
-    const unitLabel = CUSTOM_UNITS.find((unit) => unit.id === customUnit)?.label;
-
-    return `경기 시작 ${amount}${unitLabel} 전 알림`;
-  }
-
-  const presetLabel =
-    PRESET_OPTIONS.find((option) => option.id === selectedPresetId)?.label ||
-    "기본 알림";
-
-  return `경기 시작 ${presetLabel} 알림`;
-};
-
 const buildSelectionLabel = ({ selectedPresetId, customAmount, customUnit }) => {
   if (selectedPresetId === "custom") {
     const unitLabel = customUnit === "hours" ? "시간" : "분";
@@ -80,7 +66,6 @@ const MatchAlarmModal = ({
   const [selectedPresetId, setSelectedPresetId] = useState("60");
   const [customAmount, setCustomAmount] = useState("15");
   const [customUnit, setCustomUnit] = useState("minutes");
-  const [previewStatus, setPreviewStatus] = useState("");
 
   useEffect(() => {
     if (!isOpen) {
@@ -106,16 +91,27 @@ const MatchAlarmModal = ({
 
   useEffect(() => {
     if (!isOpen || isAlarmLoading) {
-      return;
+      return undefined;
     }
 
+    let isMounted = true;
     const nextSettings = existingAlarm
       ? getReminderSettingsFromAlarm(existingAlarm, defaultReminderSettings)
       : defaultReminderSettings;
 
-    setSelectedPresetId(nextSettings?.presetId || "60");
-    setCustomAmount(nextSettings?.customAmount || "15");
-    setCustomUnit(nextSettings?.customUnit || "minutes");
+    window.queueMicrotask(() => {
+      if (!isMounted) {
+        return;
+      }
+
+      setSelectedPresetId(nextSettings?.presetId || "60");
+      setCustomAmount(nextSettings?.customAmount || "15");
+      setCustomUnit(nextSettings?.customUnit || "minutes");
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, [
     defaultReminderSettings,
     existingAlarm,
@@ -131,11 +127,6 @@ const MatchAlarmModal = ({
     return `${homeName} vs ${awayName}`;
   }, [match]);
 
-  const previewLabel = buildPreviewLabel({
-    selectedPresetId,
-    customAmount,
-    customUnit,
-  });
   const selectionLabel = buildSelectionLabel({
     selectedPresetId,
     customAmount,
@@ -144,40 +135,6 @@ const MatchAlarmModal = ({
   const hasExistingAlarm = Boolean(existingAlarm?.id);
   const actionsDisabled = isAlarmLoading;
   const saveDisabled = actionsDisabled || !canSaveAlarm;
-
-  const handleShowNotificationPreview = async () => {
-    if (!("Notification" in window)) {
-      setPreviewStatus("이 브라우저는 시스템 알림 미리보기를 지원하지 않아요.");
-      return;
-    }
-
-    try {
-      const permission =
-        Notification.permission === "default"
-          ? await Notification.requestPermission()
-          : Notification.permission;
-
-      if (permission !== "granted") {
-        setPreviewStatus("브라우저 설정에서 알림 권한을 허용해 주세요.");
-        return;
-      }
-
-      const notification = new Notification("FanPick 경기 알림", {
-        body: `${matchTitle} 경기가 곧 시작해요!\n${formatScheduleLabel(match)}`,
-        icon: "/fanpick_mascot.svg",
-        tag: `fanpick-match-preview-${match.id}`,
-      });
-
-      notification.onclick = () => {
-        window.focus();
-        notification.close();
-      };
-      setPreviewStatus("실제 알림 형태로 미리보기를 보냈어요.");
-    } catch (error) {
-      console.error("Failed to show notification preview.", error);
-      setPreviewStatus("알림 미리보기를 표시하지 못했어요.");
-    }
-  };
 
   if (!isOpen || !match) {
     return null;
@@ -215,7 +172,7 @@ const MatchAlarmModal = ({
               aria-label="모달 닫기"
               onClick={onClose}
             >
-              ×
+              <FiX aria-hidden="true" />
             </button>
           </div>
 
@@ -271,7 +228,7 @@ const MatchAlarmModal = ({
             aria-label="모달 닫기"
             onClick={onClose}
           >
-            ×
+            <FiX aria-hidden="true" />
           </button>
         </div>
 
@@ -399,26 +356,6 @@ const MatchAlarmModal = ({
           </div>
         </div>
 
-        <div className={styles.previewCard}>
-          <span className={styles.previewLabel}>미리보기</span>
-          <strong className={styles.previewValue}>{previewLabel}</strong>
-          <span className={styles.previewMessage}>
-            FanPick 경기 알림 · {matchTitle} 경기가 곧 시작해요!
-          </span>
-          <button
-            className={styles.previewButton}
-            type="button"
-            onClick={handleShowNotificationPreview}
-          >
-            실제 알림 미리보기
-          </button>
-          {previewStatus ? (
-            <span className={styles.previewStatus} role="status">
-              {previewStatus}
-            </span>
-          ) : null}
-        </div>
-
         <div className={styles.buttonArea}>
           <button
             className={styles.cancelButton}
@@ -440,20 +377,22 @@ const MatchAlarmModal = ({
             </button>
           ) : null}
 
-          <button
-            className={styles.confirmButton}
-            type="button"
-            onClick={() =>
-              onConfirm?.({
-                presetId: selectedPresetId,
-                customAmount,
-                customUnit,
-              })
-            }
-            disabled={saveDisabled}
-          >
-            {hasExistingAlarm ? "알림 수정" : "알림 저장"}
-          </button>
+          {!hasExistingAlarm ? (
+            <button
+              className={styles.confirmButton}
+              type="button"
+              onClick={() =>
+                onConfirm?.({
+                  presetId: selectedPresetId,
+                  customAmount,
+                  customUnit,
+                })
+              }
+              disabled={saveDisabled}
+            >
+              알림 저장
+            </button>
+          ) : null}
         </div>
       </section>
     </div>

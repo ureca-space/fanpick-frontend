@@ -249,14 +249,23 @@ const CalendarPage = () => {
   }, [currentMonth, isMyFilter, selectedSport]);
 
   useEffect(() => {
-    if (!userId) {
-      setAlarmMatchIds([]);
-      setSelectedAlarmRecord(null);
-      setSelectedAlarmRecordLoading(false);
-      return undefined;
-    }
-
     let isMounted = true;
+
+    if (!userId) {
+      window.queueMicrotask(() => {
+        if (!isMounted) {
+          return;
+        }
+
+        setAlarmMatchIds([]);
+        setSelectedAlarmRecord(null);
+        setSelectedAlarmRecordLoading(false);
+      });
+
+      return () => {
+        isMounted = false;
+      };
+    }
 
     const loadFavoriteTeamIds = async () => {
       const teamIds = await fetchFavoriteTeamIds(userId);
@@ -328,17 +337,33 @@ const CalendarPage = () => {
   }, [userId]);
 
   useEffect(() => {
+    let isMounted = true;
+
     if (!userId || !selectedAlarmMatch?.id) {
-      setSelectedAlarmRecord(null);
-      setSelectedAlarmRecordLoading(false);
-      return undefined;
+      window.queueMicrotask(() => {
+        if (!isMounted) {
+          return;
+        }
+
+        setSelectedAlarmRecord(null);
+        setSelectedAlarmRecordLoading(false);
+      });
+
+      return () => {
+        isMounted = false;
+      };
     }
 
-    let isMounted = true;
-    setSelectedAlarmRecordLoading(true);
-    setSelectedAlarmRecord(null);
-
     const loadSelectedAlarm = async () => {
+      await Promise.resolve();
+
+      if (!isMounted) {
+        return;
+      }
+
+      setSelectedAlarmRecordLoading(true);
+      setSelectedAlarmRecord(null);
+
       try {
         const alarm = await fetchCalendarMatchAlarm(
           userId,

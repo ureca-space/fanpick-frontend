@@ -5,7 +5,7 @@
   padding: 24px;
   border: 1px solid var(--color-white-10);
   border-radius: 8px;
-  background: rgb(24 26 42 / 62%);
+  background-color: var(--color-surface-card-overlay);
 }
 
 .matchCard[data-focus-result="win"] {
@@ -17,11 +17,11 @@
 }
 
 .matchCard[data-focus-result="draw"] {
-  border-color: rgb(245 158 11 / 34%);
+  border-color: var(--color-status-warning-border);
 }
 
 .matchCard[data-focus-result="live"] {
-  border-color: rgb(56 189 248 / 30%);
+  border-color: var(--color-status-info-border);
 }
 
 .matchCard[data-focus-result="resultPending"] {
@@ -31,7 +31,7 @@
 
 .matchCard[data-focus-result="cancelled"],
 .matchCard[data-focus-result="postponed"] {
-  border-color: rgb(148 163 184 / 26%);
+  border-color: var(--color-status-neutral-border-soft);
   border-style: dashed;
 }
 

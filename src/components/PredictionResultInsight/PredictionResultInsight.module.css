@@ -47,8 +47,8 @@
 }
 
 .myPick[data-result="correct"] {
-  border-color: rgb(97 118 255 / 48%);
-  background-color: rgb(97 118 255 / 13%);
+  border-color: var(--color-prediction-home-border);
+  background-color: var(--color-prediction-home-soft);
 }
 
 .myPick[data-result="correct"] b {
@@ -56,8 +56,8 @@
 }
 
 .myPick[data-result="incorrect"] {
-  border-color: rgb(223 93 118 / 48%);
-  background-color: rgb(223 93 118 / 13%);
+  border-color: var(--color-prediction-away-border-strong);
+  background-color: var(--color-prediction-away-subtle);
 }
 
 .myPick[data-result="incorrect"] b {
@@ -65,7 +65,7 @@
 }
 
 .myPick[data-result="void"] {
-  border-color: rgb(245 158 11 / 48%);
+  border-color: var(--color-status-warning-border-medium);
   background-color: var(--color-status-warning-soft);
 }
 
@@ -75,7 +75,7 @@
 
 .myPick[data-result="cancelled"],
 .myPick[data-result="postponed"] {
-  border-color: rgb(148 163 184 / 48%);
+  border-color: var(--color-status-neutral-border-medium);
   border-style: dashed;
   background-color: var(--color-status-neutral-soft);
 }
@@ -100,7 +100,7 @@
 }
 
 .myPick[data-result="live"] {
-  border-color: rgb(56 189 248 / 48%);
+  border-color: var(--color-status-info-border-medium);
   background-color: var(--color-status-info-soft);
 }
 

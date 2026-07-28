@@ -11,6 +11,11 @@ export const SPORT_ICONS = {
   esports: TbDeviceGamepad2,
 };
 
+export const CLOSED_PREDICTION_STATUS_LABELS = {
+  cancelled: "경기취소",
+  postponed: "경기취소",
+};
+
 // - 예측 결과별 화면 문구
 export const RESULT_LABELS = {
   pending: "예측진행중",

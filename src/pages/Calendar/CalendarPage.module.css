@@ -67,8 +67,64 @@
   color: var(--color-accent-strong);
 }
 
+.saveNotice {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: min(calc(100% - 40px), 360px);
+  min-height: 50px;
+  padding: 13px 16px;
+  border: 1px solid var(--color-white-14);
+  border-radius: 12px;
+  color: var(--color-text-white);
+  background-color: var(--color-primary-dark);
+  box-shadow: 0 18px 45px var(--color-black-40);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.4;
+  pointer-events: none;
+  animation: saveNoticeIn 0.2s ease both;
+}
+
+.saveNotice::before {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background-color: var(--color-status-info);
+  content: "";
+}
+
+.saveNoticeSuccess {
+  border-color: var(--color-status-info);
+}
+
+.saveNoticeError {
+  border-color: var(--color-accent-48);
+}
+
+.saveNoticeError::before {
+  background-color: var(--color-accent);
+}
+
 .mobileSelectedDay {
   display: none;
+}
+
+@keyframes saveNoticeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 720px) {
@@ -82,6 +138,14 @@
 
   .statusMessageError {
     font-size: 12px;
+  }
+
+  .saveNotice {
+    right: 14px;
+    bottom: 18px;
+    width: calc(100% - 28px);
+    min-height: 48px;
+    font-size: 13px;
   }
 }
 

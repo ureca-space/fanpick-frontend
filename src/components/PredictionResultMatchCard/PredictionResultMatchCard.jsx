@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   isLiveMatchStatus,
   isResultPendingMatchStatus,
+  parseMatchScore,
 } from "../../utils/matchStatus";
 import PredictionResultInsight from "../PredictionResultInsight/PredictionResultInsight";
 import styles from "./PredictionResultMatchCard.module.css";
@@ -9,22 +10,6 @@ import styles from "./PredictionResultMatchCard.module.css";
 const joinClassNames = (...classNames) => classNames.filter(Boolean).join(" ");
 
 const normalizeTeamCode = (teamCode) => teamCode?.trim().toUpperCase() ?? "";
-
-const parseScore = (score) => {
-  if (!score) {
-    return {
-      awayScore: null,
-      homeScore: null,
-    };
-  }
-
-  const [awayScore, homeScore] = String(score).split(":").map(Number);
-
-  return {
-    awayScore: Number.isFinite(awayScore) ? awayScore : null,
-    homeScore: Number.isFinite(homeScore) ? homeScore : null,
-  };
-};
 
 const getTeamName = (team) => team?.name ?? team?.shortName ?? "-";
 
@@ -123,7 +108,7 @@ const getDisplayScore = (match, side) => {
     return match.homeScore;
   }
 
-  const scores = parseScore(match.score);
+  const scores = parseMatchScore(match.score);
 
   return side === "away" ? scores.awayScore : scores.homeScore;
 };

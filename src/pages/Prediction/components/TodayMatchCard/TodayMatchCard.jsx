@@ -1,17 +1,12 @@
 import { forwardRef } from "react";
-import Skeleton from "../../../../components/Skeleton/Skeleton";
 import {
   isLiveMatchStatus,
   isResultPendingMatchStatus,
 } from "../../../../utils/matchStatus";
-import { SPORT_ICONS } from "../../predictionUtils";
-import TeamMark from "../TeamMark/TeamMark";
-import styles from "./TodayMatchCard.module.css";
-
-const CLOSED_STATUS_LABELS = {
-  cancelled: "경기취소",
-  postponed: "경기취소",
-};
+import { CLOSED_PREDICTION_STATUS_LABELS } from "../../predictionUtils";
+import PredictionMatchCard, {
+  PredictionMatchCardSkeleton,
+} from "../PredictionMatchCard/PredictionMatchCard";
 
 // - 오늘의 경기 표시
 // - 홈팀 또는 원정팀 선택 처리
@@ -29,17 +24,15 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
   // - API에 비율이 없으면 기본값 50% 사용
   const homeRate = match.homeRate ?? 50;
   const awayRate = match.awayRate ?? 50;
-  const SportIcon = SPORT_ICONS[match.sport];
   const hasSelection = Boolean(selection);
-  const closedStatusLabel = CLOSED_STATUS_LABELS[match.status] ?? "";
+  const closedStatusLabel =
+    CLOSED_PREDICTION_STATUS_LABELS[match.status] ?? "";
   const isLive = isLiveMatchStatus(match.status);
   const isResultPending = isResultPendingMatchStatus(match.status);
   const isClosed =
     isLive || isResultPending || match.isFinished || Boolean(closedStatusLabel);
   const canChangeSelection =
     hasSelection && canChangePrediction && !isClosed;
-  const isHomeSelected = selection === "home";
-  const isAwaySelected = selection === "away";
   const isCancelled = Boolean(closedStatusLabel);
   const isHomeDisabled =
     isClosed ||
@@ -73,143 +66,44 @@ const TodayMatchCard = forwardRef(function TodayMatchCard(
           ? "변경가능"
           : "투표완료"
         : "예측진행중";
+  const statusTone = isCancelled
+    ? "cancelled"
+    : isLive
+      ? "live"
+      : isResultPending
+        ? "resultPending"
+        : isClosed
+          ? "finished"
+          : "waiting";
 
   return (
-    <article
-      className={`${styles.matchCard} ${isTarget ? styles.targetMatchCard : ""}`}
+    <PredictionMatchCard
+      awayDisabled={isAwayDisabled}
+      awayValue={isClosed ? (match.awayScore ?? "-") : `${awayRate}%`}
+      boardTone={statusTone}
+      headingStatusLabel={headingStatusLabel}
+      homeDisabled={isHomeDisabled}
+      homeValue={isClosed ? (match.homeScore ?? "-") : `${homeRate}%`}
+      isCancelled={isCancelled}
+      isClosed={isClosed}
+      isTarget={isTarget}
+      match={match}
+      onAwaySelect={() => onSelect(match, "away")}
+      onHomeSelect={() => onSelect(match, "home")}
       ref={ref}
-      tabIndex={isTarget ? -1 : undefined}
-    >
-      <div className={styles.matchMeta}>
-        <span>{match.sportLabel}</span>
-        {SportIcon && (
-          <span className={styles.sportIcon} aria-hidden="true">
-            <SportIcon />
-          </span>
-        )}
-        <strong>{match.league}</strong>
-      </div>
-
-      <div className={styles.matchHeading}>
-        <p>
-          <strong>{match.time}</strong> {headingStatusLabel}
-        </p>
-        <span
-          className={
-            isCancelled
-              ? styles.cancelled
-              : isLive
-                ? styles.live
-                : isResultPending
-                  ? styles.resultPending
-                : isClosed
-                  ? styles.finished
-                  : ""
-          }
-        >
-          {statusLabel}
-        </span>
-      </div>
-
-      <div
-        className={`${styles.teams} ${isClosed ? styles.finishedTeams : ""} ${
-          isCancelled ? styles.cancelledTeams : ""
-        }`}
-      >
-        <button
-          type="button"
-          className={`${styles.teamButton} ${isHomeSelected ? styles.selected : ""}`}
-          disabled={isHomeDisabled}
-          onClick={() => onSelect(match, "home")}
-        >
-          <span className={styles.teamIdentity}>
-            <TeamMark team={match.homeTeam} />
-            <span className={styles.teamText}>
-              <strong>{match.homeTeam.name}</strong>
-              {isHomeSelected && (
-                <small className={styles.myPickBadge}>내 선택</small>
-              )}
-              {isClosed && <small>{homeRate}%</small>}
-            </span>
-          </span>
-          {isClosed ? (
-            <b>{match.homeScore ?? "-"}</b>
-          ) : (
-            <b>{homeRate}%</b>
-          )}
-        </button>
-
-        <button
-          type="button"
-          className={`${styles.teamButton} ${styles.awayTeam} ${isAwaySelected ? styles.selected : ""}`}
-          disabled={isAwayDisabled}
-          onClick={() => onSelect(match, "away")}
-        >
-          {isClosed ? (
-            <b>{match.awayScore ?? "-"}</b>
-          ) : (
-            <b>{awayRate}%</b>
-          )}
-          <span className={styles.teamIdentity}>
-            <span className={styles.teamText}>
-              <strong>{match.awayTeam.name}</strong>
-              {isAwaySelected && (
-                <small className={styles.myPickBadge}>내 선택</small>
-              )}
-              {isClosed && <small>{awayRate}%</small>}
-            </span>
-            <TeamMark team={match.awayTeam} />
-          </span>
-        </button>
-      </div>
-
-      <small>{(match.participants ?? 0).toLocaleString()}명 참여</small>
-    </article>
+      selection={selection}
+      statusLabel={statusLabel}
+      statusTone={statusTone}
+      variant="today"
+    />
   );
 });
 
 export const TodayMatchCardSkeleton = () => (
-  <article
-    className={`${styles.matchCard} ${styles.skeletonCard}`}
-    aria-label="오늘의 경기 로딩 중"
-  >
-    <div className={styles.matchMeta}>
-      <Skeleton.Line className={styles.skeletonMetaShort} />
-      <Skeleton.Circle className={styles.skeletonSportIcon} />
-      <Skeleton.Line className={styles.skeletonMetaLong} />
-    </div>
-
-    <div className={styles.matchHeading}>
-      <Skeleton.Line className={styles.skeletonHeading} />
-      <Skeleton.Line className={styles.skeletonStatus} />
-    </div>
-
-    <div className={styles.teams}>
-      <div className={styles.teamButton}>
-        <span className={styles.teamIdentity}>
-          <Skeleton.Circle className={styles.skeletonTeamMark} />
-
-          <span className={styles.teamText}>
-            <Skeleton.Line className={styles.skeletonTeamName} />
-            <Skeleton.Line className={styles.skeletonTeamSubtext} />
-          </span>
-        </span>
-      </div>
-
-      <div className={`${styles.teamButton} ${styles.awayTeam}`}>
-        <span className={styles.teamIdentity}>
-          <span className={styles.teamText}>
-            <Skeleton.Line className={styles.skeletonTeamName} />
-            <Skeleton.Line className={styles.skeletonTeamSubtext} />
-          </span>
-
-          <Skeleton.Circle className={styles.skeletonTeamMark} />
-        </span>
-      </div>
-    </div>
-
-    <Skeleton.Line className={styles.skeletonParticipants} />
-  </article>
+  <PredictionMatchCardSkeleton
+    ariaLabel="오늘의 경기 로딩 중"
+    variant="today"
+  />
 );
 
 export default TodayMatchCard;

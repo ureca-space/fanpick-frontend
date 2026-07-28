@@ -87,7 +87,7 @@ const getFinishedProtectionMs = (sport) => {
   return minutes * 60 * 1000;
 };
 
-const parseScore = (score) => {
+export const parseMatchScore = (score) => {
   if (score === null || score === undefined || String(score).trim() === "") {
     return {
       awayScore: null,
@@ -104,7 +104,7 @@ const parseScore = (score) => {
 };
 
 const isLikelyUnsettledFinishedScore = ({ score, sport }) => {
-  const { awayScore, homeScore } = parseScore(score);
+  const { awayScore, homeScore } = parseMatchScore(score);
 
   if (awayScore === null || homeScore === null) {
     return true;

@@ -2,6 +2,8 @@ import { createClient } from "@supabase/supabase-js";
 
 const ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 const KOREA_TIME_OFFSET = 9 * 60 * 60 * 1000;
+const DEFAULT_LOOKBACK_DAYS = 3;
+const DEFAULT_MAX_MATCHES = 30;
 
 const supabaseUrl = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
 
@@ -43,6 +45,24 @@ const getKoreaDate = (daysAgo = 0) => {
   return `${year}-${month}-${day}`;
 };
 
+const parsePositiveInteger = (value, fallback) => {
+  const parsedValue = Number.parseInt(String(value ?? ""), 10);
+
+  return Number.isInteger(parsedValue) && parsedValue > 0
+    ? parsedValue
+    : fallback;
+};
+
+const reportLookbackDays = parsePositiveInteger(
+  process.env.AI_REPORT_LOOKBACK_DAYS,
+  DEFAULT_LOOKBACK_DAYS,
+);
+
+const maxMatchesToGenerate = parsePositiveInteger(
+  process.env.AI_REPORT_MAX_MATCHES,
+  DEFAULT_MAX_MATCHES,
+);
+
 const generateReport = async (matchId) => {
   const response = await fetch(
     `${supabaseUrl}/functions/v1/generate-match-report`,
@@ -79,9 +99,9 @@ const generateReport = async (matchId) => {
 
 const generateMatchAiReports = async () => {
   const today = getKoreaDate(0);
-  const yesterday = getKoreaDate(1);
+  const fromDate = getKoreaDate(reportLookbackDays);
 
-  console.log(`\n[FanPick AI] ${yesterday} ~ ${today} 종료 경기 조회 중...\n`);
+  console.log(`\n[FanPick AI] ${fromDate} ~ ${today} 종료 경기 조회 중...\n`);
 
   const { data: finishedMatches, error: matchError } = await supabase
     .from("matches")
@@ -98,7 +118,8 @@ const generateMatchAiReports = async () => {
       status
     `,
     )
-    .in("match_date", [yesterday, today])
+    .gte("match_date", fromDate)
+    .lte("match_date", today)
     .eq("status", "finished")
     .order("match_date", {
       ascending: true,
@@ -112,7 +133,7 @@ const generateMatchAiReports = async () => {
   }
 
   if (!finishedMatches?.length) {
-    console.log("[FanPick AI] 어제와 오늘 종료된 경기가 없습니다.");
+    console.log("[FanPick AI] 조회 범위 안에 종료된 경기가 없습니다.");
 
     return;
   }
@@ -132,12 +153,13 @@ const generateMatchAiReports = async () => {
     (existingReports ?? []).map((report) => report.match_id),
   );
 
-  const matchesToGenerate = finishedMatches.filter(
-    (match) => !reportedMatchIds.has(match.id),
-  );
+  const matchesToGenerate = finishedMatches
+    .filter((match) => !reportedMatchIds.has(match.id))
+    .slice(0, maxMatchesToGenerate);
 
   console.log(`[FanPick AI] 종료 경기: ${finishedMatches.length}경기`);
   console.log(`[FanPick AI] 기존 리포트: ${reportedMatchIds.size}경기`);
+  console.log(`[FanPick AI] 최대 생성 수: ${maxMatchesToGenerate}경기`);
   console.log(`[FanPick AI] 생성 대상: ${matchesToGenerate.length}경기\n`);
 
   if (matchesToGenerate.length === 0) {
