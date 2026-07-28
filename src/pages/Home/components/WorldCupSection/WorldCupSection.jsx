@@ -98,7 +98,7 @@ const WorldCupSection = () => {
   const handleStartWorldCup = () => {
     if (isAuthLoading) return;
 
-    const worldCupPath = `/worldcup/${activeFilter}`;
+    const worldCupPath = "/worldcup";
 
     if (!isLoggedIn) {
       setPendingWorldCupPath(worldCupPath);
