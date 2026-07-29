@@ -23,6 +23,7 @@ import {
 } from "./components/CommunitySidebars/CommunitySidebars";
 import CommunitySubNav from "./components/CommunitySubNav/CommunitySubNav";
 import { BOARD_FILTERS, CATEGORIES } from "./communityConstants";
+import { getCommunityPostImages } from "./communityImageUtils";
 import styles from "./CommunityPage.module.css";
 
 const PAGE_SIZE = 10;
@@ -466,65 +467,84 @@ const CommunityPage = () => {
                       {category !== "my-comments" && <span>응원</span>}
                     </div>
 
-                    {visiblePosts.map((post) => (
-                      <Link
-                        to={`/community/${post.destinationId ?? post.id}`}
-                        state={{
-                          communityListSearch: searchParams.toString(),
-                        }}
-                        className={[
-                          styles.postRow,
-                          post.isMyComment ? styles.threeColumnRow : "",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                        key={post.id}
-                      >
-                        {post.isMyComment ? (
-                          <span className={styles.myCommentContent}>
-                            <strong>{post.title}</strong>
-                            <span>{post.postTitle}</span>
-                          </span>
-                        ) : (
-                          <span className={styles.postTitle}>
-                            {!CATEGORIES.some(
-                              (item) =>
-                                item.id !== "all" && item.id === category,
-                            ) && (
-                              <small className={styles.postCategory}>
-                                {CATEGORY_LABELS[post.category]}
-                              </small>
-                            )}
+                    {visiblePosts.map((post) => {
+                      const postImages = getCommunityPostImages(post);
 
-                            <span className={styles.postTitleText}>
-                              {formatPostTitle(post.title)}
+                      return (
+                        <Link
+                          to={`/community/${post.destinationId ?? post.id}`}
+                          state={{
+                            communityListSearch: searchParams.toString(),
+                          }}
+                          className={[
+                            styles.postRow,
+                            post.isMyComment ? styles.threeColumnRow : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
+                          key={post.id}
+                        >
+                          {post.isMyComment ? (
+                            <span className={styles.myCommentContent}>
+                              <strong>{post.title}</strong>
+                              <span>{post.postTitle}</span>
                             </span>
+                          ) : (
+                            <span className={styles.postTitle}>
+                              {!CATEGORIES.some(
+                                (item) =>
+                                  item.id !== "all" && item.id === category,
+                              ) && (
+                                <small className={styles.postCategory}>
+                                  {CATEGORY_LABELS[post.category]}
+                                </small>
+                              )}
 
-                            <b>({post.commentCount})</b>
+                              {postImages.length > 0 && (
+                                <span
+                                  className={styles.postImagePreview}
+                                  aria-label={`첨부 이미지 ${postImages.length}개`}
+                                >
+                                  <img src={postImages[0].url} alt="" />
+
+                                  {postImages.length > 1 && (
+                                    <small>{postImages.length}</small>
+                                  )}
+                                </span>
+                              )}
+
+                              <span className={styles.postTitleText}>
+                                {formatPostTitle(post.title)}
+                              </span>
+
+                              <b>({post.commentCount})</b>
+                            </span>
+                          )}
+
+                          <span title={post.author_name}>
+                            {post.isMyComment
+                              ? CATEGORY_LABELS[post.category]
+                              : formatAuthorName(post.author_name)}
                           </span>
-                        )}
 
-                        <span title={post.author_name}>
-                          {post.isMyComment
-                            ? CATEGORY_LABELS[post.category]
-                            : formatAuthorName(post.author_name)}
-                        </span>
-
-                        <span>
-                          {formatRelativeTime(post.created_at, currentTime)}
-                        </span>
-
-                        {!post.isMyComment && (
-                          <span>{(post.view_count ?? 0).toLocaleString()}</span>
-                        )}
-
-                        {!post.isMyComment && (
                           <span>
-                            {(post.supportCount ?? 0).toLocaleString()}
+                            {formatRelativeTime(post.created_at, currentTime)}
                           </span>
-                        )}
-                      </Link>
-                    ))}
+
+                          {!post.isMyComment && (
+                            <span>
+                              {(post.view_count ?? 0).toLocaleString()}
+                            </span>
+                          )}
+
+                          {!post.isMyComment && (
+                            <span>
+                              {(post.supportCount ?? 0).toLocaleString()}
+                            </span>
+                          )}
+                        </Link>
+                      );
+                    })}
                   </div>
 
                   <div className={styles.pagination} aria-label="페이지 이동">

@@ -8,6 +8,10 @@ import {
   updateCommunityPost,
 } from "../../../services/communityApi";
 import { CATEGORIES } from "../communityConstants";
+import {
+  getCommunityPostImages,
+  MAX_COMMUNITY_POST_IMAGES,
+} from "../communityImageUtils";
 import styles from "./CommunityWritePage.module.css";
 
 const CATEGORY_OPTIONS = CATEGORIES.filter(
@@ -31,6 +35,7 @@ const CommunityWritePage = () => {
   const { postId } = useParams();
   const { user, isAuthLoading } = useAuth();
   const fileInputRef = useRef(null);
+  const newImagesRef = useRef([]);
 
   const isEditMode = Boolean(postId);
 
@@ -38,10 +43,8 @@ const CommunityWritePage = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  const [imageFile, setImageFile] = useState(null);
-  const [imageObjectUrl, setImageObjectUrl] = useState("");
-  const [existingImageUrl, setExistingImageUrl] = useState("");
-  const [removeImage, setRemoveImage] = useState(false);
+  const [newImages, setNewImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
 
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -86,8 +89,8 @@ const CommunityWritePage = () => {
         setCategory(post.category ?? "");
         setTitle(post.title ?? "");
         setContent(post.content ?? "");
-        setExistingImageUrl(post.image_url ?? "");
-        setRemoveImage(false);
+        setExistingImages(getCommunityPostImages(post));
+        setNewImages([]);
       } catch (error) {
         console.error("수정할 게시글 조회 오류:", error);
 
@@ -110,44 +113,101 @@ const CommunityWritePage = () => {
   }, [isAuthLoading, isEditMode, navigate, postId, user]);
 
   useEffect(() => {
-    if (!imageObjectUrl) {
-      return undefined;
-    }
+    newImagesRef.current = newImages;
+  }, [newImages]);
 
+  useEffect(() => {
     return () => {
-      URL.revokeObjectURL(imageObjectUrl);
+      newImagesRef.current.forEach((image) => {
+        URL.revokeObjectURL(image.previewUrl);
+      });
     };
-  }, [imageObjectUrl]);
+  }, []);
 
-  const imagePreviewUrl = imageObjectUrl || existingImageUrl;
+  const imagePreviews = [...existingImages, ...newImages];
 
   const handleImageChange = (event) => {
-    const selectedFile = event.target.files?.[0];
+    const selectedFiles = Array.from(event.target.files ?? []);
 
-    if (!selectedFile) return;
+    if (selectedFiles.length === 0) return;
 
-    if (!ALLOWED_IMAGE_TYPES.includes(selectedFile.type)) {
+    const availableImageCount =
+      MAX_COMMUNITY_POST_IMAGES - imagePreviews.length;
+
+    if (availableImageCount <= 0) {
+      alert(`이미지는 최대 ${MAX_COMMUNITY_POST_IMAGES}장까지 첨부할 수 있습니다.`);
+      event.target.value = "";
+      return;
+    }
+
+    const targetFiles = selectedFiles.slice(0, availableImageCount);
+
+    const invalidTypeFile = targetFiles.find(
+      (file) => !ALLOWED_IMAGE_TYPES.includes(file.type),
+    );
+
+    if (invalidTypeFile) {
       alert("JPG, PNG, WEBP, GIF 이미지만 첨부할 수 있습니다.");
       event.target.value = "";
       return;
     }
 
-    if (selectedFile.size > MAX_IMAGE_SIZE) {
+    const oversizedFile = targetFiles.find((file) => file.size > MAX_IMAGE_SIZE);
+
+    if (oversizedFile) {
       alert("이미지는 최대 5MB까지 첨부할 수 있습니다.");
       event.target.value = "";
       return;
     }
 
-    setImageFile(selectedFile);
-    setImageObjectUrl(URL.createObjectURL(selectedFile));
-    setRemoveImage(false);
+    if (selectedFiles.length > availableImageCount) {
+      alert(`이미지는 최대 ${MAX_COMMUNITY_POST_IMAGES}장까지 첨부할 수 있습니다.`);
+    }
+
+    const selectedImages = targetFiles.map((file) => {
+      const id =
+        globalThis.crypto?.randomUUID?.() ??
+        `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const previewUrl = URL.createObjectURL(file);
+
+      return {
+        file,
+        id,
+        previewUrl,
+        url: previewUrl,
+      };
+    });
+
+    setNewImages((currentImages) => [...currentImages, ...selectedImages]);
+
+    event.target.value = "";
   };
 
-  const handleRemoveImage = () => {
-    setImageFile(null);
-    setImageObjectUrl("");
-    setExistingImageUrl("");
-    setRemoveImage(true);
+  const handleRemoveExistingImage = (imageId) => {
+    setExistingImages((currentImages) =>
+      currentImages.filter((image) => image.id !== imageId),
+    );
+  };
+
+  const handleRemoveNewImage = (imageId) => {
+    setNewImages((currentImages) => {
+      const targetImage = currentImages.find((image) => image.id === imageId);
+
+      if (targetImage) {
+        URL.revokeObjectURL(targetImage.previewUrl);
+      }
+
+      return currentImages.filter((image) => image.id !== imageId);
+    });
+  };
+
+  const handleClearImages = () => {
+    newImages.forEach((image) => {
+      URL.revokeObjectURL(image.previewUrl);
+    });
+
+    setNewImages([]);
+    setExistingImages([]);
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -186,13 +246,14 @@ const CommunityWritePage = () => {
         category,
         title: title.trim(),
         content: content.trim(),
-        imageFile,
+        imageFiles: newImages.map((image) => image.file),
       };
 
       if (isEditMode) {
         await updateCommunityPost(postId, {
           ...postData,
-          removeImage,
+          removeImage: imagePreviews.length === 0,
+          retainedImagePaths: existingImages.map((image) => image.path),
         });
 
         navigate(`/community/${postId}`, {
@@ -328,36 +389,58 @@ const CommunityWritePage = () => {
             <div className={styles.imageSectionHeader}>
               <div>
                 <strong>사진 첨부</strong>
-                <p>JPG, PNG, WEBP, GIF · 최대 5MB</p>
+                <p>
+                  JPG, PNG, WEBP, GIF · 최대 {MAX_COMMUNITY_POST_IMAGES}장 · 각
+                  5MB
+                </p>
               </div>
 
               <label className={styles.imageSelectButton}>
-                이미지 선택
+                이미지 추가
                 <input
                   ref={fileInputRef}
                   className={styles.imageInput}
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/gif"
+                  multiple
                   onChange={handleImageChange}
                 />
               </label>
             </div>
 
-            {imagePreviewUrl && (
+            {imagePreviews.length > 0 && (
               <div className={styles.imagePreviewArea}>
-                <img
-                  className={styles.imagePreview}
-                  src={imagePreviewUrl}
-                  alt="게시글 첨부 이미지 미리보기"
-                />
+                <div className={styles.imagePreviewGrid}>
+                  {imagePreviews.map((image, index) => (
+                    <div className={styles.imagePreviewItem} key={image.id}>
+                      <img
+                        className={styles.imagePreview}
+                        src={image.url}
+                        alt={`게시글 첨부 이미지 미리보기 ${index + 1}`}
+                      />
+
+                      <button
+                        type="button"
+                        className={styles.imageRemoveButton}
+                        onClick={() =>
+                          image.file
+                            ? handleRemoveNewImage(image.id)
+                            : handleRemoveExistingImage(image.id)
+                        }
+                        aria-label={`첨부 이미지 ${index + 1} 삭제`}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  ))}
+                </div>
 
                 <button
                   type="button"
-                  className={styles.imageRemoveButton}
-                  onClick={handleRemoveImage}
-                  aria-label="첨부 이미지 삭제"
+                  className={styles.imageClearButton}
+                  onClick={handleClearImages}
                 >
-                  이미지 삭제
+                  전체 삭제
                 </button>
               </div>
             )}
