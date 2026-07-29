@@ -87,6 +87,23 @@ export const uploadCommunityPostImage = async ({ userId, file }) => {
   };
 };
 
+const uploadCommunityPostImages = async ({ userId, files = [] }) => {
+  const uploadedImages = [];
+
+  for (const file of files) {
+    const uploadedImage = await uploadCommunityPostImage({
+      userId,
+      file,
+    });
+
+    if (uploadedImage) {
+      uploadedImages.push(uploadedImage);
+    }
+  }
+
+  return uploadedImages;
+};
+
 export const deleteCommunityPostImage = async (imagePath) => {
   if (!imagePath) return;
 
@@ -97,6 +114,46 @@ export const deleteCommunityPostImage = async (imagePath) => {
   if (error) {
     throw error;
   }
+};
+
+const deleteCommunityPostImages = async (imagePaths = []) => {
+  const uniqueImagePaths = [...new Set(imagePaths.filter(Boolean))];
+
+  if (uniqueImagePaths.length === 0) return;
+
+  const { error } = await supabase.storage
+    .from(COMMUNITY_IMAGE_BUCKET)
+    .remove(uniqueImagePaths);
+
+  if (error) {
+    throw error;
+  }
+};
+
+const getPostImages = (post) => {
+  const imageUrls = Array.isArray(post?.image_urls)
+    ? post.image_urls.filter(Boolean)
+    : [];
+
+  const imagePaths = Array.isArray(post?.image_paths) ? post.image_paths : [];
+
+  if (imageUrls.length > 0) {
+    return imageUrls.map((imageUrl, index) => ({
+      imageUrl,
+      imagePath: imagePaths[index] || "",
+    }));
+  }
+
+  if (post?.image_url) {
+    return [
+      {
+        imageUrl: post.image_url,
+        imagePath: post.image_path || "",
+      },
+    ];
+  }
+
+  return [];
 };
 
 // 게시글·댓글에 저장된 user_id로 최신 공개 프로필을 연결
@@ -303,20 +360,26 @@ export const createCommunityPost = async ({
   title,
   content,
   imageFile = null,
+  imageFiles = [],
 }) => {
   if (!user?.id) {
     throw new Error("로그인이 필요합니다.");
   }
 
-  let uploadedImage = null;
+  const targetImageFiles =
+    imageFiles.length > 0 ? imageFiles : [imageFile].filter(Boolean);
+  let uploadedImages = [];
 
   try {
-    if (imageFile) {
-      uploadedImage = await uploadCommunityPostImage({
+    if (targetImageFiles.length > 0) {
+      uploadedImages = await uploadCommunityPostImages({
         userId: user.id,
-        file: imageFile,
+        files: targetImageFiles,
       });
     }
+
+    const imageUrls = uploadedImages.map((image) => image.imageUrl);
+    const imagePaths = uploadedImages.map((image) => image.imagePath);
 
     const { data, error } = await supabase
       .from("community_posts")
@@ -325,8 +388,10 @@ export const createCommunityPost = async ({
         category,
         title,
         content,
-        image_url: uploadedImage?.imageUrl ?? null,
-        image_path: uploadedImage?.imagePath ?? null,
+        image_url: imageUrls[0] ?? null,
+        image_path: imagePaths[0] ?? null,
+        image_urls: imageUrls,
+        image_paths: imagePaths,
         author_name: user.user_metadata?.nickname || "FanPick 사용자",
         author_avatar_url: user.user_metadata?.avatar_url || null,
       })
@@ -339,9 +404,11 @@ export const createCommunityPost = async ({
 
     return data;
   } catch (error) {
-    if (uploadedImage?.imagePath) {
+    if (uploadedImages.length > 0) {
       try {
-        await deleteCommunityPostImage(uploadedImage.imagePath);
+        await deleteCommunityPostImages(
+          uploadedImages.map((image) => image.imagePath),
+        );
       } catch (deleteError) {
         console.error("게시글 이미지 롤백 오류:", deleteError);
       }
@@ -353,11 +420,19 @@ export const createCommunityPost = async ({
 
 export const updateCommunityPost = async (
   postId,
-  { category, title, content, imageFile = null, removeImage = false },
+  {
+    category,
+    title,
+    content,
+    imageFile = null,
+    imageFiles = [],
+    removeImage = false,
+    retainedImagePaths = null,
+  },
 ) => {
   const { data: currentPost, error: fetchError } = await supabase
     .from("community_posts")
-    .select("user_id, image_url, image_path")
+    .select("user_id, image_url, image_path, image_urls, image_paths")
     .eq("id", postId)
     .single();
 
@@ -365,23 +440,31 @@ export const updateCommunityPost = async (
     throw fetchError;
   }
 
-  let uploadedImage = null;
-  let nextImageUrl = currentPost.image_url;
-  let nextImagePath = currentPost.image_path;
+  const currentImages = getPostImages(currentPost);
+  const shouldUseRetainedImagePaths = Array.isArray(retainedImagePaths);
+  const retainedImagePathSet = new Set(
+    shouldUseRetainedImagePaths ? retainedImagePaths.filter(Boolean) : [],
+  );
+  const retainedImages = shouldUseRetainedImagePaths
+    ? currentImages.filter((image) => retainedImagePathSet.has(image.imagePath))
+    : removeImage
+      ? []
+      : currentImages;
+  const targetImageFiles =
+    imageFiles.length > 0 ? imageFiles : [imageFile].filter(Boolean);
+  let uploadedImages = [];
 
   try {
-    if (imageFile) {
-      uploadedImage = await uploadCommunityPostImage({
+    if (targetImageFiles.length > 0) {
+      uploadedImages = await uploadCommunityPostImages({
         userId: currentPost.user_id,
-        file: imageFile,
+        files: targetImageFiles,
       });
-
-      nextImageUrl = uploadedImage.imageUrl;
-      nextImagePath = uploadedImage.imagePath;
-    } else if (removeImage) {
-      nextImageUrl = null;
-      nextImagePath = null;
     }
+
+    const nextImages = [...retainedImages, ...uploadedImages];
+    const nextImageUrls = nextImages.map((image) => image.imageUrl);
+    const nextImagePaths = nextImages.map((image) => image.imagePath);
 
     const { error: updateError } = await supabase
       .from("community_posts")
@@ -389,8 +472,10 @@ export const updateCommunityPost = async (
         category,
         title,
         content,
-        image_url: nextImageUrl,
-        image_path: nextImagePath,
+        image_url: nextImageUrls[0] ?? null,
+        image_path: nextImagePaths[0] ?? null,
+        image_urls: nextImageUrls,
+        image_paths: nextImagePaths,
         updated_at: new Date().toISOString(),
       })
       .eq("id", postId);
@@ -399,20 +484,24 @@ export const updateCommunityPost = async (
       throw updateError;
     }
 
-    const shouldDeletePreviousImage =
-      currentPost.image_path && currentPost.image_path !== nextImagePath;
+    const nextImagePathSet = new Set(nextImagePaths);
+    const imagePathsToDelete = currentImages
+      .map((image) => image.imagePath)
+      .filter((imagePath) => imagePath && !nextImagePathSet.has(imagePath));
 
-    if (shouldDeletePreviousImage) {
+    if (imagePathsToDelete.length > 0) {
       try {
-        await deleteCommunityPostImage(currentPost.image_path);
+        await deleteCommunityPostImages(imagePathsToDelete);
       } catch (deleteError) {
         console.error("기존 게시글 이미지 삭제 오류:", deleteError);
       }
     }
   } catch (error) {
-    if (uploadedImage?.imagePath) {
+    if (uploadedImages.length > 0) {
       try {
-        await deleteCommunityPostImage(uploadedImage.imagePath);
+        await deleteCommunityPostImages(
+          uploadedImages.map((image) => image.imagePath),
+        );
       } catch (deleteError) {
         console.error("새 게시글 이미지 롤백 오류:", deleteError);
       }
@@ -425,7 +514,7 @@ export const updateCommunityPost = async (
 export const deleteCommunityPost = async (postId) => {
   const { data: post, error: fetchError } = await supabase
     .from("community_posts")
-    .select("image_path")
+    .select("image_path, image_paths")
     .eq("id", postId)
     .single();
 
@@ -442,9 +531,14 @@ export const deleteCommunityPost = async (postId) => {
     throw deleteError;
   }
 
-  if (post.image_path) {
+  const imagePathsToDelete = [
+    ...(Array.isArray(post.image_paths) ? post.image_paths : []),
+    post.image_path,
+  ];
+
+  if (imagePathsToDelete.some(Boolean)) {
     try {
-      await deleteCommunityPostImage(post.image_path);
+      await deleteCommunityPostImages(imagePathsToDelete);
     } catch (imageDeleteError) {
       console.error("게시글 첨부 이미지 삭제 오류:", imageDeleteError);
     }

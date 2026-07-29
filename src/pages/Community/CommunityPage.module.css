@@ -154,6 +154,40 @@
   white-space: nowrap;
 }
 
+.postImagePreview {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  overflow: hidden;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--color-surface-muted);
+}
+
+.postImagePreview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.postImagePreview small {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  display: grid;
+  min-width: 16px;
+  height: 16px;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--color-text-white);
+  background: var(--color-black-48);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
 .postCategory {
   flex: 0 0 auto;
   padding: 3px 6px;
@@ -365,6 +399,11 @@
   .postRow {
     grid-template-columns: minmax(0, 1fr) max-content;
     min-height: 54px;
+  }
+
+  .postImagePreview {
+    width: 28px;
+    height: 28px;
   }
 
   .postRow.threeColumnRow {

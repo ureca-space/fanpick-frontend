@@ -215,10 +215,8 @@
 }
 
 .imagePreviewArea {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
+  display: grid;
+  gap: 14px;
   margin-top: 24px;
   padding: 16px;
   border: 1px solid var(--color-white-10);
@@ -226,19 +224,51 @@
   background: var(--color-surface-muted);
 }
 
-.imagePreview {
-  display: block;
-  width: min(100%, 520px);
-  max-height: 360px;
-  object-fit: contain;
+.imagePreviewGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.imagePreviewItem {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
   border-radius: 6px;
   background: var(--color-surface-dark);
 }
 
+.imagePreview {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .imageRemoveButton {
-  flex-shrink: 0;
-  min-width: 90px;
-  height: 38px;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 6px;
+  color: var(--color-text-white);
+  background: var(--color-black-48);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease;
+}
+
+.imageRemoveButton:hover {
+  background: var(--color-accent);
+}
+
+.imageClearButton {
+  justify-self: end;
+  height: 34px;
   padding: 0 14px;
   border: 1px solid var(--color-white-18);
   border-radius: 6px;
@@ -246,14 +276,9 @@
   background: transparent;
   font-size: 13px;
   font-weight: 700;
-  cursor: pointer;
-  transition:
-    border-color 0.2s ease,
-    color 0.2s ease,
-    background-color 0.2s ease;
 }
 
-.imageRemoveButton:hover {
+.imageClearButton:hover {
   border-color: var(--color-accent);
   color: var(--color-text-white);
   background: var(--color-white-02);
@@ -317,17 +342,18 @@
     width: 100%;
   }
 
-  .imagePreviewArea {
-    flex-direction: column;
+  .imagePreviewGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .imagePreview {
+  .imageClearButton {
     width: 100%;
-    max-height: 300px;
   }
 
   .imageRemoveButton {
-    width: 100%;
+    height: 28px;
+    padding: 0 9px;
+    font-size: 11px;
   }
 
   .actions {

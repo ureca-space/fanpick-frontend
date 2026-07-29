@@ -29,6 +29,7 @@ import { formatRelativeTime } from "../../../utils/formatRelativeTime";
 import { getPredictionBadgeMeta } from "../../../utils/predictionBadge";
 import CommunitySidebars from "../components/CommunitySidebars/CommunitySidebars";
 import { CATEGORIES } from "../communityConstants";
+import { getCommunityPostImages } from "../communityImageUtils";
 import styles from "./CommunityDetailPage.module.css";
 
 const CATEGORY_LABELS = Object.fromEntries(
@@ -158,7 +159,7 @@ const normalizePost = (post) => ({
   avatarUrl: post.author_avatar_url,
   createdAt: post.created_at,
   views: Number(post.view_count ?? 0),
-  imageUrl: post.image_url ?? "",
+  images: getCommunityPostImages(post),
 });
 
 const normalizeComments = (rows) => {
@@ -857,14 +858,18 @@ const CommunityDetailPage = () => {
                 <LinkifiedText text={post.content} />
               </p>
 
-              {post.imageUrl && (
-                <div className={styles.postImageArea}>
-                  <img
-                    className={styles.postImage}
-                    src={post.imageUrl}
-                    alt={`${post.title} 첨부 이미지`}
-                    loading="lazy"
-                  />
+              {post.images.length > 0 && (
+                <div className={styles.postImageGrid}>
+                  {post.images.map((image, index) => (
+                    <div className={styles.postImageArea} key={image.id}>
+                      <img
+                        className={styles.postImage}
+                        src={image.url}
+                        alt={`${post.title} 첨부 이미지 ${index + 1}`}
+                        loading="lazy"
+                      />
+                    </div>
+                  ))}
                 </div>
               )}
 
