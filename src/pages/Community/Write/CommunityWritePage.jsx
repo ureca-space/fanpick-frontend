@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router";
 import Button from "../../../components/Button/Button";
+import FanPickDialog from "../../../components/FanPickDialog/FanPickDialog";
 import useAuth from "../../../contexts/useAuth";
+import useFanPickDialog from "../../../hooks/useFanPickDialog";
 import {
   createCommunityPost,
   fetchCommunityPost,
@@ -49,6 +51,9 @@ const CommunityWritePage = () => {
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingPost, setIsLoadingPost] = useState(isEditMode);
+  const { dialogProps, showDialog } = useFanPickDialog({
+    lockBodyScroll: false,
+  });
 
   useEffect(() => {
     if (!isEditMode) {
@@ -81,8 +86,16 @@ const CommunityWritePage = () => {
         if (!isMounted) return;
 
         if (post.user_id !== user.id) {
-          alert("작성자만 게시글을 수정할 수 있습니다.");
-          navigate(`/community/${postId}`, { replace: true });
+          const moveToPost = () => {
+            navigate(`/community/${postId}`, { replace: true });
+          };
+
+          showDialog({
+            description: "작성자만 게시글을 수정할 수 있습니다.",
+            onClose: moveToPost,
+            onConfirm: moveToPost,
+            title: "수정 권한 없음",
+          });
           return;
         }
 
@@ -96,8 +109,16 @@ const CommunityWritePage = () => {
 
         if (!isMounted) return;
 
-        alert("게시글을 불러오지 못했습니다.");
-        navigate("/community", { replace: true });
+        const moveToCommunity = () => {
+          navigate("/community", { replace: true });
+        };
+
+        showDialog({
+          description: "게시글을 불러오지 못했습니다.",
+          onClose: moveToCommunity,
+          onConfirm: moveToCommunity,
+          title: "게시글 조회 실패",
+        });
       } finally {
         if (isMounted) {
           setIsLoadingPost(false);
@@ -110,7 +131,7 @@ const CommunityWritePage = () => {
     return () => {
       isMounted = false;
     };
-  }, [isAuthLoading, isEditMode, navigate, postId, user]);
+  }, [isAuthLoading, isEditMode, navigate, postId, showDialog, user]);
 
   useEffect(() => {
     newImagesRef.current = newImages;
@@ -135,7 +156,10 @@ const CommunityWritePage = () => {
       MAX_COMMUNITY_POST_IMAGES - imagePreviews.length;
 
     if (availableImageCount <= 0) {
-      alert(`이미지는 최대 ${MAX_COMMUNITY_POST_IMAGES}장까지 첨부할 수 있습니다.`);
+      showDialog({
+        description: `이미지는 최대 ${MAX_COMMUNITY_POST_IMAGES}장까지 첨부할 수 있습니다.`,
+        title: "이미지 첨부 불가",
+      });
       event.target.value = "";
       return;
     }
@@ -147,7 +171,10 @@ const CommunityWritePage = () => {
     );
 
     if (invalidTypeFile) {
-      alert("JPG, PNG, WEBP, GIF 이미지만 첨부할 수 있습니다.");
+      showDialog({
+        description: "JPG, PNG, WEBP, GIF 이미지만 첨부할 수 있습니다.",
+        title: "지원하지 않는 파일 형식",
+      });
       event.target.value = "";
       return;
     }
@@ -155,13 +182,19 @@ const CommunityWritePage = () => {
     const oversizedFile = targetFiles.find((file) => file.size > MAX_IMAGE_SIZE);
 
     if (oversizedFile) {
-      alert("이미지는 최대 5MB까지 첨부할 수 있습니다.");
+      showDialog({
+        description: "이미지는 최대 5MB까지 첨부할 수 있습니다.",
+        title: "이미지 용량 초과",
+      });
       event.target.value = "";
       return;
     }
 
     if (selectedFiles.length > availableImageCount) {
-      alert(`이미지는 최대 ${MAX_COMMUNITY_POST_IMAGES}장까지 첨부할 수 있습니다.`);
+      showDialog({
+        description: `이미지는 최대 ${MAX_COMMUNITY_POST_IMAGES}장까지 첨부할 수 있습니다.`,
+        title: "일부 이미지만 첨부됨",
+      });
     }
 
     const selectedImages = targetFiles.map((file) => {
@@ -228,12 +261,20 @@ const CommunityWritePage = () => {
     }
 
     if (!user) {
-      alert("로그인 후 글을 작성할 수 있습니다.");
+      const moveToLogin = () => {
+        navigate("/login", {
+          state: {
+            from: isEditMode ? `/community/${postId}/edit` : "/community/write",
+          },
+        });
+      };
 
-      navigate("/login", {
-        state: {
-          from: isEditMode ? `/community/${postId}/edit` : "/community/write",
-        },
+      showDialog({
+        cancelText: "취소",
+        confirmText: "로그인하기",
+        description: "로그인 후 글을 작성할 수 있습니다.",
+        onConfirm: moveToLogin,
+        title: "로그인이 필요합니다",
       });
 
       return;
@@ -274,11 +315,12 @@ const CommunityWritePage = () => {
     } catch (error) {
       console.error("게시글 저장 오류:", error);
 
-      alert(
-        `게시글을 저장하지 못했습니다.${
+      showDialog({
+        description: `게시글을 저장하지 못했습니다.${
           error?.message ? `\n${error.message}` : ""
         }`,
-      );
+        title: "게시글 저장 실패",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -462,6 +504,8 @@ const CommunityWritePage = () => {
           </div>
         </form>
       </div>
+
+      <FanPickDialog {...dialogProps} />
     </section>
   );
 };

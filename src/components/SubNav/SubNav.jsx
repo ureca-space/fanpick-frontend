@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router";
 import FanPickDialog from "../FanPickDialog/FanPickDialog";
 import useAuth from "../../contexts/useAuth";
 import styles from "./SubNav.module.css";

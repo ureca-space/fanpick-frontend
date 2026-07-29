@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router";
 import { LOGOUT_REDIRECT_STORAGE_KEY } from "../constants/authFlow";
 import useAuth from "../contexts/useAuth";
 

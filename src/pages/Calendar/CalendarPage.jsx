@@ -542,24 +542,6 @@ const CalendarPage = () => {
     try {
       await ensurePushSubscription(userId);
 
-      console.log("[calendar-alarm] save attempt", {
-        userId,
-        matchId: selectedAlarmMatch.id,
-        matchDate: selectedAlarmMatch.date,
-        matchTime: selectedAlarmMatch.time,
-        matchTitle: [
-          selectedAlarmMatch.homeTeam?.shortName ||
-            selectedAlarmMatch.homeTeam?.name,
-          selectedAlarmMatch.awayTeam?.shortName ||
-            selectedAlarmMatch.awayTeam?.name,
-        ]
-          .filter(Boolean)
-          .join(" vs "),
-        sportLabel: selectedAlarmMatch.sportLabel,
-        league: selectedAlarmMatch.league,
-        alarmSettings,
-      });
-
       const savedAlarm = await saveCalendarMatchAlarm(userId, {
         matchId: selectedAlarmMatch.id,
         presetId: alarmSettings?.presetId ?? "60",
@@ -587,7 +569,6 @@ const CalendarPage = () => {
         );
       }
 
-      console.log("[calendar-alarm] save success", savedAlarm);
       setSaveNotice({
         type: "success",
         message: "알림이 저장됐어요.",
@@ -619,11 +600,6 @@ const CalendarPage = () => {
     }
 
     try {
-      console.log("[calendar-alarm] delete attempt", {
-        userId,
-        matchId: selectedAlarmMatch.id,
-      });
-
       const canceledAlarm = await cancelCalendarMatchAlarm(
         userId,
         selectedAlarmMatch.id,
@@ -637,7 +613,6 @@ const CalendarPage = () => {
         prevIds.filter((matchId) => matchId !== matchIdToRemove),
       );
 
-      console.log("[calendar-alarm] delete success", canceledAlarm);
       setSaveNotice({
         type: "success",
         message: "알림이 해제됐어요.",

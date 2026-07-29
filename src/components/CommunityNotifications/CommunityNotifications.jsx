@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FiBell, FiCheck } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import {
   fetchCommunityNotifications,
   markAllCommunityNotificationsRead,

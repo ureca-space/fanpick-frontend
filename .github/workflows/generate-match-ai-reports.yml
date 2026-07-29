@@ -10,6 +10,13 @@ on:
   # Actions 화면에서 직접 실행 가능
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: generate-match-ai-reports
+  cancel-in-progress: false
+
 jobs:
   generate-reports:
     runs-on: ubuntu-latest
@@ -26,6 +33,13 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Sync latest match and prediction data
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVER_KEY: ${{ secrets.SUPABASE_SERVER_KEY }}
+          PANDASCORE_API_KEY: ${{ secrets.PANDASCORE_API_KEY }}
+        run: npm run sync:results
 
       - name: Generate match AI reports
         env:

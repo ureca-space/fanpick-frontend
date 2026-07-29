@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import Button from "../../components/Button/Button.jsx";
 import EmptyState from "../../components/EmptyState/EmptyState.jsx";
+import FanPickDialog from "../../components/FanPickDialog/FanPickDialog.jsx";
 import PaginationControls from "../../components/PaginationControls/PaginationControls.jsx";
 import PredictionBadgeIcon from "../../components/PredictionBadgeIcon/PredictionBadgeIcon.jsx";
 import Skeleton from "../../components/Skeleton/Skeleton.jsx";
@@ -11,6 +12,7 @@ import {
   fetchFavoriteTeamIds,
   getFavoriteTeamIds,
 } from "../../services/favoriteTeams.js";
+import useFanPickDialog from "../../hooks/useFanPickDialog.js";
 import { subscribeToMatchChanges } from "../../services/matchRealtime.js";
 import {
   createSettledPredictionSummary,
@@ -427,6 +429,9 @@ const MyPage = () => {
   const [favoriteTeamsPage, setFavoriteTeamsPage] = useState(0);
   const [historyPage, setHistoryPage] = useState(0);
   const [currentTime, setCurrentTime] = useState(() => Date.now());
+  const { dialogProps, showDialog } = useFanPickDialog({
+    lockBodyScroll: false,
+  });
 
   const [isEditingNickname, setIsEditingNickname] = useState(false);
   const [nicknameInput, setNicknameInput] = useState("");
@@ -672,12 +677,18 @@ const MyPage = () => {
     const trimmedNickname = nicknameInput.trim();
 
     if (!trimmedNickname) {
-      alert("닉네임을 입력해 주세요.");
+      showDialog({
+        description: "닉네임을 입력해 주세요.",
+        title: "닉네임 확인",
+      });
       return;
     }
 
     if (trimmedNickname.length > 12) {
-      alert("닉네임은 12자 이하로 입력해 주세요.");
+      showDialog({
+        description: "닉네임은 12자 이하로 입력해 주세요.",
+        title: "닉네임 확인",
+      });
       return;
     }
 
@@ -725,7 +736,10 @@ const MyPage = () => {
       setIsEditingNickname(false);
     } catch (error) {
       console.error("닉네임 수정 오류:", error);
-      alert("닉네임을 수정하지 못했습니다.");
+      showDialog({
+        description: "닉네임을 수정하지 못했습니다.",
+        title: "닉네임 수정 실패",
+      });
     } finally {
       setIsSavingNickname(false);
     }
@@ -754,12 +768,18 @@ const MyPage = () => {
     const extension = ALLOWED_IMAGE_TYPES[file.type];
 
     if (!extension) {
-      alert("JPG, PNG, WEBP 이미지만 업로드할 수 있습니다.");
+      showDialog({
+        description: "JPG, PNG, WEBP 이미지만 업로드할 수 있습니다.",
+        title: "지원하지 않는 파일 형식",
+      });
       return;
     }
 
     if (file.size > MAX_AVATAR_SIZE) {
-      alert("프로필 이미지는 2MB 이하만 업로드할 수 있습니다.");
+      showDialog({
+        description: "프로필 이미지는 2MB 이하만 업로드할 수 있습니다.",
+        title: "이미지 용량 초과",
+      });
       return;
     }
 
@@ -837,7 +857,10 @@ const MyPage = () => {
       }));
     } catch (error) {
       console.error("프로필 이미지 업로드 오류:", error);
-      alert("프로필 이미지를 변경하지 못했습니다.");
+      showDialog({
+        description: "프로필 이미지를 변경하지 못했습니다.",
+        title: "프로필 이미지 변경 실패",
+      });
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -961,7 +984,8 @@ const MyPage = () => {
   };
 
   return (
-    <main className={styles.myPage}>
+    <>
+      <main className={styles.myPage}>
       <div className={`container ${styles.inner}`}>
         <header className={styles.pageHeader}>
           <p className={styles.eyebrow}>FANPICK ACCOUNT</p>
@@ -1429,7 +1453,10 @@ const MyPage = () => {
           )}
         </section>
       </div>
-    </main>
+      </main>
+
+      <FanPickDialog {...dialogProps} />
+    </>
   );
 };
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router";
 import CommunityNotifications from "../../components/CommunityNotifications/CommunityNotifications";
 import FanPickDialog from "../../components/FanPickDialog/FanPickDialog";
 import { LOGOUT_REDIRECT_STORAGE_KEY } from "../../constants/authFlow";

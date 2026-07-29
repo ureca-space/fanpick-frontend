@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router";
 import EmptyState from "../../components/EmptyState/EmptyState";
 import MatchFilter from "../../components/MatchFilter/MatchFilter";
 import PaginationControls from "../../components/PaginationControls/PaginationControls";

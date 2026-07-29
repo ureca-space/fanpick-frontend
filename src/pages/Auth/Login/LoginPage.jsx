@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router";
 import { supabase } from "../../../lib/supabase";
 import styles from "../AuthPage.module.css";
 

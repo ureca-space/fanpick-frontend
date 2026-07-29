@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import styles from "./ViewAllLink.module.css";
 
 const ViewAllLink = ({ to, onClick, children = "VIEW ALL", className = "" }) => {

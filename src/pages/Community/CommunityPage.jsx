@@ -5,7 +5,7 @@ import {
   FiChevronsLeft,
   FiChevronsRight,
 } from "react-icons/fi";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router";
 import EmptyState from "../../components/EmptyState/EmptyState";
 import SearchInput from "../../components/SearchInput/SearchInput";
 import Skeleton from "../../components/Skeleton/Skeleton";
