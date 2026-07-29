@@ -101,6 +101,12 @@ export const fetchMatchAiReports = async () => {
     `,
     )
     .eq("matches.status", "finished")
+    .order("matches(match_date)", {
+      ascending: false,
+    })
+    .order("matches(match_time)", {
+      ascending: false,
+    })
     .order("created_at", {
       ascending: false,
     })

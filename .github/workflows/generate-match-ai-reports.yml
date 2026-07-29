@@ -2,8 +2,9 @@ name: Generate Match AI Reports
 
 on:
   schedule:
-    # 한국 시간 매일 22:30, 23:30, 00:30, 01:30, 02:30
+    # 한국 시간 매일 09:40, 22:30, 23:30, 00:30, 01:30, 02:30
     # GitHub Actions cron은 UTC 기준
+    - cron: "40 0 * * *"
     - cron: "30 13-17 * * *"
 
   # Actions 화면에서 직접 실행 가능

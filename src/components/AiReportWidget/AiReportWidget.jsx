@@ -208,7 +208,7 @@ const sortReports = (reportList) => {
 
     const secondTime = secondReport.match?.match_time ?? "";
 
-    return firstTime.localeCompare(secondTime);
+    return secondTime.localeCompare(firstTime);
   });
 };
 

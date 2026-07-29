@@ -29,7 +29,7 @@ const ALLOWED_IMAGE_TYPES = [
 const CommunityWritePage = () => {
   const navigate = useNavigate();
   const { postId } = useParams();
-  const { user } = useAuth();
+  const { user, isAuthLoading } = useAuth();
   const fileInputRef = useRef(null);
 
   const isEditMode = Boolean(postId);
@@ -39,7 +39,7 @@ const CommunityWritePage = () => {
   const [content, setContent] = useState("");
 
   const [imageFile, setImageFile] = useState(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState("");
+  const [imageObjectUrl, setImageObjectUrl] = useState("");
   const [existingImageUrl, setExistingImageUrl] = useState("");
   const [removeImage, setRemoveImage] = useState(false);
 
@@ -48,9 +48,23 @@ const CommunityWritePage = () => {
   const [isLoadingPost, setIsLoadingPost] = useState(isEditMode);
 
   useEffect(() => {
-    if (!isEditMode || !user) {
-      setIsLoadingPost(false);
-      return;
+    if (!isEditMode) {
+      return undefined;
+    }
+
+    if (isAuthLoading) {
+      return undefined;
+    }
+
+    if (!user) {
+      navigate("/login", {
+        replace: true,
+        state: {
+          from: `/community/${postId}/edit`,
+        },
+      });
+
+      return undefined;
     }
 
     let isMounted = true;
@@ -93,22 +107,19 @@ const CommunityWritePage = () => {
     return () => {
       isMounted = false;
     };
-  }, [isEditMode, navigate, postId, user]);
+  }, [isAuthLoading, isEditMode, navigate, postId, user]);
 
   useEffect(() => {
-    if (!imageFile) {
-      setImagePreviewUrl(existingImageUrl);
+    if (!imageObjectUrl) {
       return undefined;
     }
 
-    const objectUrl = URL.createObjectURL(imageFile);
-
-    setImagePreviewUrl(objectUrl);
-
     return () => {
-      URL.revokeObjectURL(objectUrl);
+      URL.revokeObjectURL(imageObjectUrl);
     };
-  }, [existingImageUrl, imageFile]);
+  }, [imageObjectUrl]);
+
+  const imagePreviewUrl = imageObjectUrl || existingImageUrl;
 
   const handleImageChange = (event) => {
     const selectedFile = event.target.files?.[0];
@@ -128,11 +139,13 @@ const CommunityWritePage = () => {
     }
 
     setImageFile(selectedFile);
+    setImageObjectUrl(URL.createObjectURL(selectedFile));
     setRemoveImage(false);
   };
 
   const handleRemoveImage = () => {
     setImageFile(null);
+    setImageObjectUrl("");
     setExistingImageUrl("");
     setRemoveImage(true);
 

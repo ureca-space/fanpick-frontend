@@ -86,8 +86,8 @@ const PredictionBadge = ({
 
   const userStats = sportStats.filter((item) => item.user_id === userId);
 
-  let totalCount = 0;
-  let accuracyRate = 0;
+  let totalCount;
+  let accuracyRate;
 
   if (fallbackSport === "overall") {
     const explicitOverallStats = userStats.find(

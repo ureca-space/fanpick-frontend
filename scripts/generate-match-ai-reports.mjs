@@ -53,6 +53,21 @@ const parsePositiveInteger = (value, fallback) => {
     : fallback;
 };
 
+const sortMatchesByMostRecent = (matches) =>
+  [...matches].sort((firstMatch, secondMatch) => {
+    const dateComparison = String(secondMatch.match_date ?? "").localeCompare(
+      String(firstMatch.match_date ?? ""),
+    );
+
+    if (dateComparison !== 0) {
+      return dateComparison;
+    }
+
+    return String(secondMatch.match_time ?? "").localeCompare(
+      String(firstMatch.match_time ?? ""),
+    );
+  });
+
 const reportLookbackDays = parsePositiveInteger(
   process.env.AI_REPORT_LOOKBACK_DAYS,
   DEFAULT_LOOKBACK_DAYS,
@@ -122,10 +137,10 @@ const generateMatchAiReports = async () => {
     .lte("match_date", today)
     .eq("status", "finished")
     .order("match_date", {
-      ascending: true,
+      ascending: false,
     })
     .order("match_time", {
-      ascending: true,
+      ascending: false,
     });
 
   if (matchError) {
@@ -153,8 +168,9 @@ const generateMatchAiReports = async () => {
     (existingReports ?? []).map((report) => report.match_id),
   );
 
-  const matchesToGenerate = finishedMatches
-    .filter((match) => !reportedMatchIds.has(match.id))
+  const matchesToGenerate = sortMatchesByMostRecent(
+    finishedMatches.filter((match) => !reportedMatchIds.has(match.id)),
+  )
     .slice(0, maxMatchesToGenerate);
 
   console.log(`[FanPick AI] 종료 경기: ${finishedMatches.length}경기`);
