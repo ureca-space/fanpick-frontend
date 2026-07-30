@@ -23,23 +23,45 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Sync latest match and prediction data
+      - name: Sync KBO schedule
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVER_KEY: ${{ secrets.SUPABASE_SERVER_KEY }}
+        run: node scripts/sync-kbo-schedule.mjs
+
+      - name: Sync K League schedule
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVER_KEY: ${{ secrets.SUPABASE_SERVER_KEY }}
+        run: node scripts/sync-kleague-schedule.mjs
+
+      - name: Sync LCK schedule
+        continue-on-error: true
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVER_KEY: ${{ secrets.SUPABASE_SERVER_KEY }}
           PANDASCORE_API_KEY: ${{ secrets.PANDASCORE_API_KEY }}
-        run: npm run sync:results
+        run: node scripts/sync-lck-schedule.mjs
+
+      - name: Sync prediction results
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVER_KEY: ${{ secrets.SUPABASE_SERVER_KEY }}
+        run: node scripts/sync-prediction-results.mjs
 
       - name: Generate match AI reports
         env:
