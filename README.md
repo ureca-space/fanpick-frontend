@@ -189,6 +189,145 @@ FanPick의 메인 화면은 스포츠 경기 정보를 빠르게 탐색할 수 �
 
 ---
 
+## Porting Manual
+
+### 1. 실행 환경
+
+- Node.js 22 이상
+- npm
+- Supabase 프로젝트
+- Vercel 계정
+- PandaScore API Key
+- OpenAI API Key
+
+### 2. 프로젝트 설치
+
+```bash
+git clone https://github.com/ureca-space/fanpick-frontend.git
+cd fanpick-frontend
+npm install
+```
+
+### 3. 환경 변수 설정
+
+루트 경로에 `.env` 파일을 생성하고 아래 값을 설정합니다.
+
+```bash
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+VITE_VAPID_PUBLIC_KEY=
+```
+
+경기 데이터 동기화와 AI 리포트 생성 스크립트를 실행하려면  
+루트 경로에 `.env.sync` 파일을 추가로 생성합니다.
+
+```bash
+SUPABASE_URL=
+SUPABASE_SERVER_KEY=
+PANDASCORE_API_KEY=
+REPORT_FUNCTION_SECRET=
+```
+
+AI 리포트 생성 범위를 직접 조정해야 하는 경우에만 아래 값을 선택적으로 추가합니다.  
+설정하지 않으면 최근 3일, 최대 30경기를 기본값으로 사용합니다.
+
+```bash
+AI_REPORT_LOOKBACK_DAYS=
+AI_REPORT_MAX_MATCHES=
+```
+
+실제 환경 변수 값은 GitHub에 올리지 않고, 로컬 `.env` 파일과 GitHub Actions Secrets, Vercel Environment Variables에서 관리합니다.
+
+### 4. 로컬 실행
+
+```bash
+npm run dev
+```
+
+### 5. 빌드 확인
+
+```bash
+npm run build
+```
+
+빌드 결과는 `dist` 폴더에 생성됩니다.
+
+### 6. Supabase 설정
+
+1. Supabase 프로젝트를 생성합니다.
+2. `supabase/migrations`의 SQL을 적용하여 필요한 테이블과 정책을 구성합니다.
+3. `supabase/functions`의 Edge Function을 배포합니다.
+4. Supabase Edge Function Secrets에 아래 값을 설정합니다.
+
+```bash
+OPENAI_API_KEY=
+REPORT_FUNCTION_SECRET=
+SUPABASE_URL=
+SUPABASE_SECRET_KEYS=
+```
+
+AI 리포트 생성은 `generate-match-report` Edge Function에서 처리합니다.  
+클라이언트는 OpenAI API를 직접 호출하지 않고, 생성된 리포트 데이터를 Supabase DB에서 조회합니다.
+
+### 7. 데이터 동기화
+
+경기 일정, 팀 기록, 순위, 예측 결과는 `scripts` 폴더의 스크립트로 동기화합니다.
+
+```bash
+npm run sync:schedules
+npm run sync:standings
+npm run sync:records
+npm run sync:prediction-results
+```
+
+AI 리포트는 종료된 경기 중 아직 리포트가 없는 경기만 대상으로 생성합니다.
+
+```bash
+node --env-file=.env.sync scripts/generate-match-ai-reports.mjs
+```
+
+### 8. GitHub Actions 설정
+
+GitHub Actions에서 자동 동기화와 AI 리포트 생성을 사용하려면  
+Repository Secrets에 아래 값을 등록합니다.
+
+```bash
+SUPABASE_URL
+SUPABASE_SERVER_KEY
+VITE_SUPABASE_PUBLISHABLE_KEY
+PANDASCORE_API_KEY
+REPORT_FUNCTION_SECRET
+```
+
+주요 워크플로우는 다음과 같습니다.
+
+- `sync-kbo.yml`: KBO 경기 일정 동기화
+- `sync-kleague.yml`: K리그 경기 일정 동기화
+- `sync-lck.yml`: LCK 경기 일정 동기화
+- `sync-records.yml`: 팀 기록 및 순위 동기화
+- `sync-prediction-results.yml`: 승부예측 결과 정산
+- `generate-match-ai-reports.yml`: 종료 경기 AI 리포트 생성
+
+### 9. Vercel 배포
+
+Vercel에서 GitHub 저장소를 연결한 뒤 아래 설정을 사용합니다.
+
+| 항목             | 값              |
+| ---------------- | --------------- |
+| Framework Preset | Vite            |
+| Build Command    | `npm run build` |
+| Output Directory | `dist`          |
+
+Vercel Environment Variables에는 아래 값을 등록합니다.
+
+```bash
+VITE_SUPABASE_URL
+VITE_SUPABASE_PUBLISHABLE_KEY
+VITE_VAPID_PUBLIC_KEY
+```
+
+---
+
 ## Folder Structure
 
 <pre>
