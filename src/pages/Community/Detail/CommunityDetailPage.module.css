@@ -186,10 +186,7 @@
 .postImageArea {
   display: grid;
   width: 100%;
-  overflow: hidden;
   place-items: center;
-  border-radius: 8px;
-  background-color: var(--color-surface-dark);
 }
 
 .postImage {
@@ -198,6 +195,7 @@
   max-width: 100%;
   height: auto;
   max-height: min(78vh, 820px);
+  border-radius: 8px;
   object-fit: contain;
 }
 
