@@ -3,7 +3,6 @@ import MatchFilter from "../../components/MatchFilter/MatchFilter";
 import SearchInput from "../../components/SearchInput/SearchInput";
 import SubNav from "../../components/SubNav/SubNav";
 import { TEAMS_SUB_NAV_ITEMS } from "../../constants/teamsNav";
-import { getTeamInfo } from "../../constants/teamInfo";
 import {
   fetchPlayerRecords,
   fetchTeamRecords,
@@ -11,6 +10,7 @@ import {
 } from "../../services/teamRecords";
 import PillTabs from "./components/PillTabs/PillTabs";
 import RecordTable from "./components/RecordTable/RecordTable";
+import TeamRecordImage from "./components/TeamRecordImage";
 import { LOL_PLAYER_RECORDS } from "./data/lolPlayerRecordData";
 import { LOL_TEAM_RECORDS } from "./data/lolTeamRecordData";
 import {
@@ -27,6 +27,19 @@ import {
   SOCCER_TEAM_RECORDS_K1,
   SOCCER_TEAM_RECORDS_K2,
 } from "./data/kleagueRecordData";
+import {
+  formatDecimal,
+  formatPercent,
+  getImageUrl,
+  getRankValue,
+  getRecordRowKey,
+  getSearchFields,
+  getSoccerPlayerOfficialImageUrl,
+  getSoccerTeamLogoUrl,
+  matchesQuery,
+  normalizeText,
+  uniqueBy,
+} from "./teamRecordUtils";
 import styles from "./TeamRecordPage.module.css";
 
 const SPORT_TABS = [
@@ -62,191 +75,6 @@ const getRecordLeagueId = (sport, soccerLeague) => {
 };
 
 const getRecordDatasetKey = (sport, view, leagueId) => `${sport}:${view}:${leagueId}`;
-
-const formatPercent = (value) => {
-  const number = Number(value);
-
-  return Number.isFinite(number) ? `${Math.round(number * 100)}%` : "-";
-};
-
-const formatDecimal = (value, digits = 2) => {
-  const number = Number(value);
-
-  return Number.isFinite(number) ? number.toFixed(digits).replace(/\.?0+$/, "") : "-";
-};
-
-const normalizeText = (value) =>
-  String(value ?? "")
-    .toLowerCase()
-    .replace(/\s+/g, "");
-
-const matchesQuery = (query, fields = []) => {
-  if (!query) {
-    return true;
-  }
-
-  const normalizedQuery = normalizeText(query);
-
-  return fields.some((field) => normalizeText(field).includes(normalizedQuery));
-};
-
-const FALLBACK_IMAGE_URL = "/fanpick_logo.svg";
-const EMPTY_IMAGE_SOURCES = [];
-const KLEAGUE_PLAYER_IMAGE_BASE_URL =
-  "https://d2tfp74nsbbrkr.cloudfront.net/v1/player";
-
-const BROKEN_IMAGE_URLS = new Set([
-  "https://sports-phinf.pstatic.net/player/kfootball/default/20190178.png",
-  "https://sports-phinf.pstatic.net/player/kfootball/default/20230255.png",
-  "https://sports-phinf.pstatic.net/player/kfootball/default/20210155.png",
-  "https://sports-phinf.pstatic.net/player/kfootball/default/20250166.png",
-  "https://sports-phinf.pstatic.net/player/kfootball/default/20260332.png",
-  "https://sports-phinf.pstatic.net/player/kfootball/default/20260282.png",
-  "https://sports-phinf.pstatic.net/player/kfootball/default/20260284.png",
-  "hhttps://ssl.pstatic.net/sstatic/people/profileImg/t/7e68a7dd-43e8-4cca-9540-dda3e777f7d2.png",
-]);
-
-const isValidImageUrl = (url) =>
-  typeof url === "string" &&
-  (/^https?:\/\//.test(url) || url.startsWith("/")) &&
-  !BROKEN_IMAGE_URLS.has(url);
-
-const getImageUrl = (...urls) => urls.find(isValidImageUrl) || FALLBACK_IMAGE_URL;
-
-const getSoccerTeamCode = (value) => {
-  const normalizedValue = String(value ?? "").trim().toUpperCase();
-
-  if (!normalizedValue) {
-    return "";
-  }
-
-  if (/^K\d+$/.test(normalizedValue)) {
-    return normalizedValue.replace(/^K(\d)$/, "K0$1");
-  }
-
-  if (/^\d+$/.test(normalizedValue)) {
-    return `K${normalizedValue.padStart(2, "0")}`;
-  }
-
-  return "";
-};
-
-const getSoccerTeamInfo = (row) => {
-  const candidates = [
-    row.teamCode,
-    row.teamId,
-    row.teamShortName,
-    row.teamName,
-  ].filter(Boolean);
-
-  return (
-    candidates
-      .flatMap((candidate) => {
-        const teamCode = getSoccerTeamCode(candidate);
-
-        return teamCode ? [teamCode, candidate] : [candidate];
-      })
-      .map((candidate) => getTeamInfo(candidate, "soccer"))
-      .find((teamInfo) => teamInfo.logo) ?? {}
-  );
-};
-
-const getSoccerTeamLogoUrl = (row) => {
-  const teamInfo = getSoccerTeamInfo(row);
-
-  return getImageUrl(teamInfo.logo, row.logoUrl, row.teamImageUrl, row.imageUrl);
-};
-
-const getSoccerPlayerOfficialImageUrl = (row) => {
-  const teamCode = getSoccerTeamCode(row.teamCode ?? row.teamId);
-  const playerId = String(row.playerId ?? "").trim();
-  const season = String(row.season ?? "2026").trim() || "2026";
-
-  if (!teamCode || !playerId) {
-    return "";
-  }
-
-  return `${KLEAGUE_PLAYER_IMAGE_BASE_URL}/${season}/${teamCode}/player_${playerId}.png`;
-};
-
-const uniqueBy = (rows = [], getKey) => {
-  const seen = new Set();
-
-  return rows.filter((row) => {
-    const key = getKey(row);
-
-    if (!key || seen.has(key)) {
-      return false;
-    }
-
-    seen.add(key);
-    return true;
-  });
-};
-
-const TeamRecordImage = ({
-  src,
-  className,
-  alt = "",
-  fallbackSrc = FALLBACK_IMAGE_URL,
-  fallbackSources = EMPTY_IMAGE_SOURCES,
-}) => {
-  const sources = useMemo(
-    () => [
-      ...new Set([src, ...fallbackSources, fallbackSrc].filter(isValidImageUrl)),
-    ],
-    [fallbackSrc, fallbackSources, src],
-  );
-  const [failedSources, setFailedSources] = useState(() => new Set());
-  const imageSrc =
-    sources.find((source) => !failedSources.has(source)) || fallbackSrc;
-  const isFallback = imageSrc === fallbackSrc;
-
-  return (
-    <img
-      className={[className, isFallback ? styles.fallbackImage : ""]
-        .filter(Boolean)
-        .join(" ")}
-      src={imageSrc}
-      alt={alt}
-      aria-hidden="true"
-      onError={() => {
-        setFailedSources((currentFailedSources) => {
-          if (currentFailedSources.has(imageSrc)) {
-            return currentFailedSources;
-          }
-
-          const nextFailedSources = new Set(currentFailedSources);
-          nextFailedSources.add(imageSrc);
-          return nextFailedSources;
-        });
-      }}
-    />
-  );
-};
-
-const getRankValue = (row) => row.rank ?? row.ranking ?? "-";
-
-const getRecordRowKey = (row, activeSport, activeView) => {
-  const rank = row.rank ?? row.ranking ?? "";
-
-  if (activeView === "player") {
-    return [
-      activeSport,
-      row.teamId,
-      row.playerId,
-      row.playerName,
-      row.playerFullName,
-      rank,
-    ]
-      .filter(Boolean)
-      .join(":");
-  }
-
-  return [activeSport, row.teamId, row.id, row.teamName, rank]
-    .filter(Boolean)
-    .join(":");
-};
 
 const collectTeamTabs = (rows = []) => {
   const seen = new Set();
@@ -405,22 +233,6 @@ const mergeSoccerPlayerFallbackImages = (rows = []) =>
       ),
     };
   });
-
-const getSearchFields = (row, sport, view) => {
-  if (view === "team") {
-    return [row.teamName, row.teamShortName, row.teamId];
-  }
-
-  if (sport === "esports") {
-    return [row.playerName, row.playerFullName, row.teamName, row.teamShortName, row.position];
-  }
-
-  if (sport === "baseball") {
-    return [row.playerName, row.teamName, row.teamShortName, row.position, row.kind];
-  }
-
-  return [row.playerName, row.playerFullName, row.teamName, row.teamShortName, row.position, row.teamId];
-};
 
 const esportsTeamColumns = [
   {

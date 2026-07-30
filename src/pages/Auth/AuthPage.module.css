@@ -3,6 +3,7 @@
   flex: 1;
   justify-content: center;
   width: 100%;
+  min-height: calc(100vh - var(--header-height));
   padding: 50px 24px 80px;
   color: var(--color-text-white);
   background-color: var(--color-primary-dark);
