@@ -84,15 +84,16 @@ const getKoreaYearMonth = () => {
 const getScheduleTargets = () => {
   const { year, month } = getKoreaYearMonth();
 
-  return Array.from({ length: 3 }, (_, index) => {
+  return Array.from({ length: 4 }, (_, index) => {
     /*
      * Date의 month는 0부터 시작한다.
-     * 현재 month - 1에 index를 더해 현재 월부터 계산한다.
+     * 현재 month - 2에 index를 더해 이전 월부터 계산한다.
      *
-     * 11월 → 12월 → 다음 해 1월처럼
+     * 1월 → 이전 해 12월처럼 역방향 연도 변경과
+     * 11월 → 12월 → 다음 해 1월처럼 순방향 연도 변경이
      * 연도가 넘어가는 경우도 자동 처리된다.
      */
-    const targetDate = new Date(Date.UTC(year, month - 1 + index, 1));
+    const targetDate = new Date(Date.UTC(year, month - 2 + index, 1));
 
     return {
       year: targetDate.getUTCFullYear(),
