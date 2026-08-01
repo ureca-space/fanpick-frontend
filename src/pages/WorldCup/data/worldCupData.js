@@ -87,200 +87,206 @@ const KLEAGUE_PLAYER_CANDIDATES = createPlayerCandidates(
 );
 
 // 현역 축구선수 실력 월드컵
+const SOCCER_PLAYER_SKILL_IMAGES = {
+  "soccer-skill-01":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Leo_Messi_Argentina_v_Egypt_7_July_2026-1.jpg/960px-Leo_Messi_Argentina_v_Egypt_7_July_2026-1.jpg",
+  "soccer-skill-02":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/BFA_2023_-2_Heung-Min_Son_%28cropped%29.jpg/960px-BFA_2023_-2_Heung-Min_Son_%28cropped%29.jpg",
+  "soccer-skill-03":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Kylian_Mbappe_France_v_Senegal_16_June_2026-391_%28cropped%29.jpg/960px-Kylian_Mbappe_France_v_Senegal_16_June_2026-391_%28cropped%29.jpg",
+  "soccer-skill-04":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Cristiano_Ronaldo_Croatia_v_Portugal_2_July_2026-075_%28cropped%29.jpg/960px-Cristiano_Ronaldo_Croatia_v_Portugal_2_July_2026-075_%28cropped%29.jpg",
+  "soccer-skill-05":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Erling_Haaland_Morocco_v_Norway_7_June_2026-51.jpg/960px-Erling_Haaland_Morocco_v_Norway_7_June_2026-51.jpg",
+  "soccer-skill-06":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Kevin_De_Bruyne_USMNT_v_Belgium_Mar_28_2026-64_%28cropped%29.jpg/960px-Kevin_De_Bruyne_USMNT_v_Belgium_Mar_28_2026-64_%28cropped%29.jpg",
+  "soccer-skill-07":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Neymar_Junior_Brazil_V_Morocco_13_June_2026-40.jpg/960px-Neymar_Junior_Brazil_V_Morocco_13_June_2026-40.jpg",
+  "soccer-skill-08":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/2019147183134_2019-05-27_Fussball_1.FC_Kaiserslautern_vs_FC_Bayern_M%C3%BCnchen_-_Sven_-_1D_X_MK_II_-_0228_-_B70I8527_%28cropped%29.jpg/960px-2019147183134_2019-05-27_Fussball_1.FC_Kaiserslautern_vs_FC_Bayern_M%C3%BCnchen_-_Sven_-_1D_X_MK_II_-_0228_-_B70I8527_%28cropped%29.jpg",
+  "soccer-skill-09":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Harry_Kane_England_v_Ghana_23_June_2026-219_%28cropped%29.jpg/960px-Harry_Kane_England_v_Ghana_23_June_2026-219_%28cropped%29.jpg",
+  "soccer-skill-10":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Karim_Benzema_Pick.jpg/960px-Karim_Benzema_Pick.jpg",
+  "soccer-skill-11":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Luka_Modric_Croatia_v_Portugal_2_July_2026-055.jpg/960px-Luka_Modric_Croatia_v_Portugal_2_July_2026-055.jpg",
+  "soccer-skill-12":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Jude_Bellingham_England_v_Panama_27_June_26-160_%28cropped%29.jpg/960px-Jude_Bellingham_England_v_Panama_27_June_26-160_%28cropped%29.jpg",
+  "soccer-skill-13":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Mohamed_Salah_Argentina_v_Egypt_7_July_2026-163_%28cropped%29.jpg/960px-Mohamed_Salah_Argentina_v_Egypt_7_July_2026-163_%28cropped%29.jpg",
+  "soccer-skill-14":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Lee_Kang-in_-_2022_%2852551771501%29_%28cropped%29.jpg/960px-Lee_Kang-in_-_2022_%2852551771501%29_%28cropped%29.jpg",
+  "soccer-skill-15":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/FC_Red_Bull_Salzburg_gegen_Bayern_M%C3%BCnchen_%282025-01-06_Testspiel%29_26.jpg/960px-FC_Red_Bull_Salzburg_gegen_Bayern_M%C3%BCnchen_%282025-01-06_Testspiel%29_26.jpg",
+  "soccer-skill-16":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Vin%C3%ADcius_J%C3%BAnior_Brazil_V_Morocco_13_June_2026-207_%28cropped%29.jpg/960px-Vin%C3%ADcius_J%C3%BAnior_Brazil_V_Morocco_13_June_2026-207_%28cropped%29.jpg",
+  "soccer-skill-17":
+    "https://upload.wikimedia.org/wikipedia/commons/5/5d/20160604_AUT_NED_8876_%28cropped%29.jpg",
+  "soccer-skill-18":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Rodri_Argentina_v_Spain_19_July_2026-187_%28cropped%29.jpg/960px-Rodri_Argentina_v_Spain_19_July_2026-187_%28cropped%29.jpg",
+  "soccer-skill-19":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/240622_%ED%99%A9%ED%9D%AC%EC%B0%AC_%ED%92%8B%EB%B3%BC_%ED%8E%98%EC%8A%A4%ED%8B%B0%EB%B2%8C.jpg/960px-240622_%ED%99%A9%ED%9D%AC%EC%B0%AC_%ED%92%8B%EB%B3%BC_%ED%8E%98%EC%8A%A4%ED%8B%B0%EB%B2%8C.jpg",
+  "soccer-skill-20":
+    "https://upload.wikimedia.org/wikipedia/commons/4/4b/Sergio_Ramos_Interview_2021_%28cropped%29.jpg",
+  "soccer-skill-21":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Manuel_Neuer_Ecuador_v_Germany_25_June_2026-148.jpg/960px-Manuel_Neuer_Ecuador_v_Germany_25_June_2026-148.jpg",
+  "soccer-skill-22":
+    "https://upload.wikimedia.org/wikipedia/commons/f/f7/Luis_Su%C3%A1rez_2026_%28cropped%29.jpg",
+  "soccer-skill-23":
+    "https://upload.wikimedia.org/wikipedia/commons/6/6e/FRA-ARG_%2810%29_%28cropped%29.jpg",
+  "soccer-skill-24":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/2023-10-04_Fu%C3%9Fball%2C_M%C3%A4nner%2C_UEFA_Champions_League%2C_RB_Leipzig_-_Manchester_City_FC_1DX_2613%2C_Phil_Foden.jpg/960px-2023-10-04_Fu%C3%9Fball%2C_M%C3%A4nner%2C_UEFA_Champions_League%2C_RB_Leipzig_-_Manchester_City_FC_1DX_2613%2C_Phil_Foden.jpg",
+  "soccer-skill-25":
+    "https://upload.wikimedia.org/wikipedia/commons/f/f7/Thibaut_Courtois_at_the_2018_World_Cup_%28cropped%29.jpg",
+  "soccer-skill-26":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Diogo_Costa_Ruben_Dias_Croatia_v_Portugal_2_July_2026-181_%28cropped%29.jpg/960px-Diogo_Costa_Ruben_Dias_Croatia_v_Portugal_2_July_2026-181_%28cropped%29.jpg",
+  "soccer-skill-27":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/FC_Red_Bull_Salzburg_gegen_Bayern_M%C3%BCnchen_%282025-01-06_Testspiel%29_19.jpg/960px-FC_Red_Bull_Salzburg_gegen_Bayern_M%C3%BCnchen_%282025-01-06_Testspiel%29_19.jpg",
+  "soccer-skill-28":
+    "https://upload.wikimedia.org/wikipedia/commons/4/4a/Kvaratskhelia_asse_psg_2425.png",
+  "soccer-skill-29":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/240609_FC_%EC%84%9C%EC%9A%B8_%ED%8C%AC%EC%82%AC%EC%9D%B8%ED%9A%8C_%28%EA%B8%B0%EC%84%B1%EC%9A%A9%29.jpg/960px-240609_FC_%EC%84%9C%EC%9A%B8_%ED%8C%AC%EC%82%AC%EC%9D%B8%ED%9A%8C_%28%EA%B8%B0%EC%84%B1%EC%9A%A9%29.jpg",
+  "soccer-skill-30":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Bruno_Fernandes_USMNT_v_Portugal_Mar_31_2026-27_%28cropped%29.jpg/960px-Bruno_Fernandes_USMNT_v_Portugal_Mar_31_2026-27_%28cropped%29.jpg",
+  "soccer-skill-31":
+    "https://upload.wikimedia.org/wikipedia/commons/7/7a/Richarlison_%C3%A9_homenageado_na_ALES_%2810.July.2019%29_08_%28cropped%29.jpg",
+  "soccer-skill-32":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Pedri_France_v_Spain_7.24.26-245.jpg/960px-Pedri_France_v_Spain_7.24.26-245.jpg",
+};
+
 const SOCCER_PLAYER_SKILL_CANDIDATES = [
   {
     id: "soccer-skill-01",
     title: "리오넬 메시",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/41d2ba82015a8f4f39b82d39dfed8f82.jpg",
   },
   {
     id: "soccer-skill-02",
     title: "손흥민",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/5d81d1691e88311c75a36db135e0d9c8.jpg",
   },
   {
     id: "soccer-skill-03",
     title: "킬리안 음바페",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/b9f66f2a4cf9c425f1f14f20f84e519a.jpg",
   },
   {
     id: "soccer-skill-04",
     title: "크리스티아누 호날두",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/ef86d95c81e3e8a6a10286fb30c0cf78.jpg",
   },
   {
     id: "soccer-skill-05",
     title: "엘링 홀란드",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/52f63ddec3a9a7c0f60c192626f7ef03.jpg",
   },
   {
     id: "soccer-skill-06",
     title: "케빈 더브라위너",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/ebd0278698cb6a65cc5d6e63114a543b.jpg",
   },
   {
     id: "soccer-skill-07",
     title: "네이마르 주니오르",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/6bee78bb15f17dd5554439b9d3404c68.jpg",
   },
   {
     id: "soccer-skill-08",
     title: "로베르트 레반도프스키",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/bc70584522cff89cc3c9927b48b1e409.jpg",
   },
   {
     id: "soccer-skill-09",
     title: "해리 케인",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/cf08946b77ff6cc54ccd2b0da0ac805c.jpg",
   },
   {
     id: "soccer-skill-10",
     title: "카림 벤제마",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/81679d8d5d02696c892cb2e2601cfdf3.jpg",
   },
   {
     id: "soccer-skill-11",
     title: "루카 모드리치",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/9c604db0687289f89f23dfe4e6348762.jpg",
   },
   {
     id: "soccer-skill-12",
     title: "주드 벨링엄",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/354d4e472166cfffa5953d9bc4c95c40.jpg",
   },
   {
     id: "soccer-skill-13",
     title: "모하메드 살라",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/5c9028ea3e41a17f61309cb66343c740.jpg",
   },
   {
     id: "soccer-skill-14",
     title: "이강인",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/73dcfba2d0d080cdaa82a8d6827902fa.jpg",
   },
   {
     id: "soccer-skill-15",
     title: "김민재",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/274db43af0be43d445c0e17643e94cd5.jpg",
   },
   {
     id: "soccer-skill-16",
     title: "비니시우스 주니오르",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/5f59220ec9e17a1f30250e4ca7b94b6f.jpg",
   },
   {
     id: "soccer-skill-17",
     title: "버진 반데이크",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/9afcc6abdf482ed44bbf484335c98496.jpg",
   },
   {
     id: "soccer-skill-18",
     title: "로드리",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/fe211e5b57d70044de94074436d9679b.jpg",
   },
   {
     id: "soccer-skill-19",
     title: "황희찬",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/920430924d0eddf06e9af2121d1afbf9.jpg",
   },
   {
     id: "soccer-skill-20",
     title: "세르히오 라모스",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/f0d29c975aba4fe66cad1e62b6798978.jpg",
   },
   {
     id: "soccer-skill-21",
     title: "마누엘 노이어",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/51c47ac24036ae2518d1aac6ee674a71.jpg",
   },
   {
     id: "soccer-skill-22",
     title: "루이스 수아레스",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/78365651fc5173731fb4b7859e120984.jpg",
   },
   {
     id: "soccer-skill-23",
     title: "앙투안 그리즈만",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/fba2b42d358343e9d01482c3ecd96edb.jpg",
   },
   {
     id: "soccer-skill-24",
     title: "필 포든",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/3bee5f54962c21b5bf29c506e0672243.jpg",
   },
   {
     id: "soccer-skill-25",
     title: "티보 쿠르투아",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/d410672dd2545a1dcfc969a9e603bea1.jpg",
   },
   {
     id: "soccer-skill-26",
     title: "후벵 디아스",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/f34ab87e78d2d2e749db91836b4ad89e.jpg",
   },
   {
     id: "soccer-skill-27",
     title: "토마스 뮐러",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/5e69f3aa3bc3bdd47ddef0408ce6cb2a.jpg",
   },
   {
     id: "soccer-skill-28",
     title: "흐비차 크라바츠헬리아",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/bcb32242d08354f14a9fab34d2ff34f0.jpg",
   },
   {
     id: "soccer-skill-29",
     title: "기성용",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/4abcfd41592e7c4cdc5146eac91946f6.jpg",
   },
   {
     id: "soccer-skill-30",
     title: "브루노 페르난데스",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/c8a18643d791c141e32257620582fbb8.jpg",
   },
   {
     id: "soccer-skill-31",
     title: "히샬리송",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/fe594945be111f46149042195e162bdb.jpg",
   },
   {
     id: "soccer-skill-32",
     title: "페드리",
-    image:
-      "https://img.piku.co.kr/w/uploads/32SsR2/9583687ba55a05d001e69ac095a1e7cf.jpg",
   },
-];
+].map((candidate) => ({
+  ...candidate,
+  image: SOCCER_PLAYER_SKILL_IMAGES[candidate.id] || candidate.image,
+}));
 
 // LOL
 // LCK 썸네일 이상형 월드컵
@@ -288,98 +294,82 @@ const LCK_THUMBNAIL_CANDIDATES = [
   {
     id: "lck-thumbnail-01",
     title: "룰 윅",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/368e29ebc55220b7b0414514ad415d1b.jpg",
+    image: "https://i.ytimg.com/vi/1UvgYTgtHp8/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-02",
-    title: "창! 창! 후루후루!",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/dece0c7b1b7b6d5b26187e44a0a63962.jpg",
+    title: "탕탕! 후루후루",
+    image: "https://i.ytimg.com/vi/7QedYnis5ns/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-03",
     title: "한화둘셋 야!!!! 천방지축 어리둥절 빙글빙글 돌아가는~",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/b88a5233398ef78fdcd63df7d82730ba.jpg",
+    image: "https://i.ytimg.com/vi/wFPQCG9I5bE/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-04",
     title: "뽀삐넛",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/846a61c328048032c20a35e0666773e7.jpg",
+    image: "https://i.ytimg.com/vi/rTV3g5hvhUI/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-05",
     title: "-이민형 단편시 ‘바텀 갱’ 中에서-",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/e376a80db7179fbd09487b80e67eec90.jpg",
+    image: "https://i.ytimg.com/vi/xekWAF9SZp0/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-06",
     title: "피했죠?",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/f1b3f65cc5299c158c84a07ba3fcbda2.jpg",
+    image: "https://i.ytimg.com/vi/uxd9nlRDuFc/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-07",
     title: "축하해주라 나 장학금 받아",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/4be4bc60d07a3d866d2bd6ffdb68317e.jpg",
+    image: "https://i.ytimg.com/vi/OPRcsPeLTxE/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-08",
     title: "11년 전통 원조 맛집",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/120713901c7a3a186639b17a4998b6da.jpg",
+    image: "https://i.ytimg.com/vi/44KJYSfMszc/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-09",
     title: "안심하라. 이것는 허위광고가 아닙니다!",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/6fedabada25cc22451b0e6c0806382d6.jpg",
+    image: "https://i.ytimg.com/vi/76NfIwFFPMA/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-10",
     title: "ㅈㄱㅊㅇ",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/603c5d61f4eea9d0e954639fb0e1642d.jpg",
+    image: "https://i.ytimg.com/vi/PzcLs0LrmnI/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-11",
     title: "룰골러스",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/c1c9318ba456032c43a7621f5f3e2abe.jpg",
+    image: "https://i.ytimg.com/vi/zzfpkM5tSSo/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-12",
     title: "AD Carry",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/0e9c23b6c41bc60d884e3ab5917e391d.jpg",
+    image: "https://i.ytimg.com/vi/c7ZDQ7AysDc/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-13",
     title: "탱탱한 최우젤리",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/695db4536d4f8211295b47086418da26.jpg",
+    image: "https://i.ytimg.com/vi/cs88RI0RXwM/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-14",
     title: "The Last Mapogo-Derby",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/d262bdadd472f7de078eb9ae9105e670.jpg",
+    image: "https://i.ytimg.com/vi/Sv_NNDuA73I/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-15",
     title: "롤윤발과 시라카",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/49ec4eb246c8789688dfc9c58db1f553.jpg",
+    image: "https://i.ytimg.com/vi/zezgYi0spm8/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-16",
     title: "League of Legend",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/58faaf2a4203760966a3ed99cca92727.jpg",
+    image: "https://i.ytimg.com/vi/NQAj0eF7XBE/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-17",
@@ -411,8 +401,7 @@ const LCK_THUMBNAIL_CANDIDATES = [
   {
     id: "lck-thumbnail-22",
     title: "양갈래 과즙상 장카설'바'",
-    image:
-      "https://img.piku.co.kr/w/uploads/8VQwpB/e0f1aaa231c55a9bef324c1fca1292d8.jpg",
+    image: "https://i.ytimg.com/vi/hqYJoKlnbzs/maxresdefault.jpg",
   },
   {
     id: "lck-thumbnail-23",

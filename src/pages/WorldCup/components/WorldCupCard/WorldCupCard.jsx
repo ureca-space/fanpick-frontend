@@ -21,7 +21,7 @@ const WorldCupCard = ({ worldCup, onStart }) => {
         <div
           className={`${styles.imageArea} ${
             isThumbnailWorldCup ? styles.thumbnailImageArea : ""
-          }`}
+          } ${isSoccerSkillWorldCup ? styles.soccerSkillImageArea : ""}`}
           aria-hidden="true"
         >
           <div className={styles.imageSlot}>
@@ -40,9 +40,7 @@ const WorldCupCard = ({ worldCup, onStart }) => {
           <div className={styles.imageSlot}>
             <WorldCupMedia
               src={worldCup.rightImage}
-              className={`${styles.battleImage} ${
-                isSoccerSkillWorldCup ? styles.croppedPlayerImage : ""
-              }`}
+              className={styles.battleImage}
               fallbackClassName={styles.imageFallback}
               fallbackLabel={fallbackLabel}
               draggable={false}

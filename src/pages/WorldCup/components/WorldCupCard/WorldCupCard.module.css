@@ -73,8 +73,7 @@
   object-position: center;
 }
 
-/* 세로로 긴 손흥민 이미지만 정사각형에 맞게 잘라서 표시 */
-.croppedPlayerImage {
+.soccerSkillImageArea .battleImage {
   object-fit: cover;
   object-position: center top;
 }
