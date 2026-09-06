@@ -114,6 +114,12 @@
 
 ---
 
+## 시연 영상
+
+[![시연 영상](https://img.youtube.com/vi/r2CH2NMvHlc/maxresdefault.jpg)](https://youtu.be/r2CH2NMvHlc)
+
+---
+
 ## Main Features
 
 ### 경기 일정 조회
@@ -385,3 +391,4 @@ FanPick은 단순한 경기 일정 조회 서비스를 넘어
 프론트엔드는 React와 Vite 기반으로 구현했으며,  
 백엔드와 데이터베이스는 Supabase를 사용하여 인증, 데이터 저장, Edge Function 기능을 구성했습니다.  
 서비스는 Vercel과 Supabase를 통해 배포하여 실제 웹 환경에서 사용할 수 있도록 구성했습니다.
+cd

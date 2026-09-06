@@ -34,4 +34,8 @@ supabase/.temp/
 docs/README.portfolio.md
 playwright-report/
 test-results/
+.tmp/
+*.inspect.ndjson
+docs/FanPick_Portfolio.pdf
+docs/FanPick_Portfolio.pptx
 
