@@ -1,5 +1,7 @@
 # FanPick [스포츠 경기 일정 및 승부예측 커뮤니티 플랫폼]
 
+[![CI/CD](https://github.com/ureca-space/fanpick-frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/ureca-space/fanpick-frontend/actions/workflows/ci.yml)
+
 ## Live Demo
 
 [FanPick 바로가기](https://fanpick-fe.vercel.app/)
