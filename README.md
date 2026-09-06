@@ -168,23 +168,6 @@ GitHub Actions는 KBO, K리그, LCK 경기 일정과 기록 데이터를 동기�
 
 ---
 
-## UI Design
-
-### Main Page
-
-FanPick의 메인 화면은 스포츠 경기 정보를 빠르게 탐색할 수 있는 대시보드형 레이아웃으로 제작했습니다.  
-상단에는 FanPick 브랜드 배너를 배치하고, 주요 경기와 인기 경기, 승부예측 진입 영역을 구성했습니다.  
-사용자는 메인 화면에서 오늘의 경기, 핫 매치, 월드컵 콘텐츠 등 주요 기능으로 이동할 수 있습니다.  
-각 섹션은 경기 정보와 팀 로고를 중심으로 구성하여 스포츠 팬이 원하는 정보를 직관적으로 확인할 수 있도록 했습니다.
-
-<div align="center">
-  <img src="./docs/FanPick-Main.png" width="900" alt="FanPick Main Page"/>
-</div>
-
-<br />
-
----
-
 ## Deployment
 
 | Part     | Platform |
